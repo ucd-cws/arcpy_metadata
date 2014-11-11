@@ -9,13 +9,12 @@ import tempfile
 
 import arcpy
 
-# TODO: Add a log silent flag, or have it use standard logging?
+# TODO: Convert to using logging or logbook - probably logging to keep dependencies down
 
 try:  # made as part of a larger package - using existing logger, but logging to screen for now if not in that package
 	from log import write as logwrite
 	from log import warning as logwarning
 except ImportError:
-
 	def logwrite(log_string, autoprint=1):  # match the signature of the expected log function
 		print(log_string)
 
@@ -25,7 +24,7 @@ except ImportError:
 translators_folder = os.path.join(arcpy.GetInstallInfo()['InstallDir'], "Metadata", "Translator")
 translation_file = os.path.join(translators_folder, "ARCGIS2FGDC.xml")
 
-metadata_temp_folder = None  # a default temp folder to use
+metadata_temp_folder = None  # a default temp folder to use - settable by other applications so they can set it once
 
 
 class MetadataItem(object):
@@ -59,6 +58,9 @@ class MetadataMulti(MetadataItem):
 		A metadata item for groups of items (like tags). Define the root element (self.path) and then the name of the subitem to store there (self.tag_name) and you can use list-like methods to edit the group
 	"""
 
+	tag_name = None
+	current_items = None
+
 	def __init__(self, parent=None, tagname=None):
 		super(MetadataMulti, self).__init__(parent)
 
@@ -68,24 +70,38 @@ class MetadataMulti(MetadataItem):
 		self.current_items = self.parent.elements.find(self.path)
 
 	def _add_item(self, item):
+		"""
+			Adds an individual item to the section
+		:param item: the text that will be added to the multi-item section, wrapped in the appropriate tag configured on parent object
+		:return: None
+		"""
 		element = xml.etree.ElementTree.Element(self.tag_name)
 		element.text = item
 		self.current_items.append(element)
 
 	def add(self, items):
-		for item in items:
-			addition = _add_item
+		"""
 
-		self.current_items.append(addition)
+		:param items:
+		:return: None
+		"""
+		for item in items:
+			self._add_item(item)
 
 	def extend(self, items):
 		"""
 			An alias for "add" to make this more pythonic
+			:param items: list of text items to add to this multi-item metadata section
+			:return: None
 		"""
 
 		self.add(items)
 
 	def append(self, item):
+		"""
+			Adds a single item to the section, like a list append
+		:param item:
+		"""
 		self._add_item(item)
 
 
