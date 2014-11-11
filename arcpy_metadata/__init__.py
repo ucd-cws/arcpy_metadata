@@ -28,10 +28,12 @@ metadata_temp_folder = None  # a default temp folder to use - settable by other 
 
 
 class MetadataItem(object):
+
+	path = None
+	value = ""
+
 	def __init__(self, parent=None):
-		self.value = ""
 		self.parent = parent
-		self.path = None
 
 	def _write(self):
 		if self.value and self.parent:
@@ -52,6 +54,21 @@ class MetadataItem(object):
 	def prepend(self, value):
 		self.value = str(value) + self.value
 
+	def require(self):
+		"""
+			Checks that the required elements for this item are in place. If they aren't, makes them
+		"""
+
+		if not self.parent or not self.path:
+			raise ValueError("MetadataItem must be assigned to a parent MetadataEditor and must have a path assigned before a require check can be performed")
+
+		if self.parent.elements.find(self.path) is not None:  # if it already exists, easy - return now
+			return True
+
+		path_elements = self.path.split()
+		for position in enumerate(path_elements):
+			pass
+
 
 class MetadataMulti(MetadataItem):
 	"""
@@ -59,14 +76,21 @@ class MetadataMulti(MetadataItem):
 	"""
 
 	tag_name = None
-	current_items = None
+	current_items = []
 
-	def __init__(self, parent=None, tagname=None):
+	def __init__(self, parent=None, tagname=None, path=None):
 		super(MetadataMulti, self).__init__(parent)
 
 		if not self.tag_name:
 			self.tag_name = tagname
 
+		if self.path:
+			self._set_path(self.path)
+		elif path is not None:
+			self._set_path(path)
+
+	def _set_path(self, path):
+		self.path = path
 		self.current_items = self.parent.elements.find(self.path)
 
 	def _add_item(self, item):
@@ -131,9 +155,7 @@ class MetadataTags(MetadataMulti):
 	"""
 	def __init__(self, parent=None):
 		self.name = "tags"
-		self.tag_name = "themekey"
-		self.path = "idinfo/keywords/theme[last()]"
-		super(MetadataTags, self).__init__(parent)
+		super(MetadataTags, self).__init__(parent, tagname="themekey", path="idinfo/keywords/theme[last()]")
 
 
 class MetadataTitle(MetadataItem):
@@ -157,13 +179,6 @@ class MetadataEditor(object):
 		self.temp_folder = temp_folder
 		self.created_temp_folder = False
 
-		self.abstract = MetadataAbstract(parent=self)
-		self.purpose = MetadataPurpose(parent=self)
-		self.tags = MetadataTags(parent=self)
-		self.title = MetadataTitle(parent=self)
-
-		self.items.extend([self.abstract, self.purpose, self.tags, self.title])
-
 		if self.feature_class and self.feature_layer:
 			raise ValueError("MetadataEditor can only use either feature_class or feature_layer - do not provide both")
 
@@ -178,12 +193,20 @@ class MetadataEditor(object):
 
 		if self.feature_class:  # for both, we want to export the metadata out
 			# export the metadata to the temporary location
-			metadata_filename = arcpy.CreateScratchName("pisces", "metadata", "xml", temp_folder)
-			self.metadata_file = os.path.join(temp_folder, metadata_filename)
+			metadata_filename = arcpy.CreateScratchName("pisces", "metadata", "xml", self.temp_folder)
+			self.metadata_file = os.path.join(self.temp_folder, metadata_filename)
 			logwrite("Exporting metadata to temporary file %s" % self.metadata_file)
 			arcpy.ExportMetadata_conversion(self.feature_class, translation_file, self.metadata_file)
 
 		self.elements.parse(self.metadata_file)
+
+		# create these all after the parsing happens so that if they have any self initialization, they can correctly perform it
+		self.abstract = MetadataAbstract(parent=self)
+		self.purpose = MetadataPurpose(parent=self)
+		self.tags = MetadataTags(parent=self)
+		self.title = MetadataTitle(parent=self)
+
+		self.items.extend([self.abstract, self.purpose, self.tags, self.title])
 
 		if items:
 			self.initialize_items()
