@@ -1,6 +1,6 @@
 arcpy_metadata
 ==============
-Whether you create it or not, metadata is a critical part of GIS analysis. ArcGIS includes a built-in metadata editor, but has scant access to metadata properties from Python. The arcpy_metadata package provides this access, allowing large Python packages that generate their own geospatial outputs in ArcGIS to properly document the data.
+Whether you create it or not, metadata is a critical part of GIS analysis. ArcGIS includes a built-in GUI metadata editor, but has scant access to metadata properties from Python. The arcpy_metadata package provides this access, allowing large Python packages that generate their own geospatial outputs in ArcGIS to properly document the data.
 
 As of this writing, documentation is still to come, but the source code is short, so we encourage you to take a look at it in the meantime. Otherwise, following is an example usage of arcpy_metadata:
 
