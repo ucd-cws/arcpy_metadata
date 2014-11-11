@@ -21,6 +21,9 @@ var/
 .installed.cfg
 *.egg
 
+# JetBrains
+.idea/*
+
 # PyInstaller
 #  Usually these files are written by a python script from a template 
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -64,7 +67,8 @@ target/
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
