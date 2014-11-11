@@ -4,6 +4,8 @@ Whether you create it or not, metadata is a critical part of GIS analysis. ArcGI
 
 As of this writing, documentation is still to come, but the source code is short, so we encourage you to take a look at it in the meantime. Otherwise, following is an example usage of arcpy_metadata:
 
+```python
+
 	import arcpy_metadata as md
 	import datetime
 	
@@ -19,7 +21,7 @@ As of this writing, documentation is still to come, but the source code is short
     metadata.tags.add(["foo", "bar", "baz"])  # tags.extend is equivalent to maintain list semantics
     
     metadata.finish()  # save the metadata back to the original source feature class and cleanup. Without calling finish(), your edits are NOT saved!
-
+```
 The code is based on a set of core classes that provide set/append/prepend operations, and we would love pull requests that add classes or attributes to cover additional portions of metadata specs.
 
 Under the hood
