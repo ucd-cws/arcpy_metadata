@@ -47,5 +47,5 @@ class TestExampleCode(unittest.TestCase):
 
 	def test_example(self):
 		clean_data()
-		self.run_example(os.path.join(test_data_folder, "simple_poly_w_base_metadata.shp"))
 		self.run_example(os.path.join(test_data_folder, "simple_poly_no_metadata.shp"))
+		self.run_example(os.path.join(test_data_folder, "simple_poly_w_base_metadata.shp"))

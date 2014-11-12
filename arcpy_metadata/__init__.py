@@ -6,6 +6,7 @@ __author__ = 'nickrsan'
 import xml
 import os
 import tempfile
+import re
 
 import arcpy
 
@@ -35,6 +36,12 @@ class MetadataItem(object):
 	def __init__(self, parent=None):
 		self.parent = parent
 
+		try:
+			self._require_tree_elements()
+		except RuntimeError:
+			pass  # it's ok - it just means the path wasn't set yet - this will get run again in _set_path
+
+
 	def _write(self):
 		if self.value and self.parent:
 			item = self.parent.elements.find(self.path)
@@ -54,7 +61,7 @@ class MetadataItem(object):
 	def prepend(self, value):
 		self.value = str(value) + self.value
 
-	def require(self):
+	def _require_tree_elements(self):
 		"""
 			Checks that the required elements for this item are in place. If they aren't, makes them
 		"""
@@ -65,9 +72,30 @@ class MetadataItem(object):
 		if self.parent.elements.find(self.path) is not None:  # if it already exists, easy - return now
 			return True
 
-		path_elements = self.path.split()
-		for position in enumerate(path_elements):
-			pass
+		temp_path = re.sub("\[.*?\]", "", self.path)
+		path_elements = temp_path.split("/")
+
+		indices = range(len(path_elements))
+		indices.reverse()
+		for position in indices:  # go backward so we can determine where the closest element is
+			attempt_elements = path_elements[:position]  # get all elements preceding the current one
+			path = ""
+			for item in attempt_elements:
+				path += item + "/"
+			path = path[:-1]  # chop off the trailing slash
+
+			main_element = self.parent.elements.find(path)  # try finding the top level element
+			if main_element is not None:  # if we found it
+				create_elements = path_elements[position:]  # get the remaining elements
+				parent_element = main_element
+				for sub_element in range(len(create_elements)):  # and start creating the elements
+					new_sub = xml.etree.ElementTree.SubElement(parent_element, create_elements[sub_element])  # create each sub_element in turn, then make it the new parent for the next iteration
+					parent_element = new_sub
+				# at this point all necessary parts of the tree for this item should be created
+				break
+
+		else:  # if we didn't break out of the loop by finding a fitting top level element
+			raise RuntimeError("Could not create necessary parts of Metadata tree to edit elements - check the path specified on your metadata item to make sure it correctly references root positions (idinfo at the start)")
 
 
 class MetadataMulti(MetadataItem):
@@ -77,20 +105,21 @@ class MetadataMulti(MetadataItem):
 
 	tag_name = None
 	current_items = []
+	path = None
 
 	def __init__(self, parent=None, tagname=None, path=None):
-		super(MetadataMulti, self).__init__(parent)
 
 		if not self.tag_name:
 			self.tag_name = tagname
 
-		if self.path:
-			self._set_path(self.path)
-		elif path is not None:
-			self._set_path(path)
+		if path:
+			self.path = path
 
-	def _set_path(self, path):
-		self.path = path
+		super(MetadataMulti, self).__init__(parent)
+
+		self._refresh()
+
+	def _refresh(self):
 		self.current_items = self.parent.elements.find(self.path)
 
 	def _add_item(self, item):
@@ -134,9 +163,9 @@ class MetadataAbstract(MetadataItem):
 		Just a shortcut MetadataItem that predefines the paths
 	"""
 	def __init__(self, parent=None):
-		super(MetadataAbstract, self).__init__(parent)
 		self.name = "abstract"
 		self.path = "idinfo/descript/abstract"
+		super(MetadataAbstract, self).__init__(parent)
 
 
 class MetadataPurpose(MetadataItem):
@@ -144,9 +173,9 @@ class MetadataPurpose(MetadataItem):
 		Just a shortcut MetadataItem that predefines the paths
 	"""
 	def __init__(self, parent=None):
-		super(MetadataPurpose, self).__init__(parent)
 		self.name = "purpose"
 		self.path = "idinfo/descript/purpose"
+		super(MetadataPurpose, self).__init__(parent)
 
 
 class MetadataTags(MetadataMulti):
@@ -163,10 +192,9 @@ class MetadataTitle(MetadataItem):
 		Just a shortcut MetadataItem that predefines the paths
 	"""
 	def __init__(self, parent=None):
-		super(MetadataTitle, self).__init__(parent)
-
 		self.path = "idinfo/citation/citeinfo/title"
 		self.name = "title"
+		super(MetadataTitle, self).__init__(parent)
 
 
 class MetadataEditor(object):
