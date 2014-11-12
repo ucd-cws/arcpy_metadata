@@ -36,3 +36,6 @@ Under the hood
 ---------------
 arcpy_metadata uses the strategy of exporting the metadata from the layer, then edits the xml export based on your method calls. When you're done, use finish() to save your data back to the source.
 
+Acknowledgements
+----------------
+arcpy_metadata is a project of the [UC Davis Center for Watershed Sciences](https://watershed.ucdavis.edu). It was created as part of a larger project funded by the California Department of Fish and Wildlife [Biogeographic Data Branch](http://www.dfg.ca.gov/biogeodata/). We thank them for their support and their commitment to high quality geospatial data.

@@ -11,6 +11,7 @@ import re
 import arcpy
 
 # TODO: Convert to using logging or logbook - probably logging to keep dependencies down
+# TODO: For shapefiles can we skip the export step and just edit the xml in place??
 
 try:  # made as part of a larger package - using existing logger, but logging to screen for now if not in that package
 	from log import write as logwrite
