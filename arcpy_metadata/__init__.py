@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-__version__ = '0.2'
+__version__ = '0.2.5'
 __author__ = 'nickrsan'
 
 import xml

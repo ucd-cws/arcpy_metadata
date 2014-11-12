@@ -3,7 +3,7 @@ from arcpy_metadata import __version__ as meta_version
 
 from distutils.core import setup
 
-setup(name="Arcpy Metadata Editor (arcpy_metadata)",
+setup(name="arcpy_metadata",
 	version=meta_version,
 	description="Python metadata editing classes for ArcGIS feature classes",
 	#scripts=[],
