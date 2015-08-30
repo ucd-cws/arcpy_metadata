@@ -9,6 +9,8 @@ import re
 
 import arcpy
 
+from metadata_items import *
+
 # TODO: Convert to using logging or logbook - probably logging to keep dependencies down
 
 try:  # made as part of a larger package - using existing logger, but logging to screen for now if not in that package
@@ -22,8 +24,6 @@ except ImportError:
     def logwarning(log_string):
         print("WARNING: {0:s}".format(log_string))
 
-
-
 installDir = arcpy.GetInstallInfo("desktop")["InstallDir"]
 xslt = os.path.join(installDir, r"Metadata\Stylesheets\gpTools\exact copy of.xslt")
 metadata_temp_folder = arcpy.env.scratchFolder  # a default temp folder to use - settable by other applications so they can set it once
@@ -36,15 +36,16 @@ class MetadataItem(object):
     def __init__(self, parent=None):
         self.parent = parent
 
-        try:
-            self._require_tree_elements()
-        except RuntimeError:
-            pass  # it's ok - it just means the path wasn't set yet - this will get run again in _set_path
+        self._require_tree_elements()
 
-        self._create_item()
+        # set current metadata value
+        value = self.parent.elements.find(self.path).text
+        self.set(value)
 
-    def _create_item(self):
-        # check if element exist, if not add to element tree
+    def _require_tree_elements(self):
+        """
+            Checks that the required elements for this item are in place. If they aren't, makes them
+        """
         e_tree = self.path.split('/')
         root = self.parent.elements.getroot()
         done = False
@@ -78,54 +79,59 @@ class MetadataItem(object):
 
     def set(self, value):
         self.value = value
+        return self.get()
 
     def get(self):
         return self.value
 
     def append(self, value):
         self.value += str(value)
+        return self.get()
 
     def prepend(self, value):
         self.value = str(value) + self.value
+        return self.get()
 
-    def _require_tree_elements(self):
-        """
-            Checks that the required elements for this item are in place. If they aren't, makes them
-        """
-
-        if not self.parent or not self.path:
-            raise ValueError(
-                "MetadataItem must be assigned to a parent MetadataEditor and must have a path assigned before a require check can be performed")
-
-        if self.parent.elements.find(self.path) is not None:  # if it already exists, easy - return now
-            return True
-
-        temp_path = re.sub("\[.*?\]", "", self.path)
-        path_elements = temp_path.split("/")
-
-        indices = range(len(path_elements))
-        indices.reverse()
-        for position in indices:  # go backward so we can determine where the closest element is
-            attempt_elements = path_elements[:position]  # get all elements preceding the current one
-            path = ""
-            for item in attempt_elements:
-                path += item + "/"
-            path = path[:-1]  # chop off the trailing slash
-
-            main_element = self.parent.elements.find(path)  # try finding the top level element
-            if main_element is not None:  # if we found it
-                create_elements = path_elements[position:]  # get the remaining elements
-                parent_element = main_element
-                for sub_element in range(len(create_elements)):  # and start creating the elements
-                    new_sub = xml.etree.ElementTree.SubElement(parent_element, create_elements[
-                        sub_element])  # create each sub_element in turn, then make it the new parent for the next iteration
-                    parent_element = new_sub
-                # at this point all necessary parts of the tree for this item should be created
-                break
-
-        else:  # if we didn't break out of the loop by finding a fitting top level element
-            raise RuntimeError(
-                "Could not create necessary parts of Metadata tree to edit elements - check the path specified on your metadata item to make sure it correctly references root positions (idinfo at the start)")
+    # This code actually doesn't work. Replace with other method further above
+    #
+    #  def _require_tree_elements(self):
+    #     """
+    #         Checks that the required elements for this item are in place. If they aren't, makes them
+    #     """
+    #
+    #     if not self.parent or not self.path:
+    #         raise ValueError(
+    #             "MetadataItem must be assigned to a parent MetadataEditor and must have a path assigned before a require check can be performed")
+    #
+    #     if self.parent.elements.find(self.path) is not None:  # if it already exists, easy - return now
+    #         return True
+    #
+    #     temp_path = re.sub("\[.*?\]", "", self.path)
+    #     path_elements = temp_path.split("/")
+    #
+    #     indices = range(len(path_elements))
+    #     indices.reverse()
+    #     for position in indices:  # go backward so we can determine where the closest element is
+    #         attempt_elements = path_elements[:position]  # get all elements preceding the current one
+    #         path = ""
+    #         for item in attempt_elements:
+    #             path += item + "/"
+    #         path = path[:-1]  # chop off the trailing slash
+    #
+    #         main_element = self.parent.elements.find(path)  # try finding the top level element
+    #         if main_element is not None:  # if we found it
+    #             create_elements = path_elements[position:]  # get the remaining elements
+    #             parent_element = main_element
+    #             for sub_element in range(len(create_elements)):  # and start creating the elements
+    #                 new_sub = xml.etree.ElementTree.SubElement(parent_element, create_elements[
+    #                     sub_element])  # create each sub_element in turn, then make it the new parent for the next iteration
+    #                 parent_element = new_sub
+    #             # at this point all necessary parts of the tree for this item should be created
+    #             break
+    #
+    #     else:  # if we didn't break out of the loop by finding a fitting top level element
+    #         raise RuntimeError(
+    #             "Could not create necessary parts of Metadata tree to edit elements - check the path specified on your metadata item to make sure it correctly references root positions (idinfo at the start)")
 
 
 class MetadataMulti(MetadataItem):
@@ -163,6 +169,13 @@ class MetadataMulti(MetadataItem):
         element.text = item
         self.current_items.append(element)
 
+    def get(self):
+        values = []
+        for item in self.current_items:
+            values.append(item.text)
+        return values
+
+
     def add(self, items):
         """
 
@@ -172,6 +185,8 @@ class MetadataMulti(MetadataItem):
         for item in items:
             self._add_item(item)
 
+        return self.get()
+
     def extend(self, items):
         """
             An alias for "add" to make this more pythonic
@@ -180,6 +195,7 @@ class MetadataMulti(MetadataItem):
         """
 
         self.add(items)
+        return self.get()
 
     def append(self, item):
         """
@@ -187,49 +203,28 @@ class MetadataMulti(MetadataItem):
         :param item:
         """
         self._add_item(item)
+        return self.get()
 
+    def remove(self, item):
+        items_to_remove = []
+        for i in self.current_items:
+            if i.text == item:
+                items_to_remove.append(i)
 
-class MetadataAbstract(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
+        for i in items_to_remove:
+            self.current_items.remove(i)
 
-    def __init__(self, parent=None):
-        self.name = "abstract"
-        self.path = "dataIdInfo/idAbs"
-        super(MetadataAbstract, self).__init__(parent)
+        return self.get()
 
+    def removeall(self):
+        items_to_remove = []
+        for i in self.current_items:
+            items_to_remove.append(i)
 
-class MetadataPurpose(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
+        for i in items_to_remove:
+            self.current_items.remove(i)
 
-    def __init__(self, parent=None):
-        self.name = "purpose"
-        self.path = "dataIdInfo/idPurp"
-        super(MetadataPurpose, self).__init__(parent)
-
-
-class MetadataTags(MetadataMulti):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "tags"
-        super(MetadataTags, self).__init__(parent, tagname="keyword", path="dataIdInfo/searchKeys[last()]")
-
-
-class MetadataTitle(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.path = "dataIdInfo/idCitation/resTitle"
-        self.name = "title"
-        super(MetadataTitle, self).__init__(parent)
+        return self.get()
 
 
 class MetadataEditor(object):
@@ -288,12 +283,30 @@ class MetadataEditor(object):
         self.elements.parse(self.metadata_file)
 
         # create these all after the parsing happens so that if they have any self initialization, they can correctly perform it
+        self.title = MetadataTitle(parent=self)
         self.abstract = MetadataAbstract(parent=self)
         self.purpose = MetadataPurpose(parent=self)
         self.tags = MetadataTags(parent=self)
-        self.title = MetadataTitle(parent=self)
+        self.place_keywords = MetadataPlaceKeywords(parent=self)
+        self.extent_description = MetadataExtentDescription(parent=self)
+        self.temporal_extent_description = MetadataTemporalExtentDescription(parent=self)
+        self.temporal_extent_instance = MetadataTemporalExtentInstance(parent=self)
+        self.temporal_extent_start = MetadataTemporalExtentStart(parent=self)
+        self.temporal_extent_end = MetadataTemporalExtentEnd(parent=self)
+        self.min_scale = MetadataMinScale(parent=self)
+        self.max_scale = MetadataMaxScale(parent=self)
+        self.last_update = MetadataLastUpdate(parent=self)
+        self.update_frequency = MetadataUpdateFrequency(parent=self)
+        self.update_frequency_description = MetadataUpdateFrequencyDescription(parent=self)
+        self.credits = MetadataCredits(parent=self)
+        self.citation = MetadataCitation(parent=self)
+        self.limitation = MetadataLimitation(parent=self)
+        self.source = MetadataSource(parent=self)
 
-        self.items.extend([self.abstract, self.purpose, self.tags, self.title])
+        self.items.extend([self.title, self.abstract, self.purpose, self.tags, self.place_keywords, self.extent_description,
+                           self.temporal_extent_description, self.temporal_extent_instance, self.temporal_extent_start,
+                           self.temporal_extent_end, self.min_scale, self.max_scale, self.last_update, self.update_frequency,
+                           self.update_frequency_description, self.credits, self.citation, self.limitation, self.source])
 
         if items:
             self.initialize_items()
@@ -357,3 +370,4 @@ class MetadataEditor(object):
         self.save()
         self.cleanup()
 
+#metadata = MetadataEditor(r"C:\Users\Thomas.Maschler\Documents\GitHub\arcpy_metadata\tests\test_data_temp_folder\simple_poly_w_base_metadata.shp")
