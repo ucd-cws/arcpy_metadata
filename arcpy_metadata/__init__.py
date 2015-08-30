@@ -39,8 +39,8 @@ class MetadataItem(object):
         self._require_tree_elements()
 
         # set current metadata value
-        value = self.parent.elements.find(self.path).text
-        self.set(value)
+        self.value = self.parent.elements.find(self.path).text
+        self.attributes = self.parent.elements.find(self.path).attrib
 
     def _require_tree_elements(self):
         """
@@ -73,7 +73,13 @@ class MetadataItem(object):
         if self.value and self.parent:
             item = self.parent.elements.find(self.path)
             item.text = self.value  # set the value, it will be written later
-        elif not self.parent:
+
+        if self.attributes and self.parent:
+            item = self.parent.elements.find(self.path)
+            for attribute in self.attributes:
+                item.set(attribute, self.attributes[attribute])  # set the value, it will be written later
+
+        if not self.parent:
             raise ValueError(
                 "Can't write values without being contained in a Metadata Editor list or without manually initializing self.parent to an instance of MetadataEditor")
 
@@ -81,8 +87,24 @@ class MetadataItem(object):
         self.value = value
         return self.get()
 
+    def set_attrib(self, attribute, attri_value):
+        self.attributes[attribute] = attri_value
+        return self.get_attrib()
+
     def get(self):
         return self.value
+
+    def get_attrib(self):
+        return self.attributes
+
+    def remove_attrib(self, attribute):
+        try:
+            del self.attributes[attribute]
+        except KeyError:
+            logwrite("Attribute %s does not exist" % attribute)
+
+        return self.get_attrib()
+
 
     def append(self, value):
         self.value += str(value)
@@ -91,47 +113,6 @@ class MetadataItem(object):
     def prepend(self, value):
         self.value = str(value) + self.value
         return self.get()
-
-    # This code actually doesn't work. Replace with other method further above
-    #
-    #  def _require_tree_elements(self):
-    #     """
-    #         Checks that the required elements for this item are in place. If they aren't, makes them
-    #     """
-    #
-    #     if not self.parent or not self.path:
-    #         raise ValueError(
-    #             "MetadataItem must be assigned to a parent MetadataEditor and must have a path assigned before a require check can be performed")
-    #
-    #     if self.parent.elements.find(self.path) is not None:  # if it already exists, easy - return now
-    #         return True
-    #
-    #     temp_path = re.sub("\[.*?\]", "", self.path)
-    #     path_elements = temp_path.split("/")
-    #
-    #     indices = range(len(path_elements))
-    #     indices.reverse()
-    #     for position in indices:  # go backward so we can determine where the closest element is
-    #         attempt_elements = path_elements[:position]  # get all elements preceding the current one
-    #         path = ""
-    #         for item in attempt_elements:
-    #             path += item + "/"
-    #         path = path[:-1]  # chop off the trailing slash
-    #
-    #         main_element = self.parent.elements.find(path)  # try finding the top level element
-    #         if main_element is not None:  # if we found it
-    #             create_elements = path_elements[position:]  # get the remaining elements
-    #             parent_element = main_element
-    #             for sub_element in range(len(create_elements)):  # and start creating the elements
-    #                 new_sub = xml.etree.ElementTree.SubElement(parent_element, create_elements[
-    #                     sub_element])  # create each sub_element in turn, then make it the new parent for the next iteration
-    #                 parent_element = new_sub
-    #             # at this point all necessary parts of the tree for this item should be created
-    #             break
-    #
-    #     else:  # if we didn't break out of the loop by finding a fitting top level element
-    #         raise RuntimeError(
-    #             "Could not create necessary parts of Metadata tree to edit elements - check the path specified on your metadata item to make sure it correctly references root positions (idinfo at the start)")
 
 
 class MetadataMulti(MetadataItem):
