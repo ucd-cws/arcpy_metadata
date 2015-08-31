@@ -38,4 +38,4 @@ arcpy_metadata uses the strategy of exporting the metadata from the layer, then 
 
 Acknowledgements
 ----------------
-arcpy_metadata is a project of the [UC Davis Center for Watershed Sciences](https://watershed.ucdavis.edu). It was created as part of a larger project funded by the California Department of Fish and Wildlife [Biogeographic Data Branch](http://www.dfg.ca.gov/biogeodata/). We thank them for their support and their commitment to high quality geospatial data.
+arcpy_metadata is a project of the [UC Davis Center for Watershed Sciences](https://watershed.ucdavis.edu). It was created as part of a larger project funded by the California Department of Fish and Wildlife [Biogeographic Data Branch](http://www.dfg.ca.gov/biogeodata/). arcpy_metadata has also received contributions from the [World Resources Institute (WRI)](https://github.com/wri). We thank them for their support and their commitment to high quality geospatial data.
