@@ -57,11 +57,21 @@ class MetadataItem(object):
                 # remove index for multi items, looks goofy. Is there a better way?
                 if "[" in e:
                     p = e.index('[')
-                    e = e[:p]
+                    e_name = e[:p]
+                    e_attrib = e[p:][1:-1].split('][')
+                else:
+                    e_name = e
+                    e_attrib = []
                 i += 1
                 d[i] = d[i-1].find(e)
                 if d[i] is None:
-                    child = xml.etree.ElementTree.Element(e)
+                    child = xml.etree.ElementTree.Element(e_name)
+                    for attrib in e_attrib:
+                        if attrib[0] == "@":
+                            kv = attrib.split('=')
+                            key = kv[0][1:]
+                            value = kv[1][1:-1]
+                            child.set(key, value)
                     d[i-1].append(child)
                     break
                 elif i == len(e_tree):
@@ -284,10 +294,24 @@ class MetadataEditor(object):
         self.limitation = MetadataLimitation(parent=self)
         self.source = MetadataSource(parent=self)
 
+        self.poc_role = MetadataPointOfContactRole(parent=self)
+        self.poc_name = MetadataPointOfContactName(parent=self)
+        self.poc_position = MetadataPointOfContactPosition(parent=self)
+        self.poc_organization = MetadataPointOfContactOrganization(parent=self)
+        self.poc_address = MetadataPointOfContactAddress(parent=self)
+        self.poc_zip = MetadataPointOfContactZIP(parent=self)
+        self.poc_city = MetadataPointOfContactCity(parent=self)
+        self.poc_state = MetadataPointOfContactState(parent=self)
+        self.poc_country = MetadataPointOfContactCountry(parent=self)
+        self.poc_email = MetadataPointOfContactEmail(parent=self)
+        self.poc_phone = MetadataPointOfContactPhone(parent=self)
+
         self.items.extend([self.title, self.abstract, self.purpose, self.tags, self.place_keywords, self.extent_description,
                            self.temporal_extent_description, self.temporal_extent_instance, self.temporal_extent_start,
                            self.temporal_extent_end, self.min_scale, self.max_scale, self.last_update, self.update_frequency,
-                           self.update_frequency_description, self.credits, self.citation, self.limitation, self.source])
+                           self.update_frequency_description, self.credits, self.citation, self.limitation, self.source,
+                           self.poc_role, self.poc_name, self.poc_position, self.poc_organization, self.poc_address,
+                           self.poc_zip, self.poc_city, self.poc_state, self.poc_country, self.poc_email, self.poc_phone])
 
         if items:
             self.initialize_items()
