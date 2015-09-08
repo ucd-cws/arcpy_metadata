@@ -10,6 +10,8 @@ import re
 import arcpy
 
 from metadata_items import *
+from contacts import *
+
 
 # TODO: Convert to using logging or logbook - probably logging to keep dependencies down
 
@@ -35,7 +37,7 @@ class MetadataItem(object):
 
     def __init__(self, parent=None):
         self.parent = parent
-
+        self.element = None
         self._require_tree_elements()
 
         # set current metadata value
@@ -75,6 +77,7 @@ class MetadataItem(object):
                     d[i-1].append(child)
                     break
                 elif i == len(e_tree):
+                    self.element = d[i]
                     done = True
 
     def _write(self):
@@ -115,7 +118,6 @@ class MetadataItem(object):
 
         return self.get_attrib()
 
-
     def append(self, value):
         self.value += str(value)
         return self.get()
@@ -127,7 +129,8 @@ class MetadataItem(object):
 
 class MetadataMulti(MetadataItem):
     """
-        A metadata item for groups of items (like tags). Define the root element (self.path) and then the name of the subitem to store there (self.tag_name) and you can use list-like methods to edit the group
+        A metadata item for groups of items (like tags). Define the root element (self.path) and then the name of the
+        subitem to store there (self.tag_name) and you can use list-like methods to edit the group
     """
 
     tag_name = None
@@ -152,8 +155,9 @@ class MetadataMulti(MetadataItem):
     def _add_item(self, item):
         """
             Adds an individual item to the section
-        :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag configured on parent object
-        :return: None
+            :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag
+                configured on parent object
+            :return: None
         """
 
         element = xml.etree.ElementTree.Element(self.tag_name)
@@ -169,9 +173,8 @@ class MetadataMulti(MetadataItem):
 
     def add(self, items):
         """
-
         :param items:
-        :return: None
+        :return: self.get()
         """
         for item in items:
             self._add_item(item)
@@ -191,7 +194,8 @@ class MetadataMulti(MetadataItem):
     def append(self, item):
         """
             Adds a single item to the section, like a list append
-        :param item:
+            :param item:
+            :return: None
         """
         self._add_item(item)
         return self.get()
@@ -216,6 +220,51 @@ class MetadataMulti(MetadataItem):
             self.current_items.remove(i)
 
         return self.get()
+
+
+
+
+# class MetadataContact(MetadataItem):
+#     """
+#         A metadata item for groups of items (like tags). Define the root element (self.path) and then the name of the
+#           subitem to store there (self.tag_name) and you can use list-like methods to edit the group
+#     """
+#
+#     role = None
+#     contact_name = None
+#     position = None
+#     organization = None
+#     address = None
+#     phone = None
+#
+#
+#     path = None
+#     current_items = []
+#     def __init__(self, parent=None, role=None, contact_name=None, position=None, organization=None, address=None, phone=None, path=None):
+#
+#
+#         if not self.role:
+#             self.role = role
+#         if not self.name:
+#             self.contact_name = contact_name
+#         if not self.position:
+#             self.position = position
+#         if not self.organization:
+#             self.organization = organization
+#         if not self.address:
+#             self.address = address #has children
+#         if not self.phone:
+#             self.phone = phone #has children
+#         #self.hours
+#         #self.instructions
+#
+#         if path:
+#             self.path = path
+#
+#         super(MetadataContact, self).__init__(parent)
+#
+#         #self._refresh()
+
 
 
 class MetadataEditor(object):
@@ -294,24 +343,28 @@ class MetadataEditor(object):
         self.limitation = MetadataLimitation(parent=self)
         self.source = MetadataSource(parent=self)
 
-        self.poc_role = MetadataPointOfContactRole(parent=self)
-        self.poc_name = MetadataPointOfContactName(parent=self)
-        self.poc_position = MetadataPointOfContactPosition(parent=self)
-        self.poc_organization = MetadataPointOfContactOrganization(parent=self)
-        self.poc_address = MetadataPointOfContactAddress(parent=self)
-        self.poc_zip = MetadataPointOfContactZIP(parent=self)
-        self.poc_city = MetadataPointOfContactCity(parent=self)
-        self.poc_state = MetadataPointOfContactState(parent=self)
-        self.poc_country = MetadataPointOfContactCountry(parent=self)
-        self.poc_email = MetadataPointOfContactEmail(parent=self)
-        self.poc_phone = MetadataPointOfContactPhone(parent=self)
+        # self.poc_role = MetadataPointOfContactRole(parent=self)
+        # self.poc_name = MetadataPointOfContactName(parent=self)
+        # self.poc_position = MetadataPointOfContactPosition(parent=self)
+        # self.poc_organization = MetadataPointOfContactOrganization(parent=self)
+        # self.poc_address = MetadataPointOfContactAddress(parent=self)
+        # self.poc_zip = MetadataPointOfContactZIP(parent=self)
+        # self.poc_city = MetadataPointOfContactCity(parent=self)
+        # self.poc_state = MetadataPointOfContactState(parent=self)
+        # self.poc_country = MetadataPointOfContactCountry(parent=self)
+        # self.poc_email = MetadataPointOfContactEmail(parent=self)
+        # self.poc_phone = MetadataPointOfContactPhone(parent=self)
+
+        self.contact = MetadataContact(parent=self)
 
         self.items.extend([self.title, self.abstract, self.purpose, self.tags, self.place_keywords, self.extent_description,
                            self.temporal_extent_description, self.temporal_extent_instance, self.temporal_extent_start,
                            self.temporal_extent_end, self.min_scale, self.max_scale, self.last_update, self.update_frequency,
                            self.update_frequency_description, self.credits, self.citation, self.limitation, self.source,
-                           self.poc_role, self.poc_name, self.poc_position, self.poc_organization, self.poc_address,
-                           self.poc_zip, self.poc_city, self.poc_state, self.poc_country, self.poc_email, self.poc_phone])
+                           # self.poc_role,
+                           # self.poc_name, self.poc_position, self.poc_organization, self.poc_address,
+                           # self.poc_zip, self.poc_city, self.poc_state, self.poc_country, self.poc_email, self.poc_phone,
+                           self.contact])
 
         if items:
             self.initialize_items()

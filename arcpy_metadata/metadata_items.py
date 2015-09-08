@@ -1,7 +1,10 @@
 __author__ = 'Thomas.Maschler'
 
+import os
 from __init__ import MetadataItem
 from __init__ import MetadataMulti
+#from __init__ import MetadataContact
+
 
 
 class MetadataTitle(MetadataItem):
