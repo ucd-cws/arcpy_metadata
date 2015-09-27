@@ -1,10 +1,18 @@
 __author__ = 'Thomas.Maschler'
 
-import os
+
 from __init__ import MetadataItem
 from __init__ import MetadataMulti
-#from __init__ import MetadataContact
+from __init__ import MetadataItems
+from __init__ import MetadataParentItem
 
+
+language_codes = {"english": ["eng", "US"],
+                  "french": ["fre", "FR"],
+                  "spanish": ["spa", "ES"]}
+
+
+# ########## General Info
 
 
 class MetadataTitle(MetadataItem):
@@ -16,6 +24,7 @@ class MetadataTitle(MetadataItem):
         self.path = "dataIdInfo/idCitation/resTitle"
         self.name = "title"
         super(MetadataTitle, self).__init__(parent)
+
 
 class MetadataAbstract(MetadataItem):
     """
@@ -39,6 +48,11 @@ class MetadataPurpose(MetadataItem):
         super(MetadataPurpose, self).__init__(parent)
 
 
+# ########## Keywords
+
+# TODO: Add category item
+# category = dataIdInfo/tpCat/TopicCatCd
+
 class MetadataTags(MetadataMulti):
     """
         Just a shortcut MetadataItem that predefines the paths
@@ -58,6 +72,134 @@ class MetadataPlaceKeywords(MetadataMulti):
         self.name = "place_keywords"
         super(MetadataPlaceKeywords, self).__init__(parent, tagname="keyword", path="dataIdInfo/placeKeys[last()]")
 
+
+class MetadataLanguage(MetadataParentItem):
+    """
+        Just a shortcut MetadataItem that predefines the paths
+    """
+
+    def __init__(self, parent, path):
+
+        self.parent = parent
+        self.path = path
+
+        super(MetadataLanguage, self).__init__(self.parent)
+
+        self._language = self._create_item(self.element.iter(), self.element, "languageCode")
+        self._country = self._create_item(self.element.iter(), self.element, "countryCode")
+
+    def set(self, value):
+        if value in language_codes.keys():
+            self._language.set_attrib({"value": language_codes[value][0]})
+            self._country.set_attrib({"value": language_codes[value][1]})
+        else:
+            raise AttributeError
+
+        return self.get()
+
+    def get(self):
+        lang = self._language.get_attrib()
+        for key in language_codes:
+            if language_codes[key][0] == lang["value"]:
+                return key
+
+
+class MetadataDataLanguage(MetadataLanguage):
+
+    def __init__(self, parent):
+        self.parent = parent
+        self.name = "language"
+        self.path = "dataIdInfo/dataLang"
+
+        super(MetadataDataLanguage, self).__init__(self.parent, self.path)
+
+
+class MetadataMDLanguage(MetadataLanguage):
+
+    def __init__(self, parent):
+        self.parent = parent
+        self.name = "metadata_language"
+        self.path = "dataIdInfo/mdLang"
+
+        super(MetadataMDLanguage, self).__init__(self.parent, self.path)
+
+
+# #### locals
+
+class MetadataLocal(MetadataParentItem):
+    """
+        Contact element
+    """
+
+    def __init__(self, parent, language, country):
+
+        self.parent = parent
+        self.path = "Esri/locales/locale[@language='%s'][@country='%s']" % (language, country)
+
+        super(MetadataLocal, self).__init__(self.parent)
+
+        self.attributes = {}
+        self.title = self._create_item(self.element.iter(), self.element, "resTitle")
+        self.abstract = self._create_item(self.element.iter(), self.element, "idAbs")
+
+
+class MetadataLocals(MetadataItems):
+    """
+        Just a shortcut MetadataItem that predefines the paths
+    """
+
+    def __init__(self, parent=None):
+
+        self.parent = parent
+
+        self.name = "locals"
+        self.path = "Esri/locales/locale"
+
+        super(MetadataLocals, self).__init__(parent, self.path)
+        self._locals = {}
+
+        for element in self.elements:
+            attrib = element.attrib
+
+            found = False
+            for lang in language_codes:
+                if language_codes[lang][0] == attrib["language"]:
+                    found = True
+                    break
+
+            if found:
+                self._locals[lang] = (MetadataLocal(self.parent, attrib["language"], attrib["country"]))
+
+    def __iter__(self):
+        return iter(self._locals)
+
+    def __getitem__(self, key):
+        return self._locals[key]
+
+    def _write(self):
+        items_to_remove = []
+        for element in self.elements:
+            items_to_remove.append(element)
+
+        for element in items_to_remove:
+            self.elements.remove(element)
+
+        for lang in self._locals:
+            self.elements.append(self._locals[lang])
+
+    def add(self, lang):
+
+        if lang in language_codes.keys():
+            language = language_codes[lang][0]
+            country = language_codes[lang][1]
+        else:
+            raise KeyError
+
+        self._locals[lang] = (MetadataLocal(self.parent, language, country))
+        self._write()
+
+
+# ########## Geographic and Temporal Extent
 
 class MetadataExtentDescription(MetadataItem):
     """
@@ -136,6 +278,8 @@ class MetadataMaxScale(MetadataItem):
         super(MetadataMaxScale, self).__init__(parent)
 
 
+# ######### Updates
+
 class MetadataLastUpdate(MetadataItem):
     """
         Just a shortcut MetadataItem that predefines the paths
@@ -168,6 +312,8 @@ class MetadataUpdateFrequencyDescription(MetadataItem):
         self.path = "dataIdInfo/resMaint/usrDefFreq/duration"
         super(MetadataUpdateFrequencyDescription, self).__init__(parent)
 
+
+# ###### Credits, Citation, Source and Limitations
 
 class MetadataCredits(MetadataItem):
     """
@@ -213,462 +359,160 @@ class MetadataSource(MetadataItem):
         super(MetadataSource, self).__init__(parent)
 
 
-# ############## Point of Contact
+# ##############  Contact
 
-class MetadataPointOfContactRole(MetadataItem):
+class MetadataContact(MetadataParentItem):
+    """
+        Contact element
+    """
+
+    def __init__(self, parent):
+        # TODO: make role a separate object
+
+        self.parent = parent
+
+        super(MetadataContact, self).__init__(self.parent)
+
+        self._role = self._create_item(self.element.iter(), self.element, "role")
+        self.role = self._create_item(self.element.iter(), self._role, "RoleCd")
+        self.contact_name = self._create_item(self.element.iter(), self.element, "rpIndName")
+        self.position = self._create_item(self.element.iter(), self.element, "rpPosName")
+        self.organization = self._create_item(self.element.iter(), self.element, "rpOrgName")
+        self.contact_info = self._create_item(self.element.iter(), self.element, "rpCntInfo")
+        self._address = self._create_item(self.element.iter(), self.contact_info, "cntAddress")
+        self.email = self._create_items(self.element.iter(), self.contact_info, "eMailAdd")
+        self.address = self._create_items(self.element.iter(), self._address, "delPoint")
+        self.city = self._create_item(self.element.iter(), self._address, "City")
+        self.state = self._create_item(self.element.iter(), self._address, "adminArea")
+        self.zip = self._create_item(self.element.iter(), self._address, "postCode")
+        self.country = self._create_item(self.element.iter(), self._address, "country")
+        self.phone = self._create_item(self.element.iter(), self.contact_info, "cntPhone")
+        self.phone_nb = self._create_items(self.element.iter(), self.phone, "voiceNum")
+        self.fax_nb = self._create_items(self.element.iter(), self.phone, "faxNum")
+        self.hours = self._create_item(self.element.iter(), self.contact_info, "cntHours")
+        self.instructions = self._create_item(self.element.iter(), self.contact_info, "cntInstr")
+        self.online_resource = self._create_item(self.element.iter(), self.contact_info, "cntOnlineRes")
+        self.link = self._create_item(self.element.iter(), self.online_resource, "linkage")
+        self.protocol = self._create_item(self.element.iter(), self.online_resource, "protocol")
+        self.profile = self._create_item(self.element.iter(), self.online_resource, "appProfile")
+        self.or_name = self._create_item(self.element.iter(), self.online_resource, "orName")
+        self.or_desc = self._create_item(self.element.iter(), self.online_resource, "orDesc")
+        self.or_function = self._create_item(self.element.iter(), self.online_resource, "orFunct")
+        self.or_function_cd = self._create_item(self.element.iter(), self.or_function, "OnFunctCd")
+
+
+class MetadataContacts(MetadataItems):
+    """
+        Just a shortcut MetadataItem that predefines the paths
+    """
+
+    def __init__(self, parent=None, path=None):
+
+        self.parent = parent
+        self.path = path
+        super(MetadataContacts, self).__init__(parent, self.path)
+        self._contacts = []
+
+    def __iter__(self):
+        return iter(self._contacts)
+
+    def __getitem__(self, key):
+        return self._contacts[key]
+
+    def _write(self):
+        items_to_remove = []
+        for element in self.elements:
+            items_to_remove.append(element)
+
+        for element in items_to_remove:
+            self.elements.remove(element)
+
+        for contact in self._contacts:
+            self.elements.append(contact)
+
+
+class MetadataPointsOfContact(MetadataContacts):
     """
         Just a shortcut MetadataItem that predefines the paths
     """
 
     def __init__(self, parent=None):
-        self.name = "poc_role"
-        self.path = "dataIdInfo/idPoC/role/RoleCd"
-        super(MetadataPointOfContactRole, self).__init__(parent)
-        self.attributes = {"value": "005"}
+        self.name = "point_of_contact"
+        self.path = "dataIdInfo/idPoC"
+        super(MetadataPointsOfContact, self).__init__(parent, self.path)
+        self._contacts = []
+        for i in range(len(self.elements)):
+            self._contacts.append(MetadataPointOfContact(parent, i))
+
+    def add(self):
+        self._contacts.append(MetadataPointOfContact(self.parent, len(self._contacts)))
+        self._write()
 
 
-class MetadataPointOfContactName(MetadataItem):
+class MetadataPointOfContact(MetadataContact):
+    """
+        Just a shortcut MetadataItem that predefines the paths
+    """
+
+    def __init__(self, parent=None, index=0):
+        self.path = "dataIdInfo/idPoC[%i]" % index
+
+        super(MetadataPointOfContact, self).__init__(parent)
+
+
+class MetadataMaintenanceContacts(MetadataContacts):
     """
         Just a shortcut MetadataItem that predefines the paths
     """
 
     def __init__(self, parent=None):
-        self.name = "poc_name"
-        self.path = "dataIdInfo/idPoC/rpIndName"
-        super(MetadataPointOfContactName, self).__init__(parent)
+        self.name = "maintenance_contact"
+        self.path = "dataIdInfo/maintCont"
+        super(MetadataMaintenanceContacts, self).__init__(parent, self.path)
+        self._contacts = []
+        for i in range(len(self.elements)):
+            self._contacts.append(MetadataPointOfContact(parent, i))
+
+    def add(self):
+        self._contacts.append(MetadataMaintenanceContact(self.parent, len(self._contacts)))
+        self._write()
 
 
-class MetadataPointOfContactPosition(MetadataItem):
+class MetadataMaintenanceContact(MetadataContact):
+    """
+        Just a shortcut MetadataItem that predefines the paths
+    """
+
+    def __init__(self, parent=None, index=0):
+        self.path = "dataIdInfo/maintCont[%i]" % index
+
+        super(MetadataMaintenanceContact, self).__init__(parent)
+
+
+class MetadataCitationContacts(MetadataContacts):
     """
         Just a shortcut MetadataItem that predefines the paths
     """
 
     def __init__(self, parent=None):
-        self.name = "poc_position"
-        self.path = "dataIdInfo/idPoC/rpPosName"
-        super(MetadataPointOfContactPosition, self).__init__(parent)
+        self.name = "citation_contact"
+        self.path = "dataIdInfo/idCitation/citRespParty"
+        super(MetadataCitationContacts, self).__init__(parent, self.path)
+        self._contacts = []
+        for i in range(len(self.elements)):
+            self._contacts.append(MetadataPointOfContact(parent, i))
+
+    def add(self):
+        self._contacts.append(MetadataMaintenanceContact(self.parent, len(self._contacts)))
+        self._write()
 
 
-class MetadataPointOfContactOrganization(MetadataItem):
+class MetadataCitationContact(MetadataContact):
     """
         Just a shortcut MetadataItem that predefines the paths
     """
 
-    def __init__(self, parent=None):
-        self.name = "poc_organization"
-        self.path = "dataIdInfo/idPoC/rpOrgName"
-        super(MetadataPointOfContactOrganization, self).__init__(parent)
+    def __init__(self, parent=None, index=0):
+        self.path = "dataIdInfo/idCitation/citRespParty[%i]" % index
 
-
-class MetadataPointOfContactAddressType(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "poc_address_type"
-        self.path = "dataIdInfo/idPoC/cntAddress[@addressType='postal']"
-        super(MetadataPointOfContactAddressType, self).__init__(parent)
-        self.attributes = {"addressType": "postal"}
-
-
-class MetadataPointOfContactAddress(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "poc_address"
-        self.path = "dataIdInfo/idPoC/cntAddress[@addressType='postal']/delPoint"
-        super(MetadataPointOfContactAddress, self).__init__(parent)
-
-
-class MetadataPointOfContactZIP(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "poc_zip"
-        self.path = "dataIdInfo/idPoC/cntAddress[@addressType='postal']/postCode"
-        super(MetadataPointOfContactZIP, self).__init__(parent)
-
-
-class MetadataPointOfContactCity(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "poc_city"
-        self.path = "dataIdInfo/idPoC/cntAddress[@addressType='postal']/city"
-        super(MetadataPointOfContactCity, self).__init__(parent)
-
-
-class MetadataPointOfContactState(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "poc_state"
-        self.path = "dataIdInfo/idPoC/cntAddress[@addressType='postal']/adminArea"
-        super(MetadataPointOfContactState, self).__init__(parent)
-
-
-class MetadataPointOfContactCountry(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "poc_country"
-        self.path = "dataIdInfo/idPoC/cntAddress[@addressType='postal']/country"
-        super(MetadataPointOfContactCountry, self).__init__(parent)
-
-
-class MetadataPointOfContactEmail(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "poc_email"
-        self.path = "dataIdInfo/idPoC/cntAddress[@addressType='postal']/eMailAdd"
-        super(MetadataPointOfContactEmail, self).__init__(parent)
-
-
-class MetadataPointOfContactPhone(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "poc_phone"
-        self.path = "dataIdInfo/idPoC/cntPhone/voiceNum"
-        super(MetadataPointOfContactPhone, self).__init__(parent)
-
-
-# ############# Data Maintenance Contact
-class MetadataDataMaintenanceRole(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_role"
-        self.path = "dataIdInfo/maintCont/role/RoleCd"
-        super(MetadataDataMaintenanceRole, self).__init__(parent)
-        self.attributes = {"value": "005"}
-
-
-class MetadataDataMaintenanceName(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_name"
-        self.path = "dataIdInfo/maintCont/rpIndName"
-        super(MetadataDataMaintenanceName, self).__init__(parent)
-
-
-class MetadataDataMaintenancePosition(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_role"
-        self.path = "dataIdInfo/maintCont/rpPosName"
-        super(MetadataDataMaintenancePosition, self).__init__(parent)
-
-
-class MetadataDataMaintenanceOrganization(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_organization"
-        self.path = "dataIdInfo/maintCont/rpOrgName"
-        super(MetadataDataMaintenanceOrganization, self).__init__(parent)
-
-
-class MetadataDataMaintenanceAddressType(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_address_type"
-        self.path = "dataIdInfo/maintCont/cntAddress"
-        super(MetadataDataMaintenanceAddressType, self).__init__(parent)
-        self.attributes = {"addressType": "postal"}
-
-
-class MetadataDataMaintenanceAddress(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_address"
-        self.path = "dataIdInfo/maintCont/cntAddress/delPoint"
-        super(MetadataDataMaintenanceAddress, self).__init__(parent)
-
-
-class MetadataDataMaintenanceZIP(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_zip"
-        self.path = "dataIdInfo/maintCont/cntAddress/postCode"
-        super(MetadataDataMaintenanceZIP, self).__init__(parent)
-
-
-class MetadataDataMaintenanceCity(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_city"
-        self.path = "dataIdInfo/maintCont/cntAddress/city"
-        super(MetadataDataMaintenanceCity, self).__init__(parent)
-
-
-class MetadataDataMaintenanceState(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_state"
-        self.path = "dataIdInfo/maintCont/cntAddress/adminArea"
-        super(MetadataDataMaintenanceState, self).__init__(parent)
-
-
-class MetadataDataMaintenanceCountry(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_country"
-        self.path = "dataIdInfo/maintCont/cntAddress/country"
-        super(MetadataDataMaintenanceCountry, self).__init__(parent)
-
-
-class MetadataDataMaintenanceEmail(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_email"
-        self.path = "dataIdInfo/maintCont/cntAddress/eMailAdd"
-        super(MetadataDataMaintenanceEmail, self).__init__(parent)
-
-
-class MetadataDataMaintenancePhone(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_phone"
-        self.path = "dataIdInfo/maintCont/cntPhone/voiceNum"
-        super(MetadataDataMaintenancePhone, self).__init__(parent)
-
-
-# ############### Citation Contact
-
-class MetadataCitationContactRole(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_role"
-        self.path = "dataIdInfo/idCitation/citRespParty/role/RoleCd"
-        super(MetadataCitationContactRole, self).__init__(parent)
-        self.attributes = {"value": "010"}
-
-
-class MetadataCitationContactName(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_name"
-        self.path = "dataIdInfo/idCitation/citRespParty/rpIndName"
-        super(MetadataCitationContactName, self).__init__(parent)
-
-
-class MetadataCitationContactPosition(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_role"
-        self.path = "dataIdInfo/idCitation/citRespParty/rpPosName"
-        super(MetadataCitationContactPosition, self).__init__(parent)
-
-
-class MetadataCitationContactOrganization(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_organization"
-        self.path = "dataIdInfo/idCitation/citRespParty/rpOrgName"
-        super(MetadataCitationContactOrganization, self).__init__(parent)
-
-
-class MetadataCitationContactAddressType(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_address_type"
-        self.path = "dataIdInfo/idCitation/citRespParty/cntAddress"
-        super(MetadataCitationContactAddressType, self).__init__(parent)
-        self.attributes = {"addressType": "postal"}
-
-
-class MetadataCitationContactAddress(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_address"
-        self.path = "dataIdInfo/idCitation/citRespParty/cntAddress/delPoint"
-        super(MetadataCitationContactAddress, self).__init__(parent)
-
-
-class MetadataCitationContactZIP(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_zip"
-        self.path = "dataIdInfo/idCitation/citRespParty/cntAddress/postCode"
-        super(MetadataCitationContactZIP, self).__init__(parent)
-
-
-class MetadataCitationContactCity(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_city"
-        self.path = "dataIdInfo/idCitation/citRespParty/cntAddress/city"
-        super(MetadataCitationContactCity, self).__init__(parent)
-
-
-class MetadataCitationContactState(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_state"
-        self.path = "dataIdInfo/idCitation/citRespParty/cntAddress/adminArea"
-        super(MetadataCitationContactState, self).__init__(parent)
-
-
-class MetadataCitationContactCountry(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_country"
-        self.path = "dataIdInfo/idCitation/citRespParty/cntAddress/country"
-        super(MetadataCitationContactCountry, self).__init__(parent)
-
-
-class MetadataCitationContactEmail(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_email"
-        self.path = "dataIdInfo/idCitation/citRespParty/cntAddress/eMailAdd"
-        super(MetadataCitationContactEmail, self).__init__(parent)
-
-
-class MetadataCitationContactPhone(MetadataItem):
-    """
-        Just a shortcut MetadataItem that predefines the paths
-    """
-
-    def __init__(self, parent=None):
-        self.name = "citation_phone"
-        self.path = "dataIdInfo/idCitation/citRespParty/cntPhone/voiceNum"
-        super(MetadataCitationContactPhone, self).__init__(parent)
-
-
-
-
-
-
-
-
-
-
-
-#The following items have special attributs and need a seperate Metadata Item class
-
-# title_local = Esri, locales, locale, resTitle
-# description_local = Esri, locales, locale, idAbs
-# language = dataIdInfo, dataLang, languageCode
-# lang_country = dataIdInfo, dataLang, languageCode
-# category = dataIdInfo, tpCat, TopicCatCd
-#
-# contact_wri_name = dataIdInfo, idPoC, rpIndName
-# contact_wri_org = dataIdInfo, idPoC, rpOrgName
-# contact_wri_pos = dataIdInfo, idPoC, rpPosName
-# contact_wri_role = dataIdInfo, idPoC, role, RoleCd
-# contact_wri_adress = dataIdInfo,idPoC, rpCntInfo, cntAddress, delPoint
-# contact_wri_city = dataIdInfo, idPoC, rpCntInfo, cntAddress, City
-# contact_wri_state = dataIdInfo, idPoC, rpCntInfo, cntAddress, adminArea
-# contact_wri_postalcode = dataIdInfo, idPoC, rpCntInfo, cntAddress, postCode
-# contact_wri_email = dataIdInfo, idPoC, rpCntInfo, cntAddress, eMailAdd
-# contact_wri_country = dataIdInfo, idPoC, rpCntInfo, cntAddress, country
-# contact_wri_phone = dataIdInfo, idPoC, rpCntInfo, cntPhone, voiceNum
-#
-# contact_tec_name = dataIdInfo, maintCont, rpIndName
-# contact_tec_org = dataIdInfo, maintCont, rpOrgName
-# contact_tec_pos = dataIdInfo, maintCont, rpPosName
-# contact_tec_role = dataIdInfo, maintCont, role, RoleCd
-# contact_tec_adress = dataIdInfo, maintCont, rpCntInfo, cntAddress, delPoint
-# contact_tec_city = dataIdInfo, maintCont, rpCntInfo, cntAddress, City
-# contact_tec_state = dataIdInfo, maintCont, rpCntInfo, cntAddress, adminArea
-# contact_tec_postalcode = dataIdInfo, maintCont, rpCntInfo, cntAddress, postCode
-# contact_tec_email = dataIdInfo, maintCont, rpCntInfo, cntAddress, eMailAdd
-# contact_tec_country = dataIdInfo, maintCont, rpCntInfo, cntAddress, country
-# contact_tec_phone = dataIdInfo, maintCont, rpCntInfo, cntPhone, voiceNum
-#
-# contact_owner_name = dataIdInfo, idCitation, citRespParty, rpIndName
-# contact_owner_org = dataIdInfo, idCitation, citRespParty, rpOrgName
-# contact_owner_pos = dataIdInfo, idCitation, citRespParty, rpPosName
-# contact_owner_rol = dataIdInfo, idCitation, citRespParty, role, RoleCd
-# contact_owner_adress = dataIdInfo, idCitation, citRespParty, rpCntInfo, cntAddress, delPoint
-# contact_owner_city = dataIdInfo, idCitation, citRespParty, rpCntInfo, cntAddress, City
-# contact_owner_state = dataIdInfo, idCitation, citRespParty, rpCntInfo, cntAddress, adminArea
-# contact_owner_postalcode = dataIdInfo, idCitation, citRespParty, rpCntInfo, cntAddress, postCode
-# contact_owner_email = dataIdInfo, idCitation, citRespParty, rpCntInfo, cntAddress, eMailAdd
-# contact_owner_country = dataIdInfo, idCitation, citRespParty, rpCntInfo, cntAddress, country
-# contact_owner_phone = dataIdInfo, idCitation, citRespParty, rpCntInfo, cntPhone, voiceNum
+        super(MetadataCitationContact, self).__init__(parent)

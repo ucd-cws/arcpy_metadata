@@ -5,12 +5,11 @@ __author__ = 'nickrsan, thomas.maschler'
 
 import xml
 import os
-import re
+import xml.etree.ElementTree as ET
 
 import arcpy
 
 from metadata_items import *
-from contacts import *
 
 
 # TODO: Convert to using logging or logbook - probably logging to keep dependencies down
@@ -37,6 +36,10 @@ class MetadataItem(object):
 
     def __init__(self, parent=None):
         self.parent = parent
+        try:
+            self.parent.elements
+        except AttributeError:
+            self.parent = parent.parent
         self.element = None
         self._require_tree_elements()
 
@@ -50,6 +53,7 @@ class MetadataItem(object):
         """
         e_tree = self.path.split('/')
         root = self.parent.elements.getroot()
+
         done = False
         while not done:
             d = {}
@@ -67,7 +71,7 @@ class MetadataItem(object):
                 i += 1
                 d[i] = d[i-1].find(e)
                 if d[i] is None:
-                    child = xml.etree.ElementTree.Element(e_name)
+                    child = ET.Element(e_name)
                     for attrib in e_attrib:
                         if attrib[0] == "@":
                             kv = attrib.split('=')
@@ -152,6 +156,12 @@ class MetadataMulti(MetadataItem):
     def _refresh(self):
         self.current_items = self.parent.elements.find(self.path)
 
+    def __iter__(self):
+        return iter(self.current_items)
+
+    def __getitem__(self, key):
+        return self.current_items[key]
+
     def _add_item(self, item):
         """
             Adds an individual item to the section
@@ -160,7 +170,7 @@ class MetadataMulti(MetadataItem):
             :return: None
         """
 
-        element = xml.etree.ElementTree.Element(self.tag_name)
+        element = ET.Element(self.tag_name)
         element.text = item
         self.current_items.append(element)
 
@@ -222,49 +232,150 @@ class MetadataMulti(MetadataItem):
         return self.get()
 
 
+class MetadataItems(MetadataItem):
+
+    def __init__(self, parent, path):
+        self.path = os.path.dirname(path)
+        self.tag_name = os.path.basename(path)
+        super(MetadataItems, self).__init__(parent)
+        self.path = path
+        self.elements = self.parent.elements.findall(self.path)
+
+    def __iter__(self):
+        return iter(self.elements)
+
+    def __getitem__(self, key):
+        return self.elements[key]
+
+    # def get(self):
+    #     values = []
+    #     for element in self.elements:
+    #         values.append(element.text)
+    #     return values
+    #
+    # def _add_item(self,item):
+    #     element = ET.Element(self.tag_name)
+    #     element.text = item
+    #     self.elements.append(element)
+    #
+    # def add(self, items):
+    #     for item in items:
+    #         self._add_item(item)
+    #     return self.get()
+    #
+    # def extent(self, items):
+    #     self.add(items)
+    #
+    # def append(self, item):
+    #     self._add_item(item)
+    #     return self.get()
+    #
+    # def remove(self, item):
+    #     items_to_remove = []
+    #     for i in self.elements:
+    #         if i.text == item:
+    #             items_to_remove.append(i)
+    #     for i in items_to_remove:
+    #         self.elements.remove(i)
+    #     return self.get()
+    #
+    # def remove_all(self):
+    #     items_to_remove = []
+    #     for i in self.elements:
+    #         items_to_remove.append(i)
+    #     for i in items_to_remove:
+    #         self.elements.remove(i)
+    #
+    #     return self.get()
 
 
-# class MetadataContact(MetadataItem):
-#     """
-#         A metadata item for groups of items (like tags). Define the root element (self.path) and then the name of the
-#           subitem to store there (self.tag_name) and you can use list-like methods to edit the group
-#     """
-#
-#     role = None
-#     contact_name = None
-#     position = None
-#     organization = None
-#     address = None
-#     phone = None
-#
-#
-#     path = None
-#     current_items = []
-#     def __init__(self, parent=None, role=None, contact_name=None, position=None, organization=None, address=None, phone=None, path=None):
-#
-#
-#         if not self.role:
-#             self.role = role
-#         if not self.name:
-#             self.contact_name = contact_name
-#         if not self.position:
-#             self.position = position
-#         if not self.organization:
-#             self.organization = organization
-#         if not self.address:
-#             self.address = address #has children
-#         if not self.phone:
-#             self.phone = phone #has children
-#         #self.hours
-#         #self.instructions
-#
-#         if path:
-#             self.path = path
-#
-#         super(MetadataContact, self).__init__(parent)
-#
-#         #self._refresh()
+class MetadataParentItem(MetadataItem):
+    def __init__(self, parent):
 
+        self.parent = parent
+        super(MetadataParentItem, self).__init__(self.parent)
+
+    def _create_item(self, iter, parent, tag_name):
+        for i in iter:
+            if i.tag == tag_name:
+                return MetadataSubItem(i, parent, True)
+        i = ET.Element(tag_name)
+        return MetadataSubItem(i, parent)
+
+    def _create_items(self, iter, parent, tag_name):
+        items = []
+        for i in iter:
+            if i.tag == tag_name:
+                items.append(i)
+
+        if not items:
+            items = [ET.Element(tag_name)]
+            return MetadataSubItems(items, parent)
+        else:
+            return MetadataSubItems(items, parent, True)
+
+
+class MetadataSubItem(object):
+    def __init__(self, element, parent, exists=False):
+
+        self.parent = parent
+        self.element = element
+
+        if not exists:
+            self.parent.append(element)
+
+        self.attributes = self.element.attrib # {}
+
+    def append(self, element):
+        self.element.append(element)
+
+    def get(self):
+        return self.element.text
+
+    def get_attrib(self):
+        return self.attributes
+
+    def set(self, value):
+        self.element.text = value
+        return self.get()
+
+    def set_attrib(self, attributes):
+        self.attributes.update(attributes)
+        for attribute in self.attributes:
+                self.element.set(attribute, self.attributes[attribute])
+        return self.get_attrib()
+
+
+class MetadataSubItems(object):
+    def __init__(self, elements, parent, exists=False):
+        self.elements = []
+        self.parent = parent
+
+        self.tag_name = elements[0].tag
+
+        for element in elements:
+            self.elements.append(MetadataSubItem(element, parent, exists))
+
+    def append(self, item):
+        element = ET.Element(self.tag_name)
+        element.text = item
+        self.elements.append(MetadataSubItem(element, self.parent, False))
+
+    def add(self, items):
+        for item in items:
+            self.append(item)
+
+    def get(self):
+        elements = []
+        for element in self.elements:
+            elements.append(element.get())
+        return elements
+
+    def __iter__(self):
+        return iter(self.elements)
+
+    def __getitem__(self, key):
+        return self.elements[key]
 
 
 class MetadataEditor(object):
@@ -342,29 +453,21 @@ class MetadataEditor(object):
         self.citation = MetadataCitation(parent=self)
         self.limitation = MetadataLimitation(parent=self)
         self.source = MetadataSource(parent=self)
+        self.points_of_contact = MetadataPointsOfContact(parent=self)
+        self.maintenance_contacts = MetadataMaintenanceContacts(parent=self)
+        self.citation_contacts = MetadataCitationContacts(parent=self)
 
-        # self.poc_role = MetadataPointOfContactRole(parent=self)
-        # self.poc_name = MetadataPointOfContactName(parent=self)
-        # self.poc_position = MetadataPointOfContactPosition(parent=self)
-        # self.poc_organization = MetadataPointOfContactOrganization(parent=self)
-        # self.poc_address = MetadataPointOfContactAddress(parent=self)
-        # self.poc_zip = MetadataPointOfContactZIP(parent=self)
-        # self.poc_city = MetadataPointOfContactCity(parent=self)
-        # self.poc_state = MetadataPointOfContactState(parent=self)
-        # self.poc_country = MetadataPointOfContactCountry(parent=self)
-        # self.poc_email = MetadataPointOfContactEmail(parent=self)
-        # self.poc_phone = MetadataPointOfContactPhone(parent=self)
+        self.language = MetadataDataLanguage(parent=self)
+        self.metadata_language = MetadataMDLanguage(parent=self)
 
-        self.contact = MetadataContact(parent=self)
+        self.locals = MetadataLocals(parent=self)
 
         self.items.extend([self.title, self.abstract, self.purpose, self.tags, self.place_keywords, self.extent_description,
                            self.temporal_extent_description, self.temporal_extent_instance, self.temporal_extent_start,
                            self.temporal_extent_end, self.min_scale, self.max_scale, self.last_update, self.update_frequency,
                            self.update_frequency_description, self.credits, self.citation, self.limitation, self.source,
-                           # self.poc_role,
-                           # self.poc_name, self.poc_position, self.poc_organization, self.poc_address,
-                           # self.poc_zip, self.poc_city, self.poc_state, self.poc_country, self.poc_email, self.poc_phone,
-                           self.contact])
+                           self.points_of_contact, self.maintenance_contacts, self.citation_contacts,
+                           self.language, self.metadata_language, self.locals])
 
         if items:
             self.initialize_items()
