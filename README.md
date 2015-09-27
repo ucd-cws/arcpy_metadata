@@ -82,11 +82,11 @@ The code is based on a set of core classes that provide set/append/prepend opera
 Supported items
 ---------------
 
-|Item Description|internal name|type|location in Arc Catalog|path in ArcGIS XML file|
+|Item description|Internal name|Type|Location in ArcCatalog|Path in ArcGIS XML file|
 |---|---|---|---|---|
 |Title|title|simple|Overview/ Item Description/ Title|dataIdInfo/idCitation/resTitle|
 |Abstract|abstract|simple|Overview/ Item Description/ Description|dataIdInfo/idAbs|
-|Locales|locals|complex|Overview/Locales/#language/..|Esri/locales/locale|
+|Locales|locales|complex|Overview/Locales/#language/..|Esri/locales/locale|
 |Purpose|purpose|simple|Overview/ Item Description/ Summery|dataIdInfo/idPurp|
 |Tags|tags|multi|Overview/ Item Description/ Tags|dataIdInfo/searchKeys/keyword|
 |Place Keywords|place_keywords|multi|Overview/ Topics & Keywords/ Place Keyword|dataIdInfo/placeKeys/keyword|
