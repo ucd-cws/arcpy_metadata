@@ -67,7 +67,7 @@ metadata.points_of_contact.add()
 metadata.points_of_contact[0].contact_name.set("Contact name")
 
 metadata.points_of_contact[0].email.get()
-metadata.points_of_contact[0].email[0].set(email1@domain.org)
+metadata.points_of_contact[0].email[0].set("email1@domain.org")
 metadata.points_of_contact[0].email.append("emai2@domain.org")
 ```
 
@@ -83,7 +83,7 @@ Supported items
 ---------------
 
 |Item Description|internal name|type|location in Arc Catalog|path in ArcGIS XML file|
-|---|---|---|---|
+|---|---|---|---|---|
 |Title|metadata.title|simple|Overview/ Item Description/ Title|dataIdInfo/idCitation/resTitle|
 |Abstract|metadata.abstract|simple|Overview/ Item Description/ Description|dataIdInfo/idAbs|
 |Locales|metadata.locals|complex|Overview/Locales/#language/..|Esri/locales/locale|
