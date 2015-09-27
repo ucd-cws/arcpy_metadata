@@ -84,31 +84,31 @@ Supported items
 
 |Item Description|internal name|type|location in Arc Catalog|path in ArcGIS XML file|
 |---|---|---|---|---|
-|Title|metadata.title|simple|Overview/ Item Description/ Title|dataIdInfo/idCitation/resTitle|
-|Abstract|metadata.abstract|simple|Overview/ Item Description/ Description|dataIdInfo/idAbs|
-|Locales|metadata.locals|complex|Overview/Locales/#language/..|Esri/locales/locale|
-|Purpose|metadata.purpose|simple|Overview/ Item Description/ Summery|dataIdInfo/idPurp|
-|Tags|metadata.tags|multi|Overview/ Item Description/ Tags|dataIdInfo/searchKeys/keyword|
-|Place Keywords|metadata.place_keywords|multi|Overview/ Topics & Keywords/ Place Keyword|dataIdInfo/placeKeys/keyword|
-|Extent Description|metadata.extent_description|simple|Resource/ Extents/ Extent/ Description|dataIdInfo/dataExt/exDesc|
-|Temporal Extent Description|metadata.temporal_extent_description|simple|   |dataIdInfo/dataExt/tempDesc|
-|Temporal Extent Instance|metadata.temporal_extent_instance|simple|Resource/ Extents/ Temporal Instance Extent/ Instance Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Instant/tmPosition|
-|Temporal Extent Start Date|metadata.temporal_extent_start|simple|Resource/ Extents/ Temporal Period Extent/ Begin Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmBegin|
-|Temporal Extent End Date|metadata.temporal_extent_end|simple|Resource/ Extents/ Temporal Period Extent/ End Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmEnd|
-|Minimum Scale|metadata.min_scale|simple|Item Description/ Appropriate Scale Range/ Min Scale|Esri/scaleRange/minScale|
-|Maximum Scale|metadata.max_scale|simple|Item Description/ Appropriate Scale Range/ Max Scale|Esri/scaleRange/maxScale|
-|Last Update|metadata.last_update|simple|Overview/ Citation/ Dates/ Revised|dataIdInfo/idCitation/date/reviseDate|
-|Update Frequency|metadata.update_frequency|list|Resource/ Maintenance/ Update Frequency|dataIdInfo/resMaint/maintFreq/MaintFreqCd|
-|Update Frequency Description|metadata.update_frequency_description|simple|Resource/ Maintenance/ Custom Frequency|dataIdInfo/resMaint/usrDefFreq/duration|
-|Credits|metadata.credits|simple|Overview/ Item Description/ Credits|dataIdInfo/idCredit|
-|Citation|metadata.citation|simple|Overview/ Citation/ Other Details|dataIdInfo/idCitation/otherCitDet|
-|Limitation|metadata.limitation|simple|Overview/ Item Description/ Use Limitation|dataIdInfo/resConst/Consts/useLimit|
-|Source|metadata.source|simple|Resource/ Lineage/ Data Source/ Source Description|dqInfo/dataLineage/dataSource/srcDesc|
-|Points of contact|metadata.points_of_contact|complex|Resource/ Points of Contact/ Contact/...|dataIdInfo/idPoC|
-|Maintenance Contacts|metadata.maintenance_contacts|complex|Resource/ Maintenance/ Maintenance Contact/...|dataIdInfo/maintCont|
-|Citation Contacts|metadata.citation_contacts|complex|Overview/ Citation Contact/ Contact/...|dataIdInfo/idCitation/citRespParty|
-|Language|metadata.language|list|Resource/ Detail/ Languages/ Language|dataIdInfo/dataLang|
-|Metadata Language|metadata.metadata_language|list|Metadata/ Detail/ Language|dataIdInfo/mdLang|
+|Title|title|simple|Overview/ Item Description/ Title|dataIdInfo/idCitation/resTitle|
+|Abstract|abstract|simple|Overview/ Item Description/ Description|dataIdInfo/idAbs|
+|Locales|locals|complex|Overview/Locales/#language/..|Esri/locales/locale|
+|Purpose|purpose|simple|Overview/ Item Description/ Summery|dataIdInfo/idPurp|
+|Tags|tags|multi|Overview/ Item Description/ Tags|dataIdInfo/searchKeys/keyword|
+|Place Keywords|place_keywords|multi|Overview/ Topics & Keywords/ Place Keyword|dataIdInfo/placeKeys/keyword|
+|Extent Description|extent_description|simple|Resource/ Extents/ Extent/ Description|dataIdInfo/dataExt/exDesc|
+|Temporal Extent Description|temporal_extent_description|simple|   |dataIdInfo/dataExt/tempDesc|
+|Temporal Extent Instance|temporal_extent_instance|simple|Resource/ Extents/ Temporal Instance Extent/ Instance Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Instant/tmPosition|
+|Temporal Extent Start Date|temporal_extent_start|simple|Resource/ Extents/ Temporal Period Extent/ Begin Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmBegin|
+|Temporal Extent End Date|temporal_extent_end|simple|Resource/ Extents/ Temporal Period Extent/ End Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmEnd|
+|Minimum Scale|min_scale|simple|Item Description/ Appropriate Scale Range/ Min Scale|Esri/scaleRange/minScale|
+|Maximum Scale|max_scale|simple|Item Description/ Appropriate Scale Range/ Max Scale|Esri/scaleRange/maxScale|
+|Last Update|last_update|simple|Overview/ Citation/ Dates/ Revised|dataIdInfo/idCitation/date/reviseDate|
+|Update Frequency|update_frequency|list|Resource/ Maintenance/ Update Frequency|dataIdInfo/resMaint/maintFreq/MaintFreqCd|
+|Update Frequency Description|update_frequency_description|simple|Resource/ Maintenance/ Custom Frequency|dataIdInfo/resMaint/usrDefFreq/duration|
+|Credits|credits|simple|Overview/ Item Description/ Credits|dataIdInfo/idCredit|
+|Citation|citation|simple|Overview/ Citation/ Other Details|dataIdInfo/idCitation/otherCitDet|
+|Limitation|limitation|simple|Overview/ Item Description/ Use Limitation|dataIdInfo/resConst/Consts/useLimit|
+|Source|source|simple|Resource/ Lineage/ Data Source/ Source Description|dqInfo/dataLineage/dataSource/srcDesc|
+|Points of contact|points_of_contact|complex|Resource/ Points of Contact/ Contact/...|dataIdInfo/idPoC|
+|Maintenance Contacts|maintenance_contacts|complex|Resource/ Maintenance/ Maintenance Contact/...|dataIdInfo/maintCont|
+|Citation Contacts|citation_contacts|complex|Overview/ Citation Contact/ Contact/...|dataIdInfo/idCitation/citRespParty|
+|Language|language|list|Resource/ Detail/ Languages/ Language|dataIdInfo/dataLang|
+|Metadata Language|metadata_language|list|Metadata/ Detail/ Language|dataIdInfo/mdLang|
 
 
 
