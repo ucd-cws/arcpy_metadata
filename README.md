@@ -116,6 +116,14 @@ Under the hood
 ---------------
 arcpy_metadata uses the strategy of exporting the metadata from the layer, then edits the xml export based on your method calls. When you're done, use finish() to save your data back to the source.
 
+
+Known limitations
+---------------
+Does not yet support all metadata items and some list items are only partly supported.
+
+Currently only works with 32-bit Python. Module crashes under 64-bit Python due to a bug arcpy (v10.3.1), when using arcpy.XSLTransform_conversion().
+
+
 Acknowledgements
 ----------------
 arcpy_metadata is a project of the [UC Davis Center for Watershed Sciences](https://watershed.ucdavis.edu) with contributions from the [World Resources Institute](www.wri.org). It was initially created as part of a larger project funded by the California Department of Fish and Wildlife [Biogeographic Data Branch](http://www.dfg.ca.gov/biogeodata/) and further developed for [Global Forest Watch](www.globalforestwatch.org). We thank our donors for their support and their commitment to high quality geospatial data.
