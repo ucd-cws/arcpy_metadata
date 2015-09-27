@@ -103,6 +103,8 @@ class MetadataLanguage(MetadataParentItem):
             if language_codes[key][0] == lang["value"]:
                 return key
 
+    def get_list_values(self):
+        return language_codes.keys()
 
 class MetadataDataLanguage(MetadataLanguage):
 
@@ -386,9 +388,9 @@ class MetadataContact(MetadataParentItem):
         self.state = self._create_item(self.element.iter(), self._address, "adminArea")
         self.zip = self._create_item(self.element.iter(), self._address, "postCode")
         self.country = self._create_item(self.element.iter(), self._address, "country")
-        self.phone = self._create_item(self.element.iter(), self.contact_info, "cntPhone")
-        self.phone_nb = self._create_items(self.element.iter(), self.phone, "voiceNum")
-        self.fax_nb = self._create_items(self.element.iter(), self.phone, "faxNum")
+        self._phone = self._create_item(self.element.iter(), self.contact_info, "cntPhone")
+        self.phone_nb = self._create_items(self.element.iter(), self._phone, "voiceNum")
+        self.fax_nb = self._create_items(self.element.iter(), self._phone, "faxNum")
         self.hours = self._create_item(self.element.iter(), self.contact_info, "cntHours")
         self.instructions = self._create_item(self.element.iter(), self.contact_info, "cntInstr")
         self.online_resource = self._create_item(self.element.iter(), self.contact_info, "cntOnlineRes")

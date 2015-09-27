@@ -434,6 +434,7 @@ class MetadataEditor(object):
         self.elements.parse(self.metadata_file)
 
         # create these all after the parsing happens so that if they have any self initialization, they can correctly perform it
+
         self.title = MetadataTitle(parent=self)
         self.abstract = MetadataAbstract(parent=self)
         self.purpose = MetadataPurpose(parent=self)
