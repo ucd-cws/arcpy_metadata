@@ -110,6 +110,7 @@ class MetadataLanguage(MetadataParentItem):
     def get_list_values(self):
         return language_codes.keys()
 
+
 class MetadataDataLanguage(MetadataLanguage):
 
     """
@@ -382,9 +383,9 @@ class MetadataSource(MetadataItem):
 # ##############  Contact
 
 
-
 class MetadataContact(MetadataParentItem):
-# TODO: Define Role, Country and Online Resource list
+
+    # TODO: Define Role, Country and Online Resource list
     """
         A MetadatContact Item
         Each Contact Item has several children
@@ -507,7 +508,6 @@ class MetadataPointOfContact(MetadataContact):
         self.path = "dataIdInfo/idPoC[%i]" % index
 
         super(MetadataPointOfContact, self).__init__(parent)
-
 
 
 class MetadataMaintenanceContacts(MetadataContacts):

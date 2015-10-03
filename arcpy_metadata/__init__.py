@@ -490,12 +490,13 @@ class MetadataEditor(object):
 
         self.locals = MetadataLocals(parent=self)
 
-        self.items.extend([self.title, self.abstract, self.purpose, self.tags, self.place_keywords, self.extent_description,
-                           self.temporal_extent_description, self.temporal_extent_instance, self.temporal_extent_start,
-                           self.temporal_extent_end, self.min_scale, self.max_scale, self.last_update, self.update_frequency,
-                           self.update_frequency_description, self.credits, self.citation, self.limitation, self.source,
-                           self.points_of_contact, self.maintenance_contacts, self.citation_contacts,
-                           self.language, self.metadata_language, self.locals])
+        self.items.extend([self.title, self.abstract, self.purpose, self.tags, self.place_keywords,
+                           self.extent_description, self.temporal_extent_description, self.temporal_extent_instance,
+                           self.temporal_extent_start, self.temporal_extent_end, self.min_scale, self.max_scale,
+                           self.last_update, self.update_frequency,self.update_frequency_description, self.credits,
+                           self.citation, self.limitation, self.source, self.points_of_contact,
+                           self.maintenance_contacts, self.citation_contacts, self.language, self.metadata_language,
+                           self.locals])
 
         if items:
             self.initialize_items()
