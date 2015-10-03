@@ -31,6 +31,10 @@ metadata_temp_folder = arcpy.env.scratchFolder  # a default temp folder to use -
 
 
 class MetadataItem(object):
+    '''
+    A standard Metadata Item
+    '''
+
     path = None
     value = ""
 
@@ -180,7 +184,6 @@ class MetadataMulti(MetadataItem):
             values.append(item.text)
         return values
 
-
     def add(self, items):
         """
         :param items:
@@ -233,6 +236,10 @@ class MetadataMulti(MetadataItem):
 
 
 class MetadataItems(MetadataItem):
+    """
+        A helper objects for more complex items like Locals or Contacts.
+        This object will allow to iterage though multiple items of the same type
+    """
 
     def __init__(self, parent, path):
         self.path = os.path.dirname(path)
@@ -290,6 +297,11 @@ class MetadataItems(MetadataItem):
 
 
 class MetadataParentItem(MetadataItem):
+    """
+    A helper object for more complex items like Contact and Locals
+    This object will allow to add child elements to an item
+    """
+
     def __init__(self, parent):
 
         self.parent = parent
@@ -316,6 +328,11 @@ class MetadataParentItem(MetadataItem):
 
 
 class MetadataSubItem(object):
+    """
+    A helper object for more complex items like Contact and Locals
+    This object can be placed as single item inside a parent items
+    """
+
     def __init__(self, element, parent, exists=False):
 
         self.parent = parent
@@ -347,6 +364,11 @@ class MetadataSubItem(object):
 
 
 class MetadataSubItems(object):
+    """
+    A helper object for more complex items like Contact and Locals
+    This object can be placed as multi item inside a parent item
+    """
+
     def __init__(self, elements, parent, exists=False):
         self.elements = []
         self.parent = parent
@@ -379,6 +401,11 @@ class MetadataSubItems(object):
 
 
 class MetadataEditor(object):
+    """
+    The metadata editor
+    Create an instance of this object for each metadata file you want to edit
+    """
+
     def __init__(self, dataset=None, metadata_file=None, items=list(),
                  temp_folder=metadata_temp_folder):
         self.items = items
@@ -525,11 +552,9 @@ class MetadataEditor(object):
 
     def finish(self):
         """
-            Alias for saving and cleaning up
+        Alias for saving and cleaning up
         :return:
         """
 
         self.save()
         self.cleanup()
-
-#metadata = MetadataEditor(r"C:\Users\Thomas.Maschler\Documents\GitHub\arcpy_metadata\tests\test_data_temp_folder\simple_poly_w_base_metadata.shp")

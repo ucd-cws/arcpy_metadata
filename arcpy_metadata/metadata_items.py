@@ -55,7 +55,7 @@ class MetadataPurpose(MetadataItem):
 
 class MetadataTags(MetadataMulti):
     """
-        Just a shortcut MetadataItem that predefines the paths
+        Just a shortcut MetadataMulti that predefines the paths
     """
 
     def __init__(self, parent=None):
@@ -65,7 +65,7 @@ class MetadataTags(MetadataMulti):
 
 class MetadataPlaceKeywords(MetadataMulti):
     """
-        Just a shortcut MetadataItem that predefines the paths
+        Just a shortcut MetadataMulti that predefines the paths
     """
 
     def __init__(self, parent=None):
@@ -75,7 +75,11 @@ class MetadataPlaceKeywords(MetadataMulti):
 
 class MetadataLanguage(MetadataParentItem):
     """
-        Just a shortcut MetadataItem that predefines the paths
+        A MetadataParentItem for Language settings
+        Each Language Item has two children
+         - Language
+         - Country
+        Predefined language pairs are stored in the global language_code dictionary
     """
 
     def __init__(self, parent, path):
@@ -108,6 +112,10 @@ class MetadataLanguage(MetadataParentItem):
 
 class MetadataDataLanguage(MetadataLanguage):
 
+    """
+        Just a shortcut MetadataLanguage that predefines the paths
+    """
+
     def __init__(self, parent):
         self.parent = parent
         self.name = "language"
@@ -117,6 +125,10 @@ class MetadataDataLanguage(MetadataLanguage):
 
 
 class MetadataMDLanguage(MetadataLanguage):
+
+    """
+        Just a shortcut MetadataLanguage that predefines the paths
+    """
 
     def __init__(self, parent):
         self.parent = parent
@@ -130,7 +142,7 @@ class MetadataMDLanguage(MetadataLanguage):
 
 class MetadataLocal(MetadataParentItem):
     """
-        Contact element
+        A MetadataLocal Item
     """
 
     def __init__(self, parent, language, country):
@@ -147,7 +159,13 @@ class MetadataLocal(MetadataParentItem):
 
 class MetadataLocals(MetadataItems):
     """
-        Just a shortcut MetadataItem that predefines the paths
+        A MetadataLocals Item for Localized Titles and Abstracts
+        Each Local Item has two children
+         - Title
+         - Abstract
+        and a language and country attribute to define the local language
+        Predefined language pairs are stored in the global language_code dictionary
+        There can be many MetadataLocals instances
     """
 
     def __init__(self, parent=None):
@@ -363,13 +381,41 @@ class MetadataSource(MetadataItem):
 
 # ##############  Contact
 
+
+
 class MetadataContact(MetadataParentItem):
+# TODO: Define Role, Country and Online Resource list
     """
-        Contact element
+        A MetadatContact Item
+        Each Contact Item has several children
+         - Role (list)
+         - Contact Name
+         - Position
+         - Organization
+         - Contact Info
+         - Email (many)
+         - Address
+         - City
+         - State
+         - ZIP
+         - Country (list)
+         - Phone number (many)
+         - Fax number (many)
+         - Hours
+         - Instructions
+         - Link
+         - Protocol
+         - Profile
+         - Online Resource Name
+         - Online Resource Function
+         - Online Resource Code (list)
+
+        and a language and country attribute to define the local language
+        Predefined language pairs are stored in the global language_code dictionary
+        There can be many MetadataLocals instances
     """
 
     def __init__(self, parent):
-        # TODO: make role a separate object
 
         self.parent = parent
 
@@ -393,19 +439,20 @@ class MetadataContact(MetadataParentItem):
         self.fax_nb = self._create_items(self.element.iter(), self._phone, "faxNum")
         self.hours = self._create_item(self.element.iter(), self.contact_info, "cntHours")
         self.instructions = self._create_item(self.element.iter(), self.contact_info, "cntInstr")
-        self.online_resource = self._create_item(self.element.iter(), self.contact_info, "cntOnlineRes")
-        self.link = self._create_item(self.element.iter(), self.online_resource, "linkage")
-        self.protocol = self._create_item(self.element.iter(), self.online_resource, "protocol")
-        self.profile = self._create_item(self.element.iter(), self.online_resource, "appProfile")
-        self.or_name = self._create_item(self.element.iter(), self.online_resource, "orName")
-        self.or_desc = self._create_item(self.element.iter(), self.online_resource, "orDesc")
-        self.or_function = self._create_item(self.element.iter(), self.online_resource, "orFunct")
+        self._online_resource = self._create_item(self.element.iter(), self.contact_info, "cntOnlineRes")
+        self.link = self._create_item(self.element.iter(), self._online_resource, "linkage")
+        self.protocol = self._create_item(self.element.iter(), self._online_resource, "protocol")
+        self.profile = self._create_item(self.element.iter(), self._online_resource, "appProfile")
+        self.or_name = self._create_item(self.element.iter(), self._online_resource, "orName")
+        self.or_desc = self._create_item(self.element.iter(), self._online_resource, "orDesc")
+        self.or_function = self._create_item(self.element.iter(), self._online_resource, "orFunct")
         self.or_function_cd = self._create_item(self.element.iter(), self.or_function, "OnFunctCd")
 
 
 class MetadataContacts(MetadataItems):
     """
-        Just a shortcut MetadataItem that predefines the paths
+        Extend the MetadataItems object
+        use self._contacts instead of self._elements
     """
 
     def __init__(self, parent=None, path=None):
@@ -435,7 +482,7 @@ class MetadataContacts(MetadataItems):
 
 class MetadataPointsOfContact(MetadataContacts):
     """
-        Just a shortcut MetadataItem that predefines the paths
+        Just a shortcut MetadataContacts that predefines the paths
     """
 
     def __init__(self, parent=None):
@@ -453,7 +500,7 @@ class MetadataPointsOfContact(MetadataContacts):
 
 class MetadataPointOfContact(MetadataContact):
     """
-        Just a shortcut MetadataItem that predefines the paths
+        Just a shortcut MetadataContacts that predefines the paths and position
     """
 
     def __init__(self, parent=None, index=0):
@@ -462,9 +509,10 @@ class MetadataPointOfContact(MetadataContact):
         super(MetadataPointOfContact, self).__init__(parent)
 
 
+
 class MetadataMaintenanceContacts(MetadataContacts):
     """
-        Just a shortcut MetadataItem that predefines the paths
+        Just a shortcut MetadataContacts that predefines the paths
     """
 
     def __init__(self, parent=None):
@@ -482,7 +530,7 @@ class MetadataMaintenanceContacts(MetadataContacts):
 
 class MetadataMaintenanceContact(MetadataContact):
     """
-        Just a shortcut MetadataItem that predefines the paths
+        Just a shortcut MetadataContact that predefines the paths and position
     """
 
     def __init__(self, parent=None, index=0):
@@ -493,7 +541,7 @@ class MetadataMaintenanceContact(MetadataContact):
 
 class MetadataCitationContacts(MetadataContacts):
     """
-        Just a shortcut MetadataItem that predefines the paths
+        Just a shortcut MetadataContacts that predefines the paths
     """
 
     def __init__(self, parent=None):
@@ -511,7 +559,7 @@ class MetadataCitationContacts(MetadataContacts):
 
 class MetadataCitationContact(MetadataContact):
     """
-        Just a shortcut MetadataItem that predefines the paths
+        Just a shortcut MetadataContact that predefines the paths and position
     """
 
     def __init__(self, parent=None, index=0):
