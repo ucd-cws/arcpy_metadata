@@ -1,15 +1,16 @@
 from __future__ import print_function
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 __author__ = 'nickrsan, thomas.maschler'
 
 import xml
 import os
-import re
+import xml.etree.ElementTree as ET
 
 import arcpy
 
 from metadata_items import *
+
 
 # TODO: Convert to using logging or logbook - probably logging to keep dependencies down
 
@@ -30,12 +31,20 @@ metadata_temp_folder = arcpy.env.scratchFolder  # a default temp folder to use -
 
 
 class MetadataItem(object):
+    '''
+    A standard Metadata Item
+    '''
+
     path = None
     value = ""
 
     def __init__(self, parent=None):
         self.parent = parent
-
+        try:
+            self.parent.elements
+        except AttributeError:
+            self.parent = parent.parent
+        self.element = None
         self._require_tree_elements()
 
         # set current metadata value
@@ -48,6 +57,7 @@ class MetadataItem(object):
         """
         e_tree = self.path.split('/')
         root = self.parent.elements.getroot()
+
         done = False
         while not done:
             d = {}
@@ -57,14 +67,25 @@ class MetadataItem(object):
                 # remove index for multi items, looks goofy. Is there a better way?
                 if "[" in e:
                     p = e.index('[')
-                    e = e[:p]
+                    e_name = e[:p]
+                    e_attrib = e[p:][1:-1].split('][')
+                else:
+                    e_name = e
+                    e_attrib = []
                 i += 1
                 d[i] = d[i-1].find(e)
                 if d[i] is None:
-                    child = xml.etree.ElementTree.Element(e)
+                    child = ET.Element(e_name)
+                    for attrib in e_attrib:
+                        if attrib[0] == "@":
+                            kv = attrib.split('=')
+                            key = kv[0][1:]
+                            value = kv[1][1:-1]
+                            child.set(key, value)
                     d[i-1].append(child)
                     break
                 elif i == len(e_tree):
+                    self.element = d[i]
                     done = True
 
     def _write(self):
@@ -105,7 +126,6 @@ class MetadataItem(object):
 
         return self.get_attrib()
 
-
     def append(self, value):
         self.value += str(value)
         return self.get()
@@ -117,7 +137,8 @@ class MetadataItem(object):
 
 class MetadataMulti(MetadataItem):
     """
-        A metadata item for groups of items (like tags). Define the root element (self.path) and then the name of the subitem to store there (self.tag_name) and you can use list-like methods to edit the group
+        A metadata item for groups of items (like tags). Define the root element (self.path) and then the name of the
+        subitem to store there (self.tag_name) and you can use list-like methods to edit the group
     """
 
     tag_name = None
@@ -139,14 +160,21 @@ class MetadataMulti(MetadataItem):
     def _refresh(self):
         self.current_items = self.parent.elements.find(self.path)
 
+    def __iter__(self):
+        return iter(self.current_items)
+
+    def __getitem__(self, key):
+        return self.current_items[key]
+
     def _add_item(self, item):
         """
             Adds an individual item to the section
-        :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag configured on parent object
-        :return: None
+            :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag
+                configured on parent object
+            :return: None
         """
 
-        element = xml.etree.ElementTree.Element(self.tag_name)
+        element = ET.Element(self.tag_name)
         element.text = item
         self.current_items.append(element)
 
@@ -156,12 +184,10 @@ class MetadataMulti(MetadataItem):
             values.append(item.text)
         return values
 
-
     def add(self, items):
         """
-
         :param items:
-        :return: None
+        :return: self.get()
         """
         for item in items:
             self._add_item(item)
@@ -181,7 +207,8 @@ class MetadataMulti(MetadataItem):
     def append(self, item):
         """
             Adds a single item to the section, like a list append
-        :param item:
+            :param item:
+            :return: None
         """
         self._add_item(item)
         return self.get()
@@ -208,7 +235,177 @@ class MetadataMulti(MetadataItem):
         return self.get()
 
 
+class MetadataItems(MetadataItem):
+    """
+        A helper objects for more complex items like Locals or Contacts.
+        This object will allow to iterage though multiple items of the same type
+    """
+
+    def __init__(self, parent, path):
+        self.path = os.path.dirname(path)
+        self.tag_name = os.path.basename(path)
+        super(MetadataItems, self).__init__(parent)
+        self.path = path
+        self.elements = self.parent.elements.findall(self.path)
+
+    def __iter__(self):
+        return iter(self.elements)
+
+    def __getitem__(self, key):
+        return self.elements[key]
+
+    # def get(self):
+    #     values = []
+    #     for element in self.elements:
+    #         values.append(element.text)
+    #     return values
+    #
+    # def _add_item(self,item):
+    #     element = ET.Element(self.tag_name)
+    #     element.text = item
+    #     self.elements.append(element)
+    #
+    # def add(self, items):
+    #     for item in items:
+    #         self._add_item(item)
+    #     return self.get()
+    #
+    # def extent(self, items):
+    #     self.add(items)
+    #
+    # def append(self, item):
+    #     self._add_item(item)
+    #     return self.get()
+    #
+    # def remove(self, item):
+    #     items_to_remove = []
+    #     for i in self.elements:
+    #         if i.text == item:
+    #             items_to_remove.append(i)
+    #     for i in items_to_remove:
+    #         self.elements.remove(i)
+    #     return self.get()
+    #
+    # def remove_all(self):
+    #     items_to_remove = []
+    #     for i in self.elements:
+    #         items_to_remove.append(i)
+    #     for i in items_to_remove:
+    #         self.elements.remove(i)
+    #
+    #     return self.get()
+
+
+class MetadataParentItem(MetadataItem):
+    """
+    A helper object for more complex items like Contact and Locals
+    This object will allow to add child elements to an item
+    """
+
+    def __init__(self, parent):
+
+        self.parent = parent
+        super(MetadataParentItem, self).__init__(self.parent)
+
+    def _create_item(self, iter, parent, tag_name):
+        for i in iter:
+            if i.tag == tag_name:
+                return MetadataSubItem(i, parent, True)
+        i = ET.Element(tag_name)
+        return MetadataSubItem(i, parent)
+
+    def _create_items(self, iter, parent, tag_name):
+        items = []
+        for i in iter:
+            if i.tag == tag_name:
+                items.append(i)
+
+        if not items:
+            items = [ET.Element(tag_name)]
+            return MetadataSubItems(items, parent)
+        else:
+            return MetadataSubItems(items, parent, True)
+
+
+class MetadataSubItem(object):
+    """
+    A helper object for more complex items like Contact and Locals
+    This object can be placed as single item inside a parent items
+    """
+
+    def __init__(self, element, parent, exists=False):
+
+        self.parent = parent
+        self.element = element
+
+        if not exists:
+            self.parent.append(element)
+
+        self.attributes = self.element.attrib # {}
+
+    def append(self, element):
+        self.element.append(element)
+
+    def get(self):
+        return self.element.text
+
+    def get_attrib(self):
+        return self.attributes
+
+    def set(self, value):
+        self.element.text = value
+        return self.get()
+
+    def set_attrib(self, attributes):
+        self.attributes.update(attributes)
+        for attribute in self.attributes:
+                self.element.set(attribute, self.attributes[attribute])
+        return self.get_attrib()
+
+
+class MetadataSubItems(object):
+    """
+    A helper object for more complex items like Contact and Locals
+    This object can be placed as multi item inside a parent item
+    """
+
+    def __init__(self, elements, parent, exists=False):
+        self.elements = []
+        self.parent = parent
+
+        self.tag_name = elements[0].tag
+
+        for element in elements:
+            self.elements.append(MetadataSubItem(element, parent, exists))
+
+    def append(self, item):
+        element = ET.Element(self.tag_name)
+        element.text = item
+        self.elements.append(MetadataSubItem(element, self.parent, False))
+
+    def add(self, items):
+        for item in items:
+            self.append(item)
+
+    def get(self):
+        elements = []
+        for element in self.elements:
+            elements.append(element.get())
+        return elements
+
+    def __iter__(self):
+        return iter(self.elements)
+
+    def __getitem__(self, key):
+        return self.elements[key]
+
+
 class MetadataEditor(object):
+    """
+    The metadata editor
+    Create an instance of this object for each metadata file you want to edit
+    """
+
     def __init__(self, dataset=None, metadata_file=None, items=list(),
                  temp_folder=metadata_temp_folder):
         self.items = items
@@ -264,6 +461,7 @@ class MetadataEditor(object):
         self.elements.parse(self.metadata_file)
 
         # create these all after the parsing happens so that if they have any self initialization, they can correctly perform it
+
         self.title = MetadataTitle(parent=self)
         self.abstract = MetadataAbstract(parent=self)
         self.purpose = MetadataPurpose(parent=self)
@@ -283,11 +481,22 @@ class MetadataEditor(object):
         self.citation = MetadataCitation(parent=self)
         self.limitation = MetadataLimitation(parent=self)
         self.source = MetadataSource(parent=self)
+        self.points_of_contact = MetadataPointsOfContact(parent=self)
+        self.maintenance_contacts = MetadataMaintenanceContacts(parent=self)
+        self.citation_contacts = MetadataCitationContacts(parent=self)
 
-        self.items.extend([self.title, self.abstract, self.purpose, self.tags, self.place_keywords, self.extent_description,
-                           self.temporal_extent_description, self.temporal_extent_instance, self.temporal_extent_start,
-                           self.temporal_extent_end, self.min_scale, self.max_scale, self.last_update, self.update_frequency,
-                           self.update_frequency_description, self.credits, self.citation, self.limitation, self.source])
+        self.language = MetadataDataLanguage(parent=self)
+        self.metadata_language = MetadataMDLanguage(parent=self)
+
+        self.locals = MetadataLocals(parent=self)
+
+        self.items.extend([self.title, self.abstract, self.purpose, self.tags, self.place_keywords,
+                           self.extent_description, self.temporal_extent_description, self.temporal_extent_instance,
+                           self.temporal_extent_start, self.temporal_extent_end, self.min_scale, self.max_scale,
+                           self.last_update, self.update_frequency,self.update_frequency_description, self.credits,
+                           self.citation, self.limitation, self.source, self.points_of_contact,
+                           self.maintenance_contacts, self.citation_contacts, self.language, self.metadata_language,
+                           self.locals])
 
         if items:
             self.initialize_items()
@@ -344,11 +553,9 @@ class MetadataEditor(object):
 
     def finish(self):
         """
-            Alias for saving and cleaning up
+        Alias for saving and cleaning up
         :return:
         """
 
         self.save()
         self.cleanup()
-
-#metadata = MetadataEditor(r"C:\Users\Thomas.Maschler\Documents\GitHub\arcpy_metadata\tests\test_data_temp_folder\simple_poly_w_base_metadata.shp")
