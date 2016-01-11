@@ -97,14 +97,16 @@ Supported items
 |Temporal Extent End Date|temporal_extent_end|simple|Resource/ Extents/ Temporal Period Extent/ End Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmEnd|
 |Minimum Scale|min_scale|simple|Item Description/ Appropriate Scale Range/ Min Scale|Esri/scaleRange/minScale|
 |Maximum Scale|max_scale|simple|Item Description/ Appropriate Scale Range/ Max Scale|Esri/scaleRange/maxScale|
+|Scale Resolution|scale_resolution|simple|Resource/ Details/ Scale Resolution|dataIdInfo/dataScale/equScale/rfDenom|
 |Last Update|last_update|simple|Overview/ Citation/ Dates/ Revised|dataIdInfo/idCitation/date/reviseDate|
 |Update Frequency|update_frequency|list|Resource/ Maintenance/ Update Frequency|dataIdInfo/resMaint/maintFreq/MaintFreqCd|
 |Update Frequency Description|update_frequency_description|simple|Resource/ Maintenance/ Custom Frequency|dataIdInfo/resMaint/usrDefFreq/duration|
 |Credits|credits|simple|Overview/ Item Description/ Credits|dataIdInfo/idCredit|
 |Citation|citation|simple|Overview/ Citation/ Other Details|dataIdInfo/idCitation/otherCitDet|
 |Limitation|limitation|simple|Overview/ Item Description/ Use Limitation|dataIdInfo/resConst/Consts/useLimit|
+|Supplemental Information|supplemental_information|simple|Resource/ Supplemental Information|dataIdInfo/suppInfo|
 |Source|source|simple|Resource/ Lineage/ Data Source/ Source Description|dqInfo/dataLineage/dataSource/srcDesc|
-|Points of contact|points_of_contact|complex|Resource/ Points of Contact/ Contact/...|dataIdInfo/idPoC|
+|Points of contact|points_of_contact|complex|Resource/ Details/ Points of Contact/ Contact/...|dataIdInfo/idPoC|
 |Maintenance Contacts|maintenance_contacts|complex|Resource/ Maintenance/ Maintenance Contact/...|dataIdInfo/maintCont|
 |Citation Contacts|citation_contacts|complex|Overview/ Citation Contact/ Contact/...|dataIdInfo/idCitation/citRespParty|
 |Language|language|list|Resource/ Detail/ Languages/ Language|dataIdInfo/dataLang|
