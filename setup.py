@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 with open('arcpy_metadata/version.py') as fin: exec(fin.read())
 
