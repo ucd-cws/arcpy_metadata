@@ -1,14 +1,12 @@
 from __future__ import print_function
 
-__version__ = '0.3.1'
-__author__ = 'nickrsan, thomas.maschler'
-
 import xml
 import os
 import xml.etree.ElementTree as ET
 
 import arcpy
 
+from version import *
 from metadata_items import *
 
 
