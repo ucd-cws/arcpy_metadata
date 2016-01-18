@@ -380,6 +380,25 @@ class MetadataSource(MetadataItem):
         super(MetadataSource, self).__init__(parent)
 
 
+class MetadataScaleResolution(MetadataItem):
+    """
+        Just a shortcut MetadataItem that predefines the paths
+    """
+    def __init__(self, parent=None):
+        self.name = "scale_resolution"
+        self.path = "dataIdInfo/dataScale/equScale/rfDenom"
+        super(MetadataScaleResolution, self).__init__(parent)
+
+
+class MetadataSupplementalInformation(MetadataItem):
+    """
+        Just a shortcut MetadataItem that predefines the paths
+    """
+    def __init__(self, parent=None):
+        self.name = "supplemental_information"
+        self.path = "dataIdInfo/suppInfo"
+        super(MetadataSupplementalInformation, self).__init__(parent)
+
 # ##############  Contact
 
 
