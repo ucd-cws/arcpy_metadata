@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 __author__ = 'nickrsan, thomas.maschler'
 
 import xml
@@ -474,12 +474,14 @@ class MetadataEditor(object):
         self.temporal_extent_end = MetadataTemporalExtentEnd(parent=self)
         self.min_scale = MetadataMinScale(parent=self)
         self.max_scale = MetadataMaxScale(parent=self)
+        self.scale_resolution = MetadataScaleResolution(parent=self)
         self.last_update = MetadataLastUpdate(parent=self)
         self.update_frequency = MetadataUpdateFrequency(parent=self)
         self.update_frequency_description = MetadataUpdateFrequencyDescription(parent=self)
         self.credits = MetadataCredits(parent=self)
         self.citation = MetadataCitation(parent=self)
         self.limitation = MetadataLimitation(parent=self)
+        self.supplemental_information = MetadataSupplementalInformation(parent=self)
         self.source = MetadataSource(parent=self)
         self.points_of_contact = MetadataPointsOfContact(parent=self)
         self.maintenance_contacts = MetadataMaintenanceContacts(parent=self)
@@ -493,10 +495,10 @@ class MetadataEditor(object):
         self.items.extend([self.title, self.abstract, self.purpose, self.tags, self.place_keywords,
                            self.extent_description, self.temporal_extent_description, self.temporal_extent_instance,
                            self.temporal_extent_start, self.temporal_extent_end, self.min_scale, self.max_scale,
-                           self.last_update, self.update_frequency,self.update_frequency_description, self.credits,
-                           self.citation, self.limitation, self.source, self.points_of_contact,
-                           self.maintenance_contacts, self.citation_contacts, self.language, self.metadata_language,
-                           self.locals])
+                           self.scale_resolution, self.last_update, self.update_frequency,
+                           self.update_frequency_description, self.credits, self.citation, self.limitation, self.source,
+                           self.points_of_contact, self.maintenance_contacts, self.citation_contacts, self.language,
+                           self.metadata_language, self.locals, self.supplemental_information])
 
         if items:
             self.initialize_items()
