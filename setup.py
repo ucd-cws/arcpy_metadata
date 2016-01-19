@@ -1,10 +1,9 @@
-__author__ = 'nickrsan'
-from arcpy_metadata import __version__ as meta_version
+from setuptools import setup
 
-from distutils.core import setup
+with open('arcpy_metadata/version.py') as fin: exec(fin.read())
 
 setup(name="arcpy_metadata",
-	version=meta_version,
+	version=__version__,
 	description="Python metadata editing classes for ArcGIS feature classes",
 	#scripts=[],
 	packages=['arcpy_metadata',],
