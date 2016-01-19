@@ -2,6 +2,8 @@ Arcpy Metadata Editor (arcpy_metadata)
 ==============
 Whether you create it or not, metadata is a critical part of GIS analysis. ArcGIS includes a built-in GUI metadata editor, but has scant access to metadata properties from Python. The arcpy_metadata package provides this access, allowing large Python packages that generate their own geospatial outputs in ArcGIS to properly document the data.
 
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/64d5bf20bff54d8a9fb940f2bfe4642c/badge.svg)](https://www.quantifiedcode.com/app/project/64d5bf20bff54d8a9fb940f2bfe4642c)
+
 Getting arcpy_metadata
 ----------------------
 arcpy_metadata is pure Python and its only dependency is arcpy (installed with ArcGIS). It's available on the Python Package Index so you can get arcpy_metadata via pip (pip install arcpy_metadata).
