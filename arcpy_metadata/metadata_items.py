@@ -2,6 +2,7 @@ __author__ = 'Thomas.Maschler'
 
 
 from __init__ import MetadataItem
+from __init__ import MetadataString
 from __init__ import MetadataMulti
 from __init__ import MetadataItems
 from __init__ import MetadataParentItem
@@ -14,16 +15,23 @@ language_codes = {"english": ["eng", "US"],
 
 # ########## General Info
 
+class MetadataStringHelper(MetadataItem):
+    def __init__(self, path, name, parent):
+        self.path = path
+        self.name = name
+        super(MetadataStringHelper, self).__init__(parent)
 
-class MetadataTitle(MetadataItem):
+
+class MetadataTitle(MetadataString):
     """
         Just a shortcut MetadataItem that predefines the paths
     """
 
-    def __init__(self, parent=None):
-        self.path = "dataIdInfo/idCitation/resTitle"
-        self.name = "title"
-        super(MetadataTitle, self).__init__(parent)
+    def __init__(self, value=None, parent=None, path="dataIdInfo/idCitation/resTitle", name="title"):
+        self.path = path
+        self.name = name
+
+        super(MetadataTitle, self).__init__(value, parent)
 
 
 class MetadataAbstract(MetadataItem):

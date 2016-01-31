@@ -9,6 +9,9 @@ import arcpy
 from version import *
 from metadata_items import *
 
+import inspect
+import types
+
 
 # TODO: Convert to using logging or logbook - probably logging to keep dependencies down
 
@@ -47,7 +50,22 @@ class MetadataItem(object):
 
         # set current metadata value
         self.value = self.parent.elements.find(self.path).text
+        self._attributes = None
         self.attributes = self.parent.elements.find(self.path).attrib
+
+    #def __repr__(self):
+    #    return self.value
+
+    @property
+    def attributes(self):
+        return self._attributes
+
+    @attributes.setter
+    def attributes(self, value):
+        if isinstance(value, dict):
+            self._attributes = value
+        else:
+            raise RuntimeWarning("Must be of type dict")
 
     def _require_tree_elements(self):
         """
@@ -102,38 +120,30 @@ class MetadataItem(object):
             raise ValueError(
                 "Can't write values without being contained in a Metadata Editor list or without manually initializing self.parent to an instance of MetadataEditor")
 
-    def set(self, value):
+
+class String(str):
+    def __new__(cls, value, parent):
+        print("Hier der wert: %s" % value)
+        obj = str.__new__(cls, value)
+        obj.parent = parent
+        return obj
+
+
+class MetadataString(MetadataItem, String):
+
+    def __init__(self, value, parent=None):
+        super(MetadataString, self).__init__(parent)
         self.value = value
-        return self.get()
-
-    def set_attrib(self, attribute, attri_value):
-        self.attributes[attribute] = attri_value
-        return self.get_attrib()
-
-    def get(self):
-        return self.value
-
-    def get_attrib(self):
-        return self.attributes
-
-    def remove_attrib(self, attribute):
-        try:
-            del self.attributes[attribute]
-        except KeyError:
-            logwrite("Attribute %s does not exist" % attribute)
-
-        return self.get_attrib()
-
-    def append(self, value):
-        self.value += str(value)
-        return self.get()
-
-    def prepend(self, value):
-        self.value = str(value) + self.value
-        return self.get()
+        self._write()
 
 
-class MetadataMulti(MetadataItem):
+class MetadataList(MetadataItem, list):
+
+    def __init__(self, parent=None):
+        super(MetadataList, self).__init__(parent)
+
+
+class MetadataMulti(MetadataList):
     """
         A metadata item for groups of items (like tags). Define the root element (self.path) and then the name of the
         subitem to store there (self.tag_name) and you can use list-like methods to edit the group
@@ -155,14 +165,16 @@ class MetadataMulti(MetadataItem):
 
         self._refresh()
 
-    def _refresh(self):
-        self.current_items = self.parent.elements.find(self.path)
-
     def __iter__(self):
         return iter(self.current_items)
 
     def __getitem__(self, key):
         return self.current_items[key]
+
+    def _refresh(self):
+        self.current_items = self.parent.elements.find(self.path)
+        for item in self.current_items:
+            super(MetadataMulti, self).append(item.text)
 
     def _add_item(self, item):
         """
@@ -176,7 +188,7 @@ class MetadataMulti(MetadataItem):
         element.text = item
         self.current_items.append(element)
 
-    def get(self):
+    def _get(self):
         values = []
         for item in self.current_items:
             values.append(item.text)
@@ -190,7 +202,7 @@ class MetadataMulti(MetadataItem):
         for item in items:
             self._add_item(item)
 
-        return self.get()
+        return self._get()
 
     def extend(self, items):
         """
@@ -200,7 +212,7 @@ class MetadataMulti(MetadataItem):
         """
 
         self.add(items)
-        return self.get()
+        return self._get()
 
     def append(self, item):
         """
@@ -209,7 +221,8 @@ class MetadataMulti(MetadataItem):
             :return: None
         """
         self._add_item(item)
-        return self.get()
+        super(MetadataMulti, self).append(item)
+
 
     def remove(self, item):
         items_to_remove = []
@@ -220,7 +233,7 @@ class MetadataMulti(MetadataItem):
         for i in items_to_remove:
             self.current_items.remove(i)
 
-        return self.get()
+        return self._get()
 
     def removeall(self):
         items_to_remove = []
@@ -230,7 +243,7 @@ class MetadataMulti(MetadataItem):
         for i in items_to_remove:
             self.current_items.remove(i)
 
-        return self.get()
+        return self._get()
 
 
 class MetadataItems(MetadataItem):
@@ -460,29 +473,54 @@ class MetadataEditor(object):
 
         # create these all after the parsing happens so that if they have any self initialization, they can correctly perform it
 
-        self.title = MetadataTitle(parent=self)
+        self._title = None
+        helper = MetadataStringHelper("dataIdInfo/idCitation/resTitle", "title", self)
+        self.title = MetadataTitle(value=helper.value, parent=self)
+        self._abstract = None
         self.abstract = MetadataAbstract(parent=self)
+        self._purpose = None
         self.purpose = MetadataPurpose(parent=self)
+        self._tags = None
         self.tags = MetadataTags(parent=self)
+        self._place_keywords = None
         self.place_keywords = MetadataPlaceKeywords(parent=self)
+        self._extent_description = None
         self.extent_description = MetadataExtentDescription(parent=self)
+        self._temporal_extent_description = None
         self.temporal_extent_description = MetadataTemporalExtentDescription(parent=self)
+        self._temporal_extent_instance = None
         self.temporal_extent_instance = MetadataTemporalExtentInstance(parent=self)
+        self._temporal_extent_start = None
         self.temporal_extent_start = MetadataTemporalExtentStart(parent=self)
+        self._temporal_extent_end = None
         self.temporal_extent_end = MetadataTemporalExtentEnd(parent=self)
+        self._min_scale = None
         self.min_scale = MetadataMinScale(parent=self)
+        self._max_scale = None
         self.max_scale = MetadataMaxScale(parent=self)
+        self._scale_resolution = None
         self.scale_resolution = MetadataScaleResolution(parent=self)
+        self._last_update = None
         self.last_update = MetadataLastUpdate(parent=self)
+        self._update_frequency = None
         self.update_frequency = MetadataUpdateFrequency(parent=self)
+        self._update_frequency_description = None
         self.update_frequency_description = MetadataUpdateFrequencyDescription(parent=self)
+        self._credits = None
         self.credits = MetadataCredits(parent=self)
+        self._citation = None
         self.citation = MetadataCitation(parent=self)
+        self._limitation = None
         self.limitation = MetadataLimitation(parent=self)
+        self._supplemental_information = None
         self.supplemental_information = MetadataSupplementalInformation(parent=self)
+        self._source = None
         self.source = MetadataSource(parent=self)
+        self._points_of_contact = None
         self.points_of_contact = MetadataPointsOfContact(parent=self)
+        self._maintenance_contacts = None
         self.maintenance_contacts = MetadataMaintenanceContacts(parent=self)
+        self._citation_contacts = None
         self.citation_contacts = MetadataCitationContacts(parent=self)
 
         self.language = MetadataDataLanguage(parent=self)
@@ -500,6 +538,348 @@ class MetadataEditor(object):
 
         if items:
             self.initialize_items()
+
+    @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, value):
+
+        if isinstance(value, MetadataTitle):
+            self._title = value
+        else:
+            self._title = MetadataTitle(value, self)
+
+    @property
+    def abstract(self):
+        return self._abstract
+
+    @abstract.setter
+    def abstract(self, value):
+        if isinstance(value, MetadataAbstract):
+            self._abstract = value
+        else:
+            self._abstract.value = value
+
+    @property
+    def purpose(self):
+        return self._purpose
+
+    @purpose.setter
+    def purpose(self, value):
+        if isinstance(value, MetadataPurpose):
+            self._purpose = value
+        else:
+            self._purpose.value = value
+####
+    @property
+    def tags(self):
+        return self._tags
+
+    @tags.setter
+    def tags(self, value):
+        if isinstance(value, MetadataTags):
+            self._tags = value
+        elif isinstance(value, list):
+            self._tags.removeall()
+            self._tags.add(value)
+        else:
+            raise RuntimeWarning("Input value must be of type list")
+
+######
+    @property
+    def place_keywords(self):
+        return self._place_keywords
+
+    @place_keywords.setter
+    def place_keywords(self, value):
+        if isinstance(value, MetadataPlaceKeywords):
+            self._place_keywords = value
+        elif isinstance(value, list):
+            self._place_keywords.removeall()
+            self._place_keywords.add(value)
+        else:
+            raise RuntimeWarning("Input value must be of type list")
+
+######
+    @property
+    def extent_description(self):
+        return self._extent_description
+
+    @extent_description.setter
+    def extent_description(self, value):
+        if isinstance(value, MetadataExtentDescription):
+            self._extent_description = value
+        else:
+            self._extent_description.value = value
+
+######
+    @property
+    def temporal_extent_description(self):
+        return self._temporal_extent_description
+
+    @temporal_extent_description.setter
+    def temporal_extent_description(self, value):
+        if isinstance(value, MetadataTemporalExtentDescription):
+            self._temporal_extent_description = value
+        else:
+            self._temporal_extent_description.value = value
+
+######
+    @property
+    def temporal_extent_instance(self):
+        return self._temporal_extent_instance
+
+    @temporal_extent_instance.setter
+    def temporal_extent_instance(self, value):
+        if isinstance(value, MetadataTemporalExtentInstance):
+            self._temporal_extent_instance = value
+        else:
+            self._temporal_extent_instance.value = value
+
+######
+    @property
+    def temporal_extent_start(self):
+        return self._temporal_extent_start
+
+    @temporal_extent_start.setter
+    def temporal_extent_start(self, value):
+        if isinstance(value, MetadataTemporalExtentStart):
+            self._temporal_extent_start = value
+        else:
+            self._temporal_extent_start.value = value
+
+
+######
+    @property
+    def temporal_extent_end(self):
+        return self._temporal_extent_end
+
+    @temporal_extent_end.setter
+    def temporal_extent_end(self, value):
+        if isinstance(value, MetadataTemporalExtentEnd):
+            self._temporal_extent_end = value
+        else:
+            self._temporal_extent_start.value = value
+
+######
+    @property
+    def min_scale(self):
+        return self._min_scale
+
+    @min_scale.setter
+    def min_scale(self, value):
+        if isinstance(value, MetadataMinScale):
+            self._min_scale = value
+        else:
+            self._min_scale.value = value
+
+######
+    @property
+    def max_scale(self):
+        return self._max_scale
+
+    @max_scale.setter
+    def max_scale(self, value):
+        if isinstance(value, MetadataMaxScale):
+            self._max_scale = value
+        else:
+            self._max_scale.value = value
+
+######
+    @property
+    def scale_resolution(self):
+        return self._scale_resolution
+
+    @scale_resolution.setter
+    def scale_resolution(self, value):
+        if isinstance(value, MetadataScaleResolution):
+            self._scale_resolution = value
+        else:
+            self._scale_resolution.value = value
+
+######
+    @property
+    def last_update(self):
+        return self._last_update
+
+    @last_update.setter
+    def last_update(self, value):
+        if isinstance(value, MetadataLastUpdate):
+            self._last_update = value
+        else:
+            self._last_update.value = value
+
+######
+    @property
+    def update_frequency(self):
+        return self._update_frequency
+
+    @update_frequency.setter
+    def update_frequency(self, value):
+        if isinstance(value, MetadataUpdateFrequency):
+            self._update_frequency = value
+        else:
+            self._update_frequency.value = value
+
+######
+    @property
+    def update_frequency_description(self):
+        return self._update_frequency_description
+
+    @update_frequency_description.setter
+    def update_frequency_description(self, value):
+        if isinstance(value, MetadataUpdateFrequencyDescription):
+            self._update_frequency_description = value
+        else:
+            self._update_frequency_description.value = value
+
+######
+    @property
+    def credits(self):
+        return self._credits
+
+    @credits.setter
+    def credits(self, value):
+        if isinstance(value, MetadataCredits):
+            self._credits = value
+        else:
+            self._credits.value = value
+
+######
+    @property
+    def citation(self):
+        return self._citation
+
+    @citation.setter
+    def citation(self, value):
+        if isinstance(value, MetadataCitation):
+            self._citation = value
+        else:
+            self._citation.value = value
+
+######
+    @property
+    def limitation(self):
+        return self._limitation
+
+    @limitation.setter
+    def limitation(self, value):
+        if isinstance(value, MetadataLimitation):
+            self._limitation = value
+        else:
+            self._limitation.value = value
+
+######
+    @property
+    def source(self):
+        return self._source
+
+    @source.setter
+    def source(self, value):
+        if isinstance(value, MetadataSource):
+            self._source = value
+        else:
+            self._source.value = value
+
+######
+    @property
+    def points_of_contact(self):
+        return self._points_of_contact
+
+    @points_of_contact.setter
+    def points_of_contact(self, value):
+        if isinstance(value, MetadataPointsOfContact):
+            self._points_of_contact = value
+        elif isinstance(value, list):
+            self._points_of_contact.removeall()
+            self._points_of_contact.add(value)
+        else:
+            raise RuntimeWarning("Input value must be of type list")
+
+######
+    @property
+    def maintenance_contacts(self):
+        return self._maintenance_contacts
+
+    @maintenance_contacts.setter
+    def maintenance_contacts(self, value):
+        if isinstance(value, MetadataMaintenanceContacts):
+            self._maintenance_contacts = value
+        elif isinstance(value, list):
+            self._maintenance_contacts.removeall()
+            self._maintenance_contacts.add(value)
+        else:
+            raise RuntimeWarning("Input value must be of type list")
+
+######
+    @property
+    def citation_contacts(self):
+        return self._citation_contacts
+
+    @citation_contacts.setter
+    def citation_contacts(self, value):
+        if isinstance(value, MetadataCitationContacts):
+            self._citation_contacts = value
+        elif isinstance(value, list):
+            self._citation_contacts.removeall()
+            self._citation_contacts.add(value)
+        else:
+            raise RuntimeWarning("Input value must be of type list")
+
+######
+    @property
+    def language(self):
+        return self._language
+
+    @language.setter
+    def language(self, value):
+        if isinstance(value, MetadataLanguage):
+            self._language = value
+        else:
+            self._language.value = value
+
+######
+    @property
+    def metadata_language(self):
+        return self._metadata_language
+
+    @metadata_language.setter
+    def metadata_language(self, value):
+        if isinstance(value, MetadataMDLanguage):
+            self._metadata_language = value
+        else:
+            self._metadata_language.value = value
+
+######
+    @property
+    def locals(self):
+        return self._locals
+
+    @locals.setter
+    def locals(self, value):
+        if isinstance(value, MetadataLocals):
+            self._locals = value
+        elif isinstance(value, list):
+            self._locals.removeall()
+            self._locals.add(value)
+        else:
+            raise RuntimeWarning("Input value must be of type list")
+
+######
+    @property
+    def supplemental_information(self):
+        return self._supplemental_information
+
+    @supplemental_information.setter
+    def supplemental_information(self, value):
+        if isinstance(value, MetadataSupplementalInformation):
+            self._supplemental_information = value
+        else:
+            self._supplemental_information.value = value
+
+
 
     def get_datatype(self):
         # get datatype
@@ -527,6 +907,9 @@ class MetadataEditor(object):
 
     def save(self):
         logwrite("Saving metadata", True)
+
+        for item in self.items:
+            print(item)
 
         for item in self.items:
             item._write()
