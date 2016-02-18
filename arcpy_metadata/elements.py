@@ -21,13 +21,14 @@ elements = {
             "extent_description": {
                 "path": "dataIdInfo/dataExt/exDesc",
                 "type": "string"},
+
             "language": {
                 "path": "dataIdInfo/dataLang",
                 "type": "language"},
 
             "last_update": {
                 "path": "dataIdInfo/idCitation/date/reviseDate",
-                "type": "string"},
+                "type": "date"},
 
             "limitation": {
                 "path": "dataIdInfo/resConst/Consts/useLimit",
@@ -43,7 +44,7 @@ elements = {
 
             "max_scale": {
                 "path": "max_scale",
-                "type": "string"},
+                "type": "integer"},
 
             "metadata_language": {
                 "path": "dataIdInfo/mdLang",
@@ -51,7 +52,7 @@ elements = {
 
             "min_scale": {
                 "path": "min_scale",
-                "type": "string"},
+                "type": "integer"},
 
             "place_keywords": {
                 "path": "dataIdInfo/searchKeys[last()]",
@@ -61,6 +62,7 @@ elements = {
             "points_of_contact": {
                 "path": "dataIdInfo/idPoC",
                 "type": "contact"},
+
             "purpose": {
                 "path": "dataIdInfo/idPurp",
                 "type": "string"},
@@ -72,6 +74,7 @@ elements = {
             "source": {
                 "path": "dqInfo/dataLineage/dataSource/srcDesc",
                 "type": "string"},
+
             "supplemental_information": {
                 "path": "dataIdInfo/suppInfo",
                 "type": "string"},
@@ -91,15 +94,15 @@ elements = {
 
             "temporal_extent_end": {
                 "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmEnd",
-                "type": "string"},
+                "type": "date"},
 
             "temporal_extent_instance": {
                 "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Instant/tmPosition",
-                "type": "string"},
+                "type": "date"},
 
             "temporal_extent_start": {
                 "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmBegin",
-                "type": "string"},
+                "type": "date"},
 
             "update_frequency": {
                 "path": "dataIdInfo/resMaint/maintFreq/MaintFreqCd",

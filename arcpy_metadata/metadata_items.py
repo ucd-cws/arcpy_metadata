@@ -3,6 +3,9 @@ __author__ = 'Thomas.Maschler'
 
 from metadata_constructors import MetadataItem
 from metadata_constructors import MetadataStringConstructor
+from metadata_constructors import MetadataDateConstructor
+from metadata_constructors import MetadataIntegerConstructor
+from metadata_constructors import MetadataFloatConstructor
 from metadata_constructors import MetadataListConstructor
 from metadata_constructors import MetadataLanguageConstructor
 from metadata_constructors import MetadataItems
@@ -10,17 +13,17 @@ from metadata_constructors import MetadataParentItem
 from metadata_constructors import MetadataContactsConstructor
 from metadata_constructors import MetadataContactConstructor
 
-from elements import language_codes
+from languages import languages
 
 
 
 # ########## General Info
 
-class MetadataStringHelper(MetadataItem):
+class MetadataHelper(MetadataItem):
     def __init__(self, path, name, parent):
         self.path = path
         self.name = name
-        super(MetadataStringHelper, self).__init__(parent)
+        super(MetadataHelper, self).__init__(parent)
 
 class MetadataString(MetadataStringConstructor):
     def __init__(self, value, path, name, parent):
@@ -28,6 +31,26 @@ class MetadataString(MetadataStringConstructor):
         self.name = name
         super(MetadataString, self).__init__(value, path, name, parent)
 
+
+class MetadataDate(MetadataDateConstructor):
+    def __init__(self, value, path, name, parent):
+        self.path = path
+        self.name = name
+        super(MetadataDate, self).__init__(value, path, name, parent)
+
+
+class MetadataInteger(MetadataIntegerConstructor):
+    def __init__(self, value, path, name, parent):
+        self.path = path
+        self.name = name
+        super(MetadataInteger, self).__init__(value, path, name, parent)
+
+
+class MetadataFloat(MetadataFloatConstructor):
+    def __init__(self, value, path, name, parent):
+        self.path = path
+        self.name = name
+        super(MetadataFloat, self).__init__(value, path, name, parent)
 
 # ########## Keywords
 
@@ -98,8 +121,8 @@ class MetadataLocals(MetadataItems):
             attrib = element.attrib
 
             found = False
-            for lang in language_codes:
-                if language_codes[lang][0] == attrib["language"]:
+            for lang in languages:
+                if languages[lang][0] == attrib["language"]:
                     found = True
                     break
 
@@ -125,9 +148,9 @@ class MetadataLocals(MetadataItems):
 
     def add(self, lang):
 
-        if lang in language_codes.keys():
-            language = language_codes[lang][0]
-            country = language_codes[lang][1]
+        if lang in languages.keys():
+            language = languages[lang][0]
+            country = languages[lang][1]
         else:
             raise KeyError
 

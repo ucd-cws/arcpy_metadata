@@ -1,6 +1,7 @@
 import os
 import xml.etree.ElementTree as ET
 from languages import languages
+from datetime import date
 
 
 
@@ -95,19 +96,56 @@ class MetadataItem(object):
                 "Can't write values without being contained in a Metadata Editor list or without manually initializing self.parent to an instance of MetadataEditor")
 
 
+class IntegerConstructor(int):
+    def __new__(cls, value, path, name, parent):
+        obj = int.__new__(cls, value)
+        obj.parent = parent
+        return obj
+
+
+class FloatConstructor(float):
+    def __new__(cls, value, path, name, parent):
+        obj = float.__new__(cls, value)
+        obj.parent = parent
+        return obj
+
+
+class DateConstructor(date):
+    def __new__(cls, value, path, name, parent):
+        obj = date.__new__(cls, value)
+        obj.parent = parent
+        return obj
+
+
 class StringConstructor(str):
     def __new__(cls, value, path, name, parent):
         obj = str.__new__(cls, value)
         obj.parent = parent
         return obj
 
+
+class MetadataDateConstructor(MetadataItem, DateConstructor):
+
+    def __init__(self, value=None, path=None, name=None, parent=None):
+        super(MetadataDateConstructor, self).__init__(parent)
+
+
+class MetadataIntegerConstructor(MetadataItem, IntegerConstructor):
+
+    def __init__(self, value=None, path=None, name=None, parent=None):
+        super(MetadataIntegerConstructor, self).__init__(parent)
+
+
+class MetadataFloatConstructor(MetadataItem, FloatConstructor):
+
+    def __init__(self, value=None, path=None, name=None, parent=None):
+        super(MetadataFloatConstructor, self).__init__(parent)
+
+
 class MetadataStringConstructor(MetadataItem, StringConstructor):
 
     def __init__(self, value=None, path=None, name=None, parent=None):
         super(MetadataStringConstructor, self).__init__(parent)
-
-        item = self.parent.elements.find(self.path)
-        item.text = value
 
 
 

@@ -6,6 +6,8 @@ import xml
 from elements import elements
 from languages import languages
 
+from datetime import date
+from datetime import datetime
 
 # TODO: Convert to using logging or logbook - probably logging to keep dependencies down
 
@@ -91,8 +93,20 @@ class MetadataEditor(object):
             setattr(self, "_%s" % name, None)
 
             if elements[name]['type'] == "string":
-                helper = MetadataStringHelper(elements[name]['path'], name, self)
+                helper = MetadataHelper(elements[name]['path'], name, self)
                 setattr(self, name, MetadataString(helper.value, elements[name]['path'], name, self))
+
+            elif elements[name]['type'] == "date":
+                helper = MetadataHelper(elements[name]['path'], name, self)
+                setattr(self, name, MetadataDate(helper.value, elements[name]['path'], name, self))
+
+            elif elements[name]['type'] == "integer":
+                helper = MetadataHelper(elements[name]['path'], name, self)
+                setattr(self, name, MetadataInteger(helper.value, elements[name]['path'], name, self))
+
+            elif elements[name]['type'] == "float":
+                helper = MetadataHelper(elements[name]['path'], name, self)
+                setattr(self, name, MetadataFloat(helper.value, elements[name]['path'], name, self))
 
             elif elements[name]['type'] == "list":
                 setattr(self, name, MetadataList(elements[name]["tagname"], elements[name]['path'], name, self))
@@ -125,7 +139,51 @@ class MetadataEditor(object):
                 else:
                     raise RuntimeWarning("Input value must be of type String")
 
-            if elements[name]['type'] == "list":
+            elif elements[name]['type'] == "date":
+                if isinstance(value, MetadataDate):
+                    self.__dict__["_%s" % name] = value
+                elif isinstance(value, date):
+                    self.__dict__["_%s" % name] = MetadataString(value, elements[name]["path"], name, self)
+                    for i in self.items:
+                        if i.name == name:
+                            i.value = date.strftime(value, "%Y%m%d")
+                elif isinstance(value, str):
+                    try:
+                        new_value = datetime.strptime(value, "%Y%m%d").date()
+                        self.__dict__["_%s" % name] = MetadataString(new_value, elements[name]["path"], name, self)
+                        for i in self.items:
+                            if i.name == name:
+                                i.value = value
+                    except:
+                        RuntimeWarning("Input value must be of type a Date or a String ('yyyymmdd')")
+                else:
+                    raise RuntimeWarning("Input value must be of type a Date or a Sting ('yyyymmdd')")
+
+            elif elements[name]['type'] == "integer":
+                if isinstance(value, MetadataInteger):
+                    self.__dict__["_%s" % name] = value
+                elif isinstance(value, int):
+                    self.__dict__["_%s" % name] = MetadataString(value, elements[name]["path"], name, self)
+                    for i in self.items:
+                        if i.name == name:
+                            i.value = value
+                elif isinstance(value, str):
+                    try:
+                        new_value = int(value)
+                        self.__dict__["_%s" % name] = MetadataString(new_value, elements[name]["path"], name, self)
+                        for i in self.items:
+                            if i.name == name:
+                                i.value = new_value
+                    except:
+                        RuntimeWarning("Input value must be of type a Date or a String ('yyyymmdd')")
+                else:
+                    raise RuntimeWarning("Input value must be of type a Date or a Sting ('yyyymmdd')")
+
+            elif elements[name]['type'] == "float":
+                if isinstance(value, MetadataFloat):
+                    self.__dict__["_%s" % name] = value
+
+            elif elements[name]['type'] == "list":
                 if isinstance(value, MetadataList):
                     self.__dict__["_%s" % name] = value
                 elif isinstance(value, list):
@@ -134,7 +192,7 @@ class MetadataEditor(object):
                 else:
                     raise RuntimeWarning("Input value must be of type list")
 
-            if elements[name]['type'] == "language":
+            elif elements[name]['type'] == "language":
                 if isinstance(value, MetadataLanguage):
                     self.__dict__["_%s" % name] = value
                 elif value in languages.keys():
@@ -142,13 +200,13 @@ class MetadataEditor(object):
                 else:
                     raise RuntimeWarning("Input value must be in %s" % str(languages.keys()))
 
-            if elements[name]['type'] == "local":
+            elif elements[name]['type'] == "local":
                 if isinstance(value, MetadataLocals):
                     self.__dict__["_%s" % name] = value
                 else:
                     raise RuntimeWarning("Input value must be of type MetadataLocals")
 
-            if elements[name]['type'] == "contact":
+            elif elements[name]['type'] == "contact":
                 if isinstance(value, MetadataContacts):
                     self.__dict__["_%s" % name] = value
                 else:
