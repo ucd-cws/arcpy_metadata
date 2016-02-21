@@ -1,6 +1,18 @@
 import os
 import arcpy
-from metadata_items import *
+
+# TODO: reduce dependencies from arcpy
+# it is actually only needed to extract metadata from GDB items
+# everything else can be done with out the module since metadata are access directly
+# if it is a feature class, arcpy can be loaded on demand using importlib
+# from importlib import import_module
+
+from metadata_items import MetadataItem
+from metadata_items import MetadataList
+from metadata_items import MetadataLanguage
+from metadata_items import MetadataContact
+from metadata_items import MetadataLocals
+
 import xml
 
 from elements import elements
@@ -21,6 +33,10 @@ except ImportError:
 
     def logwarning(log_string):
         print("WARNING: {0:s}".format(log_string))
+
+
+
+
 
 installDir = arcpy.GetInstallInfo("desktop")["InstallDir"]
 xslt = os.path.join(installDir, r"Metadata\Stylesheets\gpTools\exact copy of.xslt")
