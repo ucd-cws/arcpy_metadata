@@ -49,8 +49,10 @@ class MetadataEditor(object):
     Create an instance of this object for each metadata file you want to edit
     """
 
-    def __init__(self, dataset=None, metadata_file=None, items=list(),
+    def __init__(self, dataset=None, metadata_file=None, items=None,
                  temp_folder=metadata_temp_folder):
+        if items is None:
+            items = list()
         self.items = items
         self.metadata_file = metadata_file
         self.elements = xml.etree.ElementTree.ElementTree()
