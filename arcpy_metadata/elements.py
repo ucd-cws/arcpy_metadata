@@ -22,9 +22,9 @@ elements = {
                 "path": "dataIdInfo/dataExt/exDesc",
                 "type": "string"},
 
-            "language": {
-                "path": "dataIdInfo/dataLang",
-                "type": "language"},
+            #"language": {
+            #    "path": "dataIdInfo/dataLang",
+            #    "type": "language"},
 
             "last_update": {
                 "path": "dataIdInfo/idCitation/date/reviseDate",
@@ -34,9 +34,9 @@ elements = {
                 "path": "dataIdInfo/resConst/Consts/useLimit",
                 "type": "string"},
 
-            "locals": {
-                "path": "Esri/locales/locale",
-                "type": "local"},
+            #"locals": {
+            #    "path": "Esri/locales/locale",
+            #    "type": "local"},
 
             "maintenance_contacts": {
                 "path": "dataIdInfo/maintCont",
@@ -46,9 +46,9 @@ elements = {
                 "path": "max_scale",
                 "type": "integer"},
 
-            "metadata_language": {
-                "path": "dataIdInfo/mdLang",
-                "type": "language"},
+            #"metadata_language": {
+            #    "path": "dataIdInfo/mdLang",
+            #    "type": "language"},
 
             "min_scale": {
                 "path": "min_scale",
@@ -113,7 +113,137 @@ elements = {
                 "type": "string"},
             }
 
+contact_elements = {
+            "role_p": {
+                "type": "string", #
+                "parent":"element",
+                "path": "role"},
 
+            "role": {
+                "type": "string",
+                "parent": "role_p",
+                "path": "RoleCd"},
+
+            "contact_name": {
+                "type": "string",
+                "parent": "element",
+                "path": "rpIndName"},
+
+            "position": {
+                "type": "string",
+                "parent": "element",
+                "path": "rpPosName"},
+
+            "organization": {
+                "type": "string",
+                "parent": "element",
+                "path": "rpOrgName"},
+
+            "contact_info": {
+                "type": "string",
+                "parent": "element",
+                "path": "rpCntInfo"},
+
+            "address_p": {
+                "type": "string", #
+                "parent": "contact_info",
+                "path": "cntAddress"},
+
+            "email": {
+                "type": "string",
+                "parent": "contact_info",
+                "path": "eMailAdd"},
+
+            "address": {
+                "type": "string",
+                "parent": "address_p",
+                "path": "delPoint"},
+
+            "city": {
+                "type": "string",
+                "parent": "address_p",
+                "path": "City"},
+
+            "state": {
+                "type": "string",
+                "parent": "address_p",
+                "path": "adminArea"},
+
+            "zip": {
+                "type": "string",
+                "parent": "address_p",
+                "path": "postCode"},
+
+            "country": {
+                "type": "string",
+                "parent": "address_p",
+                "path": "country"},
+
+            "phone": {
+                "type": "string", #
+                "parent": "contact_info",
+                "path": "cntPhone"},
+
+            "phone_nb": {
+                "type": "string",
+                "parent": "phone",
+                "path": "voiceNum"},
+
+            "fax_nb": {
+                "type": "string",
+                "parent": "phone",
+                "path": "faxNum"},
+
+            "hours": {
+                "type": "string",
+                "parent": "contact_info",
+                "path": "cntHours"},
+
+            "instructions": {
+                "type": "string",
+                "parent": "contact_info",
+                "path": "cntInstr"},
+
+            "online_resource": {
+                "type": "string", #
+                "parent": "contact_info",
+                "path": "cntOnlineRes"},
+
+            "link": {
+                "type": "string",
+                "parent": "online_resource",
+                "path": "linkage"},
+
+            "protocol": {
+                "type": "string",
+                "parent": "online_resource",
+                "path": "protocol"},
+
+            "profile": {
+                "type": "string",
+                "parent": "online_resource",
+                "path": "appProfile"},
+
+            "or_name": {
+                "type": "string",
+                "parent": "online_resource",
+                "path": "orName"},
+
+            "or_desc": {
+                "type": "string",
+                "parent": "online_resource",
+                "path": "orDesc"},
+
+            "or_function": {
+                "type": "string",
+                "parent": "online_resource",
+                "path": "orFunct"},
+
+            "or_function_cd": {
+                "type": "string",
+                "parent": "or_function",
+                "path": "OnFunctCd"}
+            }
 
 
 

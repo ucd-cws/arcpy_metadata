@@ -143,14 +143,14 @@ class MetadataEditor(object):
                 if isinstance(value, MetadataDate):
                     self.__dict__["_%s" % name] = value
                 elif isinstance(value, date):
-                    self.__dict__["_%s" % name] = MetadataString(value, elements[name]["path"], name, self)
+                    self.__dict__["_%s" % name] = MetadataDate(value, elements[name]["path"], name, self)
                     for i in self.items:
                         if i.name == name:
                             i.value = date.strftime(value, "%Y%m%d")
                 elif isinstance(value, str):
                     try:
                         new_value = datetime.strptime(value, "%Y%m%d").date()
-                        self.__dict__["_%s" % name] = MetadataString(new_value, elements[name]["path"], name, self)
+                        self.__dict__["_%s" % name] = MetadataDate(new_value, elements[name]["path"], name, self)
                         for i in self.items:
                             if i.name == name:
                                 i.value = value
@@ -163,14 +163,14 @@ class MetadataEditor(object):
                 if isinstance(value, MetadataInteger):
                     self.__dict__["_%s" % name] = value
                 elif isinstance(value, int):
-                    self.__dict__["_%s" % name] = MetadataString(value, elements[name]["path"], name, self)
+                    self.__dict__["_%s" % name] = MetadataInteger(value, elements[name]["path"], name, self)
                     for i in self.items:
                         if i.name == name:
                             i.value = value
                 elif isinstance(value, str):
                     try:
                         new_value = int(value)
-                        self.__dict__["_%s" % name] = MetadataString(new_value, elements[name]["path"], name, self)
+                        self.__dict__["_%s" % name] = MetadataInteger(new_value, elements[name]["path"], name, self)
                         for i in self.items:
                             if i.name == name:
                                 i.value = new_value

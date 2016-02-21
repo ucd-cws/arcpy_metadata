@@ -146,7 +146,7 @@ class MetadataLocals(MetadataItems):
         for lang in self._locals:
             self.elements.append(self._locals[lang])
 
-    def add(self, lang):
+    def new_local(self, lang):
 
         if lang in languages.keys():
             language = languages[lang][0]
@@ -156,8 +156,6 @@ class MetadataLocals(MetadataItems):
 
         self._locals[lang] = (MetadataLocal(self.parent, self.path, language, country))
         self._write()
-
-
 
 
 class MetadataContacts(MetadataContactsConstructor):
@@ -171,11 +169,26 @@ class MetadataContacts(MetadataContactsConstructor):
         super(MetadataContacts, self).__init__(parent, self.path)
         self._contacts = []
         for i in range(len(self.elements)):
-            self._contacts.append(MetadataContact(self.path, parent, i))
+            self.append(MetadataContact(self.path, parent, i))
 
-    def add(self):
-        self._contacts.append(MetadataContact(self.path, self.parent, len(self._contacts)))
+    def new_contact(self):
+        self.append(MetadataContact(self.path, self.parent, len(self._contacts)))
+
+    def append(self, value):
+        """
+            Adds a single item to the section, like a list append
+            :param value:
+            :return: None
+        """
+
+        if value is None:
+            value = MetadataContact(self.path, self.parent, len(self._contacts))
+        elif not isinstance(value, MetadataContact):
+            raise RuntimeError("Input value must be of type MetadataContact")
+
+        self._contacts.append(value)
         self._write()
+        super(MetadataContacts, self).append(value)
 
 
 class MetadataContact(MetadataContactConstructor):
@@ -184,7 +197,7 @@ class MetadataContact(MetadataContactConstructor):
     """
 
     def __init__(self, path, parent=None, index=0):
-        self.path = "%s[%i]" % (path,index)
+        self.path = "%s[%i]" % (path, index)
 
         super(MetadataContact, self).__init__(parent)
 
