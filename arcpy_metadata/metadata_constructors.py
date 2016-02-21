@@ -1,11 +1,9 @@
 import os
 import xml.etree.ElementTree as ET
 from languages import languages
-from datetime import date
-from elements import contact_elements
 
 
-class MetadataItem(object):
+class MetadataItemConstructor(object):
     '''
     A standard Metadata Item
     '''
@@ -22,24 +20,41 @@ class MetadataItem(object):
         self.element = None
         self._require_tree_elements()
 
-        # set current metadata value
+        # set current metadata value and attributes
         self.value = self.parent.elements.find(self.path).text
-        self._attributes = None
         self.attributes = self.parent.elements.find(self.path).attrib
-
-    #def __repr__(self):
-    #    return self.value
 
     @property
     def attributes(self):
-        return self._attributes
+        return self.parent.elements.find(self.path).attrib
 
     @attributes.setter
-    def attributes(self, value):
-        if isinstance(value, dict):
-            self._attributes = value
+    def attributes(self, v):
+        if isinstance(v, dict):
+            if self.parent:
+                item = self.parent.elements.find(self.path)
+                for attribute in v:
+                    item.set(attribute, v[attribute])  # set the value, it will be written later
+            if not self.parent:
+                raise ValueError(
+                    "Can't write values without being contained in a Metadata Editor list or without manually initializing self.parent to an instance of MetadataEditor")
         else:
             raise RuntimeWarning("Must be of type dict")
+
+    @property
+    def value(self):
+        return self.parent.elements.find(self.path).text
+
+    @value.setter
+    def value(self, v):
+        if self.parent:
+            item = self.parent.elements.find(self.path)
+            item.text = v  # set the value, it will be written later
+        if not self.parent:
+            raise ValueError(
+                "Can't write values without being contained in a Metadata Editor list or without manually initializing"
+                " self.parent to an instance of MetadataEditor")
+
 
     def _require_tree_elements(self):
         """
@@ -78,119 +93,8 @@ class MetadataItem(object):
                     self.element = d[i]
                     done = True
 
-    def _write(self):
 
-        # set value
-        if self.value and self.parent:
-            item = self.parent.elements.find(self.path)
-            item.text = self.value  # set the value, it will be written later
-
-        if self.attributes and self.parent:
-            item = self.parent.elements.find(self.path)
-            for attribute in self.attributes:
-                item.set(attribute, self.attributes[attribute])  # set the value, it will be written later
-
-        if not self.parent:
-            raise ValueError(
-                "Can't write values without being contained in a Metadata Editor list or without manually initializing self.parent to an instance of MetadataEditor")
-
-
-class IntegerConstructor(int):
-    def __new__(cls, value, path, name, parent):
-        if value is None:
-            obj = int.__new__(cls, 0)
-        else:
-            obj = int.__new__(cls, value)
-        obj.parent = parent
-        return obj
-
-#    def __init__(self, value, path, name, parent):
-#        super(IntegerConstructor, self).__init__(value)
-
-
-class FloatConstructor(float):
-    def __new__(cls, value, path, name, parent):
-        if value is None:
-            obj = float.__new__(cls, 0.0)
-        else:
-            obj = float.__new__(cls, value)
-        obj.parent = parent
-        return obj
-
-#    def __init__(self, value, path, name, parent):
-#        super(FloatConstructor, self).__init__(value)
-
-
-class DateConstructor(date):
-    def __new__(cls, value, path, name, parent):
-        if value is None:
-            obj = date.__new__(cls, 1900, 1, 1)
-        else:
-            obj = date.__new__(cls, value[0], value[1], value[2])
-        obj.parent = parent
-        return obj
-
-#    def __init__(self, value, path, name, parent):
-#        super(DateConstructor, self).__init__(value[0], value[1], value[2])
-
-
-class StringConstructor(str):
-    def __new__(cls, value, path, name, parent):
-        obj = str.__new__(cls, value)
-        obj.parent = parent
-        return obj
-
-#    def __init__(self, value, path, name, parent):
-#        super(StringConstructor, self).__init__()
-
-
-class SubStringConstructor(str):
-    def __new__(cls, element, parent, exists):
-        obj = str.__new__(cls, "")
-        obj.parent = parent
-        return obj
-
-#    def __init__(self, element, parent, exists):
-#        super(SubStringConstructor, self).__init__()
-
-
-class MetadataDateConstructor(MetadataItem, DateConstructor):
-
-    def __init__(self, value=None, path=None, name=None, parent=None):
-        super(MetadataDateConstructor, self).__init__(parent)
-
-
-class MetadataIntegerConstructor(MetadataItem, IntegerConstructor):
-
-    def __init__(self, value=None, path=None, name=None, parent=None):
-        super(MetadataIntegerConstructor, self).__init__(parent)
-
-
-class MetadataFloatConstructor(MetadataItem, FloatConstructor):
-
-    def __init__(self, value=None, path=None, name=None, parent=None):
-        super(MetadataFloatConstructor, self).__init__(parent)
-
-
-class MetadataStringConstructor(MetadataItem, StringConstructor):
-
-    def __init__(self, value=None, path=None, name=None, parent=None):
-        super(MetadataStringConstructor, self).__init__(parent)
-
-
-class ListConstructor(MetadataItem, list):
-
-    def __init__(self, parent=None):
-        super(ListConstructor, self).__init__(parent)
-
-
-class DictConstructor(MetadataItem, dict):
-
-    def __init__(self, parent=None):
-        super(DictConstructor, self).__init__(parent)
-
-
-class MetadataListConstructor(ListConstructor):
+class MetadataListConstructor(MetadataItemConstructor):
     """
         A metadata item for groups of items (like tags). Define the root element (self.path) and then the name of the
         subitem to store there (self.tag_name) and you can use list-like methods to edit the group
@@ -210,20 +114,31 @@ class MetadataListConstructor(ListConstructor):
 
         super(MetadataListConstructor, self).__init__(parent)
 
-        self._refresh()
+        self.current_items = []
+        values = []
+        for item in self.parent.elements.find(self.path):
+            values.append(item.text)
+        self.value = values
 
-    def __iter__(self):
-        return iter(self.current_items)
-
-    def __getitem__(self, key):
-        return self.current_items[key]
-
-    def _refresh(self):
-        self.current_items = self.parent.elements.find(self.path)
+    @property
+    def value(self):
+        v = []
         for item in self.current_items:
-            super(MetadataListConstructor, self).append(item.text)
+            v.append(item.text)
+        return v
 
-    def _add_item(self, item):
+    @value.setter
+    def value(self, v):
+        self._removeall()
+        if v is None:
+            pass
+        elif isinstance(v, list):
+            for value in v:
+                self._append(value)
+        else:
+            raise RuntimeWarning("Input value must be a List or None")
+
+    def _append(self, item):
         """
             Adds an individual item to the section
             :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag
@@ -235,54 +150,7 @@ class MetadataListConstructor(ListConstructor):
         element.text = item
         self.current_items.append(element)
 
-    def _get(self):
-        values = []
-        for item in self.current_items:
-            values.append(item.text)
-        return values
-
-    def add(self, items):
-        """
-        :param items:
-        :return: self.get()
-        """
-        for item in items:
-            self._add_item(item)
-
-        return self._get()
-
-    def extend(self, items):
-        """
-            An alias for "add" to make this more pythonic
-            :param items: list of text items to add to this multi-item metadata section
-            :return: None
-        """
-
-        self.add(items)
-        return self._get()
-
-    def append(self, item):
-        """
-            Adds a single item to the section, like a list append
-            :param item:
-            :return: None
-        """
-        self._add_item(item)
-        super(MetadataListConstructor, self).append(item)
-
-    def remove(self, item):
-        items_to_remove = []
-        for i in self.current_items:
-            if i.text == item:
-                items_to_remove.append(i)
-
-        for i in items_to_remove:
-            self.current_items.remove(i)
-
-        super(MetadataListConstructor, self).remove(item)
-        return self
-
-    def removeall(self):
+    def _removeall(self):
         items_to_remove = []
 
         for i in self.current_items:
@@ -291,13 +159,8 @@ class MetadataListConstructor(ListConstructor):
         for i in items_to_remove:
             self.current_items.remove(i)
 
-        for i in items_to_remove:
-            super(MetadataListConstructor, self).remove(i.text)
 
-        return self
-
-
-class MetadataItems(ListConstructor):
+class MetadataItemsConstructor(MetadataItemConstructor):
     """
         A helper objects for more complex items like Locals or Contacts.
         This object will allow to iterage though multiple items of the same type
@@ -306,79 +169,114 @@ class MetadataItems(ListConstructor):
     def __init__(self, parent, path):
         self.path = os.path.dirname(path)
         self.tag_name = os.path.basename(path)
-        super(MetadataItems, self).__init__(parent)
+        super(MetadataItemsConstructor, self).__init__(parent)
         self.path = path
         self.elements = self.parent.elements.findall(self.path)
+        self.value = self.elements
 
-    def __iter__(self):
-        return iter(self.elements)
+    @property
+    def value(self):
+        return self.elements
 
-    def __getitem__(self, key):
-        return self.elements[key]
+    @value.setter
+    def value(self, v):
+        if not hasattr(self, 'elements'):
+            self.elements = self.parent.elements.findall(self.path)
+
+        self._removeall()
+        if v is None:
+            pass
+        elif isinstance(v, list):
+            for value in v:
+                self._append(value)
+        else:
+            raise RuntimeWarning("Input value must be a List or None")
+
+    def _append(self, element):
+        """
+            Adds an individual item to the section
+            :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag
+                configured on parent object
+            :return: None
+        """
+        self.elements.append(element)
+
+    def _removeall(self):
+        items_to_remove = []
+
+        for i in self.elements:
+            items_to_remove.append(i)
+
+        for i in items_to_remove:
+            self.elements.remove(i)
 
 
-class MetadataParentItem(MetadataItem):
+class MetadataParentItemConstructor(MetadataItemConstructor):
     """
     A helper object for more complex items like Contact and Locals
     This object will allow to add child elements to an item
     """
 
-    def __init__(self, parent):
-
+    def __init__(self, parent, child_elements):
         self.parent = parent
+        self.child_elements = child_elements
+        super(MetadataParentItemConstructor, self).__init__(self.parent)
 
-        super(MetadataParentItem, self).__init__(self.parent)
+        i = 0
+        while i < len(self.child_elements):
+            for element in self.child_elements.keys():
+                if self.child_elements[element]["parent"] == "element" and \
+                                "_{}".format(element) not in self.__dict__.keys():
+                    setattr(self, "_{}".format(element),
+                            self._create_item(self.element.iter(), self.element, self.child_elements[element]["path"]))
+                    setattr(self, element, self.__dict__["_{}".format(element)].value)
+                    i = 0
 
-    def _create_item(self, iter, parent, tag_name, item_type=None):
-        for i in iter:
-            if i.tag == tag_name:
-                if item_type == "string":
-                    return MetadataSubString(i, parent, True)
+                elif "_{}".format(self.child_elements[element]["parent"]) in self.__dict__.keys() and \
+                                "_{}".format(element) not in self.__dict__.keys():
+                    setattr(self, "_{}".format(element),
+                            self._create_item(self.element.iter(),
+                                              self.__dict__["_{}".format(self.child_elements[element]["parent"])],
+                                              self.child_elements[element]["path"]))
+                    setattr(self, element, self.__dict__["_{}".format(element)].value)
+                    i = 0
+
                 else:
-                    return MetadataSubItem(i, parent, True)
-        i = ET.Element(tag_name)
-        if item_type == "string":
-            return MetadataSubString(i, parent)
+                    i += 1
+        #self.value = self.element
+
+    def __setattr__(self, n, v):
+        if n in ["path", "parent", "child_elements", "name", "value"]:
+            self.__dict__[n] = v
         else:
-            return MetadataSubItem(i, parent, True)
-
-    def _create_items(self, iter, parent, tag_name):
-        items = []
-        for i in iter:
-            if i.tag == tag_name:
-                items.append(i)
-
-        if not items:
-            items = [ET.Element(tag_name)]
-            return MetadataSubItems(items, parent)
-        else:
-            return MetadataSubItems(items, parent, True)
-
-    def __setattr__(self, name, value):
-
-        if name in contact_elements.keys():
-            if contact_elements[name]['type'] == "string":
-                if isinstance(value, MetadataSubString):
-                    self.__dict__["_{}".format(name)] = value
-                elif "_{}".format(name) in self.__dict__.keys():
-                    if isinstance(value, str):
-                        self.__dict__["_{}".format(name)].element.text = value
-                    else:
-                        raise RuntimeWarning("Input value must be of type String")
+            if n in self.child_elements.keys():
+                if isinstance(v, str):
+                    self.__dict__["_{}".format(n)].element.text = v
+                elif v is None:
+                    self.__dict__["_{}".format(n)].element.text = ""
                 else:
-                    raise RuntimeWarning("No such item exists")
-        else:
-            self.__dict__[name] = value
+                    raise RuntimeWarning("Input value must be of type String or None")
+            else:
+                self.__dict__[n] = v
 
     def __getattr__(self, name):
 
-        if name in contact_elements.keys():
-            return self.__dict__["_{}".format(name)].element.text
+        if name != "child_elements" and name in self.child_elements.keys():
+                return self.__dict__["_{}".format(name)].element.text
+        #elif name == "value":
+        #    return self.element
         else:
             return self.__dict__[name]
 
+    def _create_item(self, iter, parent, tag_name):
+        for i in iter:
+            if i.tag == tag_name:
+                return MetadataSubItemConstructor(i, parent, True)
+        i = ET.Element(tag_name)
+        return MetadataSubItemConstructor(i, parent)
 
-class MetadataSubItem(object):
+
+class MetadataSubItemConstructor(object):
     """
     A helper object for more complex items like Contact and Locals
     This object can be placed as single item inside a parent items
@@ -392,75 +290,39 @@ class MetadataSubItem(object):
         if not exists:
             self.parent.append(element)
 
-        self._attributes = None
+        self.value = self.element.text
         self.attributes = self.element.attrib # {}
 
     @property
     def attributes(self):
-        return self._attributes
+        return self.element.attrib
 
     @attributes.setter
-    def attributes(self, value):
-        if isinstance(value, dict):
-            for attribute in value:
-                self.element.set(attribute, value[attribute])
-            self._attributes = self.element.attrib
+    def attributes(self, v):
+        if isinstance(v, dict):
+            for attribute in v:
+                self.element.set(attribute, v[attribute])
         else:
             raise RuntimeWarning("Must be of type dict")
+
+    @property
+    def value(self):
+        return self.element.text
+
+    @value.setter
+    def value(self, v):
+        if isinstance(v, str):
+            self.element.text = v
+        elif v is None:
+            self.element.text = ""
+        else:
+            raise RuntimeWarning("Must be of type String or None")
 
     def append(self, element):
         self.element.append(element)
 
 
-class MetadataSubString(MetadataSubItem, SubStringConstructor):
-    """
-    A helper object for more complex items like Contact and Locals
-    This object can be placed as single item inside a parent items
-    """
-
-    def __init__(self, element, parent, exists=False):
-
-        super(MetadataSubString, self).__init__(element, parent, exists)
-
-
-class MetadataSubItems(object):
-    """
-    A helper object for more complex items like Contact and Locals
-    This object can be placed as multi item inside a parent item
-    """
-
-    def __init__(self, elements, parent, exists=False):
-        self.elements = []
-        self.parent = parent
-
-        self.tag_name = elements[0].tag
-
-        for element in elements:
-            self.elements.append(MetadataSubItem(element, parent, exists))
-
-    def append(self, item):
-        element = ET.Element(self.tag_name)
-        element.text = item
-        self.elements.append(MetadataSubItem(element, self.parent, False))
-
-    def add(self, items):
-        for item in items:
-            self.append(item)
-
-    def get(self):
-        elements = []
-        for element in self.elements:
-            elements.append(element.get())
-        return elements
-
-    def __iter__(self):
-        return iter(self.elements)
-
-    def __getitem__(self, key):
-        return self.elements[key]
-
-
-class MetadataLanguageConstructor(MetadataParentItem):
+class MetadataLanguageConstructor(MetadataParentItemConstructor):
     """
         A MetadataParentItem for Language settings
         Each Language Item has two children
@@ -496,108 +358,3 @@ class MetadataLanguageConstructor(MetadataParentItem):
 
     def get_list_values(self):
         return languages.keys()
-
-
-class MetadataContactConstructor(MetadataParentItem):
-
-    # TODO: Define Role, Country and Online Resource list
-    """
-        A MetadatContact Item
-        Each Contact Item has several children
-         - Role (list)
-         - Contact Name
-         - Position
-         - Organization
-         - Contact Info
-         - Email (many)
-         - Address
-         - City
-         - State
-         - ZIP
-         - Country (list)
-         - Phone number (many)
-         - Fax number (many)
-         - Hours
-         - Instructions
-         - Link
-         - Protocol
-         - Profile
-         - Online Resource Name
-         - Online Resource Function
-         - Online Resource Code (list)
-
-        and a language and country attribute to define the local language
-        Predefined language pairs are stored in the global language_code dictionary
-        There can be many MetadataLocals instances
-    """
-
-    def __init__(self, parent):
-
-        self.parent = parent
-
-        super(MetadataContactConstructor, self).__init__(self.parent)
-
-        i = 0
-
-
-        while i < len(contact_elements):
-
-            for subitem in contact_elements.keys():
-
-                if contact_elements[subitem]["parent"] == "element" and "_{}".format(subitem) not in self.__dict__.keys():
-                    setattr(self,
-                            subitem,
-                            self._create_item(self.element.iter(),
-                                              self.element,
-                                              contact_elements[subitem]["path"],
-                                              contact_elements[subitem]["type"]))
-                    i = 0
-
-
-                elif "_{}".format(contact_elements[subitem]["parent"]) in self.__dict__.keys() and \
-                        "_{}".format(subitem) not in self.__dict__.keys():
-                    setattr(self,
-                            subitem,
-                            self._create_item(self.element.iter(),
-                                              self.__dict__["_{}".format(contact_elements[subitem]["parent"])],
-                                              contact_elements[subitem]["path"],
-                                              contact_elements[subitem]["type"]))
-                    i = 0
-                else:
-                    i += 1
-
-
-class MetadataContactsConstructor(MetadataItems):
-    """
-        Extend the MetadataItems object
-        use self._contacts instead of self._elements
-    """
-
-    def __init__(self, parent=None, path=None):
-
-        self.parent = parent
-        self.path = path
-        super(MetadataContactsConstructor, self).__init__(parent, self.path)
-        self._contacts = []
-
-    def __iter__(self):
-        return iter(self._contacts)
-
-    def __getitem__(self, key):
-        return self._contacts[key]
-
-    def _write(self):
-        items_to_remove = []
-        for element in self.elements:
-            items_to_remove.append(element)
-
-        for element in items_to_remove:
-            self.elements.remove(element)
-
-        for contact in self._contacts:
-            self.elements.append(contact)
-
-    def remove(self, value):
-        self._contacts.remove(value)
-        self._write()
-        super(MetadataContactsConstructor, self).remove(value)

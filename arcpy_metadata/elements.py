@@ -43,7 +43,7 @@ elements = {
                 "type": "contact"},
 
             "max_scale": {
-                "path": "max_scale",
+                "path": "Esri/scaleRange/maxScale",
                 "type": "integer"},
 
             #"metadata_language": {
@@ -51,7 +51,7 @@ elements = {
             #    "type": "language"},
 
             "min_scale": {
-                "path": "min_scale",
+                "path": "Esri/scaleRange/minScale",
                 "type": "integer"},
 
             "place_keywords": {
