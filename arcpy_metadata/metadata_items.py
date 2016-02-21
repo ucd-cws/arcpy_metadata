@@ -43,11 +43,11 @@ class MetadataLanguage(MetadataParentItemConstructor):
         self.path = path
 
         language_elements = {
-            "language": {
+            "attr_lang": {
                 "parent": "element",
                 "path": "languageCode"},
 
-            "country": {
+            "attr_country": {
                 "parent": "element",
                 "path": "countryCode"}
             }
@@ -55,7 +55,7 @@ class MetadataLanguage(MetadataParentItemConstructor):
         super(MetadataLanguage, self).__init__(self.parent, language_elements)
 
     def get_lang(self):
-        lang = self._language.attributes
+        lang = self._attr_lang.attributes
         if "value" in lang.keys():
             for key in languages:
                 if languages[key][0] == lang["value"]:
@@ -64,6 +64,42 @@ class MetadataLanguage(MetadataParentItemConstructor):
         else:
             return ""
 
+    def __setattr__(self, n, v):
+        if n in ["path", "parent", "child_elements", "name", "value"]:
+            self.__dict__[n] = v
+        elif n == "attr_lang":
+            if v == "" or v is None:
+                self._attr_lang.attributes = {}
+            else:
+                self._attr_lang.attributes = v
+        elif n == "attr_country":
+            if v == "" or v is None:
+                self._attr_country.attributes = {}
+            else:
+                self._attr_country.attributes = v
+        else:
+            if n in self.child_elements.keys():
+                if isinstance(v, str):
+                    self.__dict__["_{}".format(n)].element.text = v
+                elif v is None:
+                    self.__dict__["_{}".format(n)].element.text = ""
+                else:
+                    raise RuntimeWarning("Input value must be of type String or None")
+            else:
+                self.__dict__[n] = v
+
+    def __getattr__(self, name):
+
+        if name != "child_elements" and name in self.child_elements.keys():
+                return self.__dict__["_{}".format(name)].element.text
+        #elif name == "value":
+        #    return self.element
+        elif name == "attr_lang":
+            return self._attr_lang.attributes
+        elif name == "attr_country":
+            return self._attr_country.attributes
+        else:
+            return self.__dict__[name]
 
 # #### locals
 

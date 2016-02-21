@@ -199,8 +199,8 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "language":
                 if v in languages.keys():
                     #self.__dict__["_{}".format(n)].value = v
-                    self.__dict__["_{}".format(n)]._language.attributes = {"value": languages[v][0]}
-                    self.__dict__["_{}".format(n)]._country.attributes = {"value": languages[v][1]}
+                    self.__dict__["_{}".format(n)].attr_lang = {"value": languages[v][0]}
+                    self.__dict__["_{}".format(n)].attr_country = {"value": languages[v][1]}
                     a = 1
                 elif v is None:
                     self.__dict__["_{}".format(n)].value = ""

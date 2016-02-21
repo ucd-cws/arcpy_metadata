@@ -246,7 +246,7 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
         #self.value = self.element
 
     def __setattr__(self, n, v):
-        if n in ["path", "parent", "child_elements", "name", "value"]:
+        if n in ["path", "parent", "child_elements", "name", "value", "attr_lang", "attr_country"]:
             self.__dict__[n] = v
         else:
             if n in self.child_elements.keys():
