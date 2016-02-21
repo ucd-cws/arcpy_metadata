@@ -2,7 +2,6 @@ __author__ = 'Thomas.Maschler'
 
 from metadata_constructors import MetadataItemConstructor
 from metadata_constructors import MetadataListConstructor
-from metadata_constructors import MetadataLanguageConstructor
 from metadata_constructors import MetadataItemsConstructor
 from metadata_constructors import MetadataParentItemConstructor
 
@@ -28,10 +27,14 @@ class MetadataList(MetadataListConstructor):
         super(MetadataList, self).__init__(parent, tagname=tagname, path=path)
 
 
-class MetadataLanguage(MetadataLanguageConstructor):
+class MetadataLanguage(MetadataParentItemConstructor):
 
     """
-        Just a shortcut MetadataLanguage that predefines the paths
+        A MetadataParentItem for Language settings
+        Each Language Item has two children
+         - Language
+         - Country
+        Predefined language pairs are stored in the global language_code dictionary
     """
 
     def __init__(self, path, name, parent):
@@ -39,9 +42,27 @@ class MetadataLanguage(MetadataLanguageConstructor):
         self.name = name
         self.path = path
 
-        super(MetadataLanguage, self).__init__(self.parent, self.path)
+        language_elements = {
+            "language": {
+                "parent": "element",
+                "path": "languageCode"},
 
+            "country": {
+                "parent": "element",
+                "path": "countryCode"}
+            }
 
+        super(MetadataLanguage, self).__init__(self.parent, language_elements)
+
+    def get_lang(self):
+        lang = self._language.attributes
+        if "value" in lang.keys():
+            for key in languages:
+                if languages[key][0] == lang["value"]:
+                    return key
+            return ""
+        else:
+            return ""
 
 
 # #### locals

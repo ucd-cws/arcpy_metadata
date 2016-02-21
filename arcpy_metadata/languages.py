@@ -1,3 +1,4 @@
-languages = {"english": ["eng", "US"],
+languages = {"": ["", ""],
+             "english": ["eng", "US"],
              "french": ["fre", "FR"],
              "spanish": ["spa", "ES"]}

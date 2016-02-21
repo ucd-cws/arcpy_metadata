@@ -101,14 +101,14 @@ class MetadataEditor(object):
                 setattr(self, name, self.__dict__["_{}".format(name)].value)
 
             elif elements[name]['type'] == "language":
-                setattr(self, name, MetadataLanguage(elements[name]['path'], name, self))
+                setattr(self, "_{}".format(name), MetadataLanguage(elements[name]['path'], name, self))
+                setattr(self, name, self.__dict__["_{}".format(name)].value)
 
             elif elements[name]['type'] == "local":
                 setattr(self, name, MetadataLocals(elements[name]['path'], name, self))
 
             elif elements[name]['type'] == "contact":
                 setattr(self, "_{}".format(name), MetadataContact(elements[name]['path'], name, self))
-                #setattr(self, "_{}".format(name), MetadataContacts(elements[name]['path'], name, self))
                 setattr(self, name, self.__dict__["_{}".format(name)])
 
             if elements[name] in self.__dict__.keys():
@@ -180,9 +180,14 @@ class MetadataEditor(object):
 
             elif elements[n]['type'] == "language":
                 if v in languages.keys():
-                    pass
+                    #self.__dict__["_{}".format(n)].value = v
+                    self.__dict__["_{}".format(n)]._language.attributes = {"value": languages[v][0]}
+                    self.__dict__["_{}".format(n)]._country.attributes = {"value": languages[v][1]}
+                    a = 1
+                elif v is None:
+                    self.__dict__["_{}".format(n)].value = ""
                 else:
-                    raise RuntimeWarning("Input value must be in %s" % str(languages.keys()))
+                    raise RuntimeWarning("Input value must be in {}, an empty String or None".format(str(languages.keys())))
 
             elif elements[n]['type'] == "local":
                 if isinstance(v, MetadataLocals):
@@ -224,6 +229,8 @@ class MetadataEditor(object):
                 return datetime.strptime(self.__dict__["_{}".format(n)].value, "%Y%m%d").date()
             elif elements[n]['type'] == "contact":
                 return self.__dict__["_{}".format(n)]
+            elif elements[n]['type'] == "language":
+                return self.__dict__["_{}".format(n)].get_lang()
             else:
                 return self.__dict__["_{}".format(n)].value
         else:
