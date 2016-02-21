@@ -104,6 +104,9 @@ class IntegerConstructor(int):
         obj.parent = parent
         return obj
 
+#    def __init__(self, value, path, name, parent):
+#        super(IntegerConstructor, self).__init__(value)
+
 
 class FloatConstructor(float):
     def __new__(cls, value, path, name, parent):
@@ -114,15 +117,21 @@ class FloatConstructor(float):
         obj.parent = parent
         return obj
 
+#    def __init__(self, value, path, name, parent):
+#        super(FloatConstructor, self).__init__(value)
+
 
 class DateConstructor(date):
     def __new__(cls, value, path, name, parent):
         if value is None:
-            obj = date.__new__(cls,1900,1,1)
+            obj = date.__new__(cls, 1900, 1, 1)
         else:
-            obj = date.__new__(cls, value)
+            obj = date.__new__(cls, value[0], value[1], value[2])
         obj.parent = parent
         return obj
+
+#    def __init__(self, value, path, name, parent):
+#        super(DateConstructor, self).__init__(value[0], value[1], value[2])
 
 
 class StringConstructor(str):
@@ -131,12 +140,18 @@ class StringConstructor(str):
         obj.parent = parent
         return obj
 
+#    def __init__(self, value, path, name, parent):
+#        super(StringConstructor, self).__init__()
+
 
 class SubStringConstructor(str):
     def __new__(cls, element, parent, exists):
         obj = str.__new__(cls, "")
         obj.parent = parent
         return obj
+
+#    def __init__(self, element, parent, exists):
+#        super(SubStringConstructor, self).__init__()
 
 
 class MetadataDateConstructor(MetadataItem, DateConstructor):
@@ -466,15 +481,15 @@ class MetadataLanguageConstructor(MetadataParentItem):
 
     def set(self, value):
         if value in languages.keys():
-            self._language.set_attrib({"value": languages[value][0]})
-            self._country.set_attrib({"value": languages[value][1]})
+            self._language.attributes = {"value": languages[value][0]}
+            self._country.attributes = {"value": languages[value][1]}
         else:
             raise AttributeError
 
         return self.get()
 
     def get(self):
-        lang = self._language.get_attrib()
+        lang = self._language.attributes
         for key in languages:
             if languages[key][0] == lang["value"]:
                 return key

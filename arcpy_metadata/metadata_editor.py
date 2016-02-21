@@ -164,6 +164,7 @@ class MetadataEditor(object):
                     self.__dict__["_%s" % name] = value
                 elif isinstance(value, int):
                     self.__dict__["_%s" % name] = MetadataInteger(value, elements[name]["path"], name, self)
+                    self.__dict__["_%s" % name].element.text = str(value)
                     for i in self.items:
                         if i.name == name:
                             i.value = value
@@ -171,13 +172,14 @@ class MetadataEditor(object):
                     try:
                         new_value = int(value)
                         self.__dict__["_%s" % name] = MetadataInteger(new_value, elements[name]["path"], name, self)
+                        self.__dict__["_%s" % name].element.text = str(new_value)
                         for i in self.items:
                             if i.name == name:
                                 i.value = new_value
                     except:
-                        RuntimeWarning("Input value must be of type a Date or a String ('yyyymmdd')")
+                        RuntimeWarning("Input value must be of type Integer")
                 else:
-                    raise RuntimeWarning("Input value must be of type a Date or a Sting ('yyyymmdd')")
+                    raise RuntimeWarning("Input value must be of type Integer")
 
             elif elements[name]['type'] == "float":
                 if isinstance(value, MetadataFloat):
