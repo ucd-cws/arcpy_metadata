@@ -98,6 +98,12 @@ Saving the changes back to the file
 ```python
 metadata.finish()  # save the metadata back to the original source feature class and cleanup. Without calling finish(), your edits are NOT saved!
 ```
+If you want to enable automatic updates of your metadata (feature classes only) call.
+```python
+metadata.finish(True) 
+```
+This might overwrite some of your recent edits including the title.
+
 The code is based on a set of core classes that provide set/append/prepend operations, and we would love pull requests that add classes or attributes to cover additional portions of metadata specs.
 
 

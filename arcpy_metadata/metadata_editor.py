@@ -120,7 +120,10 @@ class MetadataEditor(object):
 
             elif elements[name]['type'] == "language":
                 setattr(self, "_{}".format(name), MetadataLanguage(elements[name]['path'], name, self))
-                setattr(self, name, self.__dict__["_{}".format(name)].value)
+                if self.__dict__["_{}".format(name)].value is not None:
+                    setattr(self, name, self.__dict__["_{}".format(name)].value.strip())
+                else:
+                    setattr(self, name, self.__dict__["_{}".format(name)].value)
 
             elif elements[name]['type'] == "local":
                 setattr(self, name, MetadataLocals(elements[name]['path'], name, self))
@@ -278,7 +281,7 @@ class MetadataEditor(object):
         for item in self.items:
             item.parent = self
 
-    def save(self):
+    def save(self, Enable_automatic_updates=False):
         logwrite("Saving metadata", True)
 
         for item in self.items:
@@ -294,7 +297,7 @@ class MetadataEditor(object):
 
         if self._workspace_type != 'FileSystem':
             arcpy.ImportMetadata_conversion(self.metadata_file, "FROM_ARCGIS", self.dataset,
-                                            Enable_automatic_updates=True)
+                                            Enable_automatic_updates=Enable_automatic_updates)
 
     def cleanup(self, delete_created_fc=False):
         try:
@@ -310,11 +313,11 @@ class MetadataEditor(object):
         except:
             logwarning("Unable to remove temporary metadata files")
 
-    def finish(self):
+    def finish(self, Enable_automatic_updates=False):
         """
         Alias for saving and cleaning up
         :return:
         """
 
-        self.save()
+        self.save(Enable_automatic_updates)
         self.cleanup()
