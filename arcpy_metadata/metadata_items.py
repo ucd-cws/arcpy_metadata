@@ -79,7 +79,7 @@ class MetadataLanguage(MetadataParentItemConstructor):
                 self._attr_country.attributes = v
         else:
             if n in self.child_elements.keys():
-                if isinstance(v, str):
+                if isinstance(v, str) or isinstance(v, unicode):
                     self.__dict__["_{}".format(n)].element.text = v
                 elif v is None:
                     self.__dict__["_{}".format(n)].element.text = ""

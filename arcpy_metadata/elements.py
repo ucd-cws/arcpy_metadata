@@ -111,6 +111,10 @@ elements = {
             "update_frequency_description": {
                 "path": "dataIdInfo/resMaint/usrDefFreq/duration",
                 "type": "string"},
+
+            "license": {
+                "path": "dataIdInfo/resConst/LegConsts/othConsts",
+                "type": "string"},
             }
 
 contact_elements = {
