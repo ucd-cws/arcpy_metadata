@@ -152,6 +152,7 @@ class MetadataListConstructor(MetadataItemConstructor):
         element = ET.Element(self.tag_name)
         element.text = item
         self.current_items.append(element)
+        self.element._children = self.current_items
 
     def _removeall(self):
         items_to_remove = []
