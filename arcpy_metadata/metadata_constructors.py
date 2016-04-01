@@ -21,7 +21,10 @@ class MetadataItemConstructor(object):
         self._require_tree_elements()
 
         # set current metadata value and attributes
-        self.value = self.parent.elements.find(self.path).text
+        if self.parent.elements.find(self.path).text is not None:
+            self.value = self.parent.elements.find(self.path).text.strip()
+        else:
+            self.value = self.parent.elements.find(self.path).text
         self.attributes = self.parent.elements.find(self.path).attrib
 
     @property
@@ -250,7 +253,7 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
             self.__dict__[n] = v
         else:
             if n in self.child_elements.keys():
-                if isinstance(v, str):
+                if isinstance(v, str) or isinstance(v, unicode):
                     self.__dict__["_{}".format(n)].element.text = v
                 elif v is None:
                     self.__dict__["_{}".format(n)].element.text = ""
@@ -290,7 +293,10 @@ class MetadataSubItemConstructor(object):
         if not exists:
             self.parent.append(element)
 
-        self.value = self.element.text
+        if self.element.text is not None:
+            self.value = self.element.text.strip()
+        else:
+            self.value = self.element.text
         self.attributes = self.element.attrib # {}
 
     @property
@@ -311,7 +317,7 @@ class MetadataSubItemConstructor(object):
 
     @value.setter
     def value(self, v):
-        if isinstance(v, str):
+        if isinstance(v, str) or isinstance(v, unicode):
             self.element.text = v
         elif v is None:
             self.element.text = ""

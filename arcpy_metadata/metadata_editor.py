@@ -112,7 +112,10 @@ class MetadataEditor(object):
 
             if elements[name]['type'] in ["string", "date", "integer", "float"]:
                 setattr(self, "_{}".format(name), MetadataItem(elements[name]['path'], name, self))
-                setattr(self, name, self.__dict__["_{}".format(name)].value)
+                if self.__dict__["_{}".format(name)].value is not None:
+                    setattr(self, name, self.__dict__["_{}".format(name)].value.strip())
+                else:
+                    setattr(self, name, self.__dict__["_{}".format(name)].value)
 
             elif elements[name]['type'] == "list":
                 setattr(self, "_{}".format(name), MetadataList(elements[name]["tagname"], elements[name]['path'], name, self))
@@ -142,7 +145,7 @@ class MetadataEditor(object):
 
         if n in elements.keys():
             if elements[n]['type'] == "string":
-                if isinstance(v, str):
+                if isinstance(v, str) or isinstance(v, unicode):
                     self.__dict__["_{}".format(n)].value = v
                 elif v is None:
                     self.__dict__["_{}".format(n)].value = ""
@@ -153,7 +156,7 @@ class MetadataEditor(object):
                 if isinstance(v, date):
                     self.__dict__["_{}".format(n)].value = date.strftime(v, "%Y%m%d")
 
-                elif isinstance(v, str):
+                elif isinstance(v, str) or isinstance(v, unicode):
                     try:
                         new_value = datetime.strptime(v, "%Y%m%d").date()
                         self.__dict__["_{}".format(n)].value = date.strftime(new_value, "%Y%m%d")
@@ -182,7 +185,7 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "float":
                 if isinstance(v, float):
                     self.__dict__["_{}".format(n)].value = str(v)
-                elif isinstance(v, str):
+                elif isinstance(v, str) or isinstance(v, unicode):
                     try:
                         new_value = float(v)
                         self.__dict__["_{}".format(n)].value = str(new_value)
@@ -263,15 +266,15 @@ class MetadataEditor(object):
         return desc.dataType
 
     def get_workspace(self):
-        workspace = os.path.dirname(self.dataset)
-        if [any(ext) for ext in ('.gdb', '.mdb', '.sde') if ext in os.path.splitext(workspace)]:
-            return workspace
-        else:
-            workspace = os.path.dirname(workspace)
-            if [any(ext) for ext in ('.gdb', '.mdb', '.sde') if ext in os.path.splitext(workspace)]:
+        workspace = self.dataset
+        desc = arcpy.Describe(workspace)
+
+        while 1 == 1:
+            if desc.dataType == "Workspace" or desc.dataType == "Folder":
                 return workspace
             else:
-                return os.path.dirname(self.dataset)
+                workspace = os.path.dirname(workspace)
+                desc = arcpy.Describe(workspace)
 
     def get_workspace_type(self):
         desc = arcpy.Describe(self._workspace)

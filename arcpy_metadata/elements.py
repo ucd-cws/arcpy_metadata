@@ -57,7 +57,7 @@ elements = {
             "place_keywords": {
                 "path": "dataIdInfo/searchKeys[last()]",
                 "tagname": "keyword",
-                "type": "string"},
+                "type": "list"},
 
             "point_of_contact": {
                 "path": "dataIdInfo/idPoC",
@@ -110,6 +110,10 @@ elements = {
 
             "update_frequency_description": {
                 "path": "dataIdInfo/resMaint/usrDefFreq/duration",
+                "type": "string"},
+
+            "license": {
+                "path": "dataIdInfo/resConst/LegConsts/othConsts",
                 "type": "string"},
             }
 
