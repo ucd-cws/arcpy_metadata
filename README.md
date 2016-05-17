@@ -2,7 +2,7 @@ Arcpy Metadata Editor (arcpy_metadata)
 ==============
 Whether you create it or not, metadata is a critical part of GIS analysis. ArcGIS includes a built-in GUI metadata editor, but has scant access to metadata properties from Python. The arcpy_metadata package provides this access, allowing large Python packages that generate their own geospatial outputs in ArcGIS to properly document the data.
 
-[![Code Issues](https://www.quantifiedcode.com/api/v1/project/64d5bf20bff54d8a9fb940f2bfe4642c/badge.svg)](https://www.quantifiedcode.com/app/project/64d5bf20bff54d8a9fb940f2bfe4642c)
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/410cbc590b3c463489fd3a7c786f1f04/badge.svg)](https://www.quantifiedcode.com/app/project/410cbc590b3c463489fd3a7c786f1f04)
 
 Getting arcpy_metadata
 ----------------------
@@ -20,57 +20,77 @@ import arcpy_metadata as md
 metadata = md.MetadataEditor(path_to_some_feature_class)  # currently supports Shapefiles, FeatureClasses, RasterDatasets and Layers
 ```
 
-Get simple items
+Get text items (returns string)
 
 ```python
-metadata.title.get()
-metadata.abstract.get()
+title = metadata.title
+abstract = metadata.abstract
 ```
 
-Change simple items
+Change text items
 
 ```python
-metadata.title.set("The new title")
-metadata.abstract.set("This is the abstract")
+metadata.title = "The new title"
+metadata.abstract = "This is the abstract"
 ```
 
-Adding text to a simple item
+Get list items (returns list)
 
 ```python
-metadata.abstract.append("\nThis is the second line of the abstract")
-metadata.abstract.prepend("This line is goes right before the first line\n")
+tags = metadata.tags
+for tag in tags:
+    print tag
 ```
 
-Adding new items to multi items
+Change list items
 
 ```python
-metadata.tags.append("New Keyword")
-metadata.tags.add(["Another keyword", "One more keyword"])
+metadata.tags = ["tag1", "tag2"]
 ```
 
-Removing items from multi items
+Get numeric items (return int or float)
 
 ```python
-metadata.tags.remove("New Keyword")
-metadata.tags.removeall()
+min_scale = metadata.min_scale
+max_scale = metadata.max_scale
 ```
 
-Lists
+Change numeric items 
 
 ```python
-list = metadata.language.get_list_values()
-metadata.language.set(list[0])
+metadata.min_scale = 500000
+metadata.max_scale = 500
 ```
 
-Complex items
+Get date items (returns date object)
 
 ```python
-metadata.points_of_contact.add()
-metadata.points_of_contact[0].contact_name.set("Contact name")
+last_update = metadata.last_update
+last_update_year = metadata.last_update.year
+```
 
-metadata.points_of_contact[0].email.get()
-metadata.points_of_contact[0].email[0].set("email1@domain.org")
-metadata.points_of_contact[0].email.append("emai2@domain.org")
+Change date items (takes both date objects and formated string (yyyymmdd)
+
+```python
+from datetime import date
+today = date.today()
+metadata.last_update = today
+metadata.last_update = "20160221"
+```
+
+Get contact items (returns contact object)
+
+```python
+contact = metadata.point_of_contact
+contact_name = metadata.point_of_contact.contact_name
+contact_email = metadata.point_of_contact.email
+```
+
+Change contact items (all contact items are string)
+
+```python
+metadata.point_of_contact.contact_name = "First and Last Name"
+metadata.point_of_contact.email = "email@address.com"
 ```
 
 Saving the changes back to the file
@@ -78,6 +98,12 @@ Saving the changes back to the file
 ```python
 metadata.finish()  # save the metadata back to the original source feature class and cleanup. Without calling finish(), your edits are NOT saved!
 ```
+If you want to enable automatic updates of your metadata (feature classes only) call.
+```python
+metadata.finish(True) 
+```
+This might overwrite some of your recent edits including the title.
+
 The code is based on a set of core classes that provide set/append/prepend operations, and we would love pull requests that add classes or attributes to cover additional portions of metadata specs.
 
 
@@ -86,34 +112,57 @@ Supported items
 
 |Item description|Internal name|Type|Location in ArcCatalog|Path in ArcGIS XML file|
 |---|---|---|---|---|
-|Title|title|simple|Overview/ Item Description/ Title|dataIdInfo/idCitation/resTitle|
-|Abstract|abstract|simple|Overview/ Item Description/ Description|dataIdInfo/idAbs|
-|Locales|locales|complex|Overview/Locales/#language/..|Esri/locales/locale|
-|Purpose|purpose|simple|Overview/ Item Description/ Summery|dataIdInfo/idPurp|
-|Tags|tags|multi|Overview/ Item Description/ Tags|dataIdInfo/searchKeys/keyword|
-|Place Keywords|place_keywords|multi|Overview/ Topics & Keywords/ Place Keyword|dataIdInfo/placeKeys/keyword|
-|Extent Description|extent_description|simple|Resource/ Extents/ Extent/ Description|dataIdInfo/dataExt/exDesc|
-|Temporal Extent Description|temporal_extent_description|simple|   |dataIdInfo/dataExt/tempDesc|
-|Temporal Extent Instance|temporal_extent_instance|simple|Resource/ Extents/ Temporal Instance Extent/ Instance Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Instant/tmPosition|
-|Temporal Extent Start Date|temporal_extent_start|simple|Resource/ Extents/ Temporal Period Extent/ Begin Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmBegin|
-|Temporal Extent End Date|temporal_extent_end|simple|Resource/ Extents/ Temporal Period Extent/ End Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmEnd|
-|Minimum Scale|min_scale|simple|Item Description/ Appropriate Scale Range/ Min Scale|Esri/scaleRange/minScale|
-|Maximum Scale|max_scale|simple|Item Description/ Appropriate Scale Range/ Max Scale|Esri/scaleRange/maxScale|
-|Scale Resolution|scale_resolution|simple|Resource/ Details/ Scale Resolution|dataIdInfo/dataScale/equScale/rfDenom|
-|Last Update|last_update|simple|Overview/ Citation/ Dates/ Revised|dataIdInfo/idCitation/date/reviseDate|
-|Update Frequency|update_frequency|list|Resource/ Maintenance/ Update Frequency|dataIdInfo/resMaint/maintFreq/MaintFreqCd|
-|Update Frequency Description|update_frequency_description|simple|Resource/ Maintenance/ Custom Frequency|dataIdInfo/resMaint/usrDefFreq/duration|
-|Credits|credits|simple|Overview/ Item Description/ Credits|dataIdInfo/idCredit|
-|Citation|citation|simple|Overview/ Citation/ Other Details|dataIdInfo/idCitation/otherCitDet|
-|Limitation|limitation|simple|Overview/ Item Description/ Use Limitation|dataIdInfo/resConst/Consts/useLimit|
-|Supplemental Information|supplemental_information|simple|Resource/ Supplemental Information|dataIdInfo/suppInfo|
-|Source|source|simple|Resource/ Lineage/ Data Source/ Source Description|dqInfo/dataLineage/dataSource/srcDesc|
-|Points of contact|points_of_contact|complex|Resource/ Details/ Points of Contact/ Contact/...|dataIdInfo/idPoC|
-|Maintenance Contacts|maintenance_contacts|complex|Resource/ Maintenance/ Maintenance Contact/...|dataIdInfo/maintCont|
-|Citation Contacts|citation_contacts|complex|Overview/ Citation Contact/ Contact/...|dataIdInfo/idCitation/citRespParty|
-|Language|language|list|Resource/ Detail/ Languages/ Language|dataIdInfo/dataLang|
-|Metadata Language|metadata_language|list|Metadata/ Detail/ Language|dataIdInfo/mdLang|
+|Title|title|String|Overview/ Item Description/ Title|dataIdInfo/idCitation/resTitle|
+|Abstract|abstract|String|Overview/ Item Description/ Description|dataIdInfo/idAbs|
+|Purpose|purpose|String|Overview/ Item Description/ Summery|dataIdInfo/idPurp|
+|Tags|tags|List|Overview/ Item Description/ Tags|dataIdInfo/searchKeys/keyword|
+|Place Keywords|place_keywords|List|Overview/ Topics & Keywords/ Place Keyword|dataIdInfo/placeKeys/keyword|
+|Extent Description|extent_description|String|Resource/ Extents/ Extent/ Description|dataIdInfo/dataExt/exDesc|
+|Temporal Extent Description|temporal_extent_description|String|   |dataIdInfo/dataExt/tempDesc|
+|Temporal Extent Instance|temporal_extent_instance|Date|Resource/ Extents/ Temporal Instance Extent/ Instance Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Instant/tmPosition|
+|Temporal Extent Start Date|temporal_extent_start|Date|Resource/ Extents/ Temporal Period Extent/ Begin Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmBegin|
+|Temporal Extent End Date|temporal_extent_end|Date|Resource/ Extents/ Temporal Period Extent/ End Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmEnd|
+|Minimum Scale|min_scale|Integer|Item Description/ Appropriate Scale Range/ Min Scale|Esri/scaleRange/minScale|
+|Maximum Scale|max_scale|Integer|Item Description/ Appropriate Scale Range/ Max Scale|Esri/scaleRange/maxScale|
+|Scale Resolution|scale_resolution|String|Resource/ Details/ Scale Resolution|dataIdInfo/dataScale/equScale/rfDenom|
+|Last Update|last_update|Date|Overview/ Citation/ Dates/ Revised|dataIdInfo/idCitation/date/reviseDate|
+|Update Frequency|update_frequency|String|Resource/ Maintenance/ Update Frequency|dataIdInfo/resMaint/maintFreq/MaintFreqCd|
+|Update Frequency Description|update_frequency_description|String|Resource/ Maintenance/ Custom Frequency|dataIdInfo/resMaint/usrDefFreq/duration|
+|Credits|credits|String|Overview/ Item Description/ Credits|dataIdInfo/idCredit|
+|Citation|citation|String|Overview/ Citation/ Other Details|dataIdInfo/idCitation/otherCitDet|
+|Limitation|limitation|String|Overview/ Item Description/ Use Limitation|dataIdInfo/resConst/Consts/useLimit|
+|Supplemental Information|supplemental_information|String|Resource/ Supplemental Information|dataIdInfo/suppInfo|
+|Source|source|String|Resource/ Lineage/ Data Source/ Source Description|dqInfo/dataLineage/dataSource/srcDesc|
+|Points of contact|point_of_contact|ContactObj|Resource/ Details/ Points of Contact/ Contact/|dataIdInfo/idPoC|
+|Maintenance Contacts|maintenance_contact|ContactObj|Resource/ Maintenance/ Maintenance Contact/|dataIdInfo/maintCont|
+|Citation Contacts|citation_contact|ContactObj|Overview/ Citation Contact/ Contact/|dataIdInfo/idCitation/citRespParty|
+|Language|language|String|Resource/ Detail/ Languages/ Language|dataIdInfo/dataLang|
+|Metadata Language|metadata_language|String|Metadata/ Detail/ Language|dataIdInfo/mdLang|
 
+Contact items
+---------------
+|Item description|Internal name|Type|Relative path in ArcGIS XML file|
+|---|---|---|---|
+|Role|role|String|role/RoleCd|
+|Contact Name|contact_name|String|rpIndName|
+|Position|position|String|rpPosName|
+|Organization|organization|String|rpOrgName|
+|Email|email|String|rpCntInfo/eMailAdd|
+|Address|address|String|rpCntInfo/cntAddress/delPoint|
+|City|city|String|rpCntInfo/cntAddress/City|
+|State|state|String|rpCntInfo/cntAddress/adminArea|
+|Zip|zip|String|rpCntInfo/cntAddress/postCode|
+|Country|country|String|rpCntInfo/cntAddress/country|
+|Phone Nb|phone_nb|String|rpCntInfo/cntPhone/voiceNum|
+|Fax Nb|fax_nb|String|rpCntInfo/cntPhone/faxNum|
+|Hours|hours|String|rpCntInfo/cntHours|
+|Instructions|instructions|String|rpCntInfo/cntInstr|
+|Website Link|link|String|rpCntInfo/cntOnlineRes/linkage|
+|Protocol|protocol|String|rpCntInfo/cntOnlineRes/protocol|
+|Profile|profile|String|rpCntInfo/cntOnlineRes/appProfile|
+|Website Name|or_name|String|rpCntInfo/cntOnlineRes/orName|
+|Website Description|or_desc|String|rpCntInfo/cntOnlineRes/orDesc|
+|Website Function|or_function_cd|String|rpCntInfo/cntOnlineRes/orFunct/OnFunctCd|
 
 
 Under the hood
@@ -123,9 +172,9 @@ arcpy_metadata uses the strategy of exporting the metadata from the layer, then 
 
 Known limitations
 ---------------
-Does not yet support all metadata items and some list items are only partly supported.
+Does not yet support all metadata items.
 
-Currently only works with 32-bit Python. Module crashes under 64-bit Python due to a bug arcpy (v10.3.1), when using arcpy.XSLTransform_conversion().
+Currently only works with 32-bit Python. Module crashes under 64-bit Python due to a bug in arcpy (v10.3.1), when using arcpy.XSLTransform_conversion().
 
 
 Acknowledgements
