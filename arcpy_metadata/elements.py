@@ -104,9 +104,9 @@ elements = {
                 "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmBegin",
                 "type": "date"},
 
-            "update_frequency": {
-                "path": "dataIdInfo/resMaint/maintFreq/MaintFreqCd",
-                "type": "string"},
+            #"update_frequency": {
+            #    "path": "dataIdInfo/resMaint/maintFreq/MaintFreqCd",
+            #    "type": "string"},
 
             "update_frequency_description": {
                 "path": "dataIdInfo/resMaint/usrDefFreq/duration",
@@ -122,9 +122,9 @@ contact_elements = {
                 "parent": "element",
                 "path": "role"},
 
-            "role": {
-                "parent": "role_p",
-                "path": "RoleCd"},
+            #"role": {
+            #    "parent": "role_p",
+            #    "path": "RoleCd"},
 
             "contact_name": {
                 "parent": "element",
@@ -147,7 +147,7 @@ contact_elements = {
                 "path": "cntAddress"},
 
             "email": {
-                "parent": "contact_info",
+                "parent": "address_p",
                 "path": "eMailAdd"},
 
             "address": {
@@ -216,11 +216,11 @@ contact_elements = {
 
             "or_function": {
                 "parent": "online_resource",
-                "path": "orFunct"},
+                "path": "orFunct"} #,
 
-            "or_function_cd": {
-                "parent": "or_function",
-                "path": "OnFunctCd"}
+            #"or_function_cd": {
+            #    "parent": "or_function",
+            #    "path": "OnFunctCd"}
             }
 
 language_elements = {
