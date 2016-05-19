@@ -177,3 +177,4 @@ Currently only works with 32-bit Python. Module crashes under 64-bit Python due 
 Acknowledgements
 ----------------
 arcpy_metadata was initially a project of the [UC Davis Center for Watershed Sciences](https://watershed.ucdavis.edu) and has received significant contributions from the [World Resources Institute](https://www.wri.org). It was created as part of a larger project funded by the California Department of Fish and Wildlife [Biogeographic Data Branch](http://www.dfg.ca.gov/biogeodata/) and further developed for [Global Forest Watch](https://www.globalforestwatch.org). We thank our funders for their support and their commitment to high quality geospatial data.
+
