@@ -126,7 +126,6 @@ Supported items
 |Maximum Scale|max_scale|Integer|Item Description/ Appropriate Scale Range/ Max Scale|Esri/scaleRange/maxScale|
 |Scale Resolution|scale_resolution|String|Resource/ Details/ Scale Resolution|dataIdInfo/dataScale/equScale/rfDenom|
 |Last Update|last_update|Date|Overview/ Citation/ Dates/ Revised|dataIdInfo/idCitation/date/reviseDate|
-|Update Frequency|update_frequency|String|Resource/ Maintenance/ Update Frequency|dataIdInfo/resMaint/maintFreq/MaintFreqCd|
 |Update Frequency Description|update_frequency_description|String|Resource/ Maintenance/ Custom Frequency|dataIdInfo/resMaint/usrDefFreq/duration|
 |Credits|credits|String|Overview/ Item Description/ Credits|dataIdInfo/idCredit|
 |Citation|citation|String|Overview/ Citation/ Other Details|dataIdInfo/idCitation/otherCitDet|
@@ -143,7 +142,6 @@ Contact items
 ---------------
 |Item description|Internal name|Type|Relative path in ArcGIS XML file|
 |---|---|---|---|
-|Role|role|String|role/RoleCd|
 |Contact Name|contact_name|String|rpIndName|
 |Position|position|String|rpPosName|
 |Organization|organization|String|rpOrgName|
@@ -162,7 +160,6 @@ Contact items
 |Profile|profile|String|rpCntInfo/cntOnlineRes/appProfile|
 |Website Name|or_name|String|rpCntInfo/cntOnlineRes/orName|
 |Website Description|or_desc|String|rpCntInfo/cntOnlineRes/orDesc|
-|Website Function|or_function_cd|String|rpCntInfo/cntOnlineRes/orFunct/OnFunctCd|
 
 
 Under the hood
@@ -179,4 +176,4 @@ Currently only works with 32-bit Python. Module crashes under 64-bit Python due 
 
 Acknowledgements
 ----------------
-arcpy_metadata was initially a project of the [UC Davis Center for Watershed Sciences](https://watershed.ucdavis.edu) and has received significant contributions from the [World Resources Institute](www.wri.org). It was created as part of a larger project funded by the California Department of Fish and Wildlife [Biogeographic Data Branch](http://www.dfg.ca.gov/biogeodata/) and further developed for [Global Forest Watch](www.globalforestwatch.org). We thank our funders for their support and their commitment to high quality geospatial data.
+arcpy_metadata was initially a project of the [UC Davis Center for Watershed Sciences](https://watershed.ucdavis.edu) and has received significant contributions from the [World Resources Institute](https://www.wri.org). It was created as part of a larger project funded by the California Department of Fish and Wildlife [Biogeographic Data Branch](http://www.dfg.ca.gov/biogeodata/) and further developed for [Global Forest Watch](https://www.globalforestwatch.org). We thank our funders for their support and their commitment to high quality geospatial data.
