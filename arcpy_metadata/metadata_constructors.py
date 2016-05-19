@@ -133,7 +133,7 @@ class MetadataListConstructor(MetadataItemConstructor):
     @value.setter
     def value(self, v):
         self._removeall()
-        if v is None:
+        if v is None or v == "":
             pass
         elif isinstance(v, list):
             for value in v:
