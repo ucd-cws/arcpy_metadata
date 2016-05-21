@@ -156,7 +156,7 @@ contact_elements = {
 
             "city": {
                 "parent": "address_p",
-                "path": "City"},
+                "path": "city"},
 
             "state": {
                 "parent": "address_p",
