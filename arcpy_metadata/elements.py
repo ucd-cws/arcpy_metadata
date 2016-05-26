@@ -6,6 +6,10 @@ elements = {
                 "path": "dataIdInfo/idAbs",
                 "type": "string"},
 
+            "alternative_title": {
+                "path": "dataIdInfo/idCitation/resAltTitle",
+                "type": "string"},
+
             "citation": {
                 "path": "dataIdInfo/idCitation/otherCitDet",
                 "type": "string"},
@@ -18,8 +22,20 @@ elements = {
                 "path": "dataIdInfo/idCredit",
                 "type": "string"},
 
+            "distance_resolution": {  # TODO: Allow to add units
+                "path": "dataIdInfo/dataScale/scaleDist/value",
+                "type": "string"},
+
+            "download": {  # TODO: Allow to add multiple download links with names
+                "path": "distInfo/distTranOps/onLineSrc/linkage",
+                "type": "string"},
+
             "extent_description": {
                 "path": "dataIdInfo/dataExt/exDesc",
+                "type": "string"},
+
+            "external_link": {
+                "path": "dataIdInfo/idCitation/citOnlineRes/linkage",
                 "type": "string"},
 
             "language": {
@@ -30,7 +46,11 @@ elements = {
                 "path": "dataIdInfo/idCitation/date/reviseDate",
                 "type": "date"},
 
-            "limitation": {
+            "license": {
+                "path": "dataIdInfo/resConst/LegConsts/useLimit",
+                "type": "string"},
+
+            "limitation": {  #TODO: does read correctly when entered though ArcGIS Online. They are stored in a seperated resConst element
                 "path": "dataIdInfo/resConst/Consts/useLimit",
                 "type": "string"},
 
@@ -69,7 +89,7 @@ elements = {
 
             "scale_resolution": {
                 "path": "dataIdInfo/dataScale/equScale/rfDenom",
-                "type": "string"},
+                "type": "integer"},
 
             "source": {
                 "path": "dqInfo/dataLineage/dataSource/srcDesc",
@@ -110,11 +130,8 @@ elements = {
 
             "update_frequency_description": {
                 "path": "dataIdInfo/resMaint/usrDefFreq/duration",
-                "type": "string"},
+                "type": "string"}
 
-            "license": {
-                "path": "dataIdInfo/resConst/LegConsts/othConsts",
-                "type": "string"},
             }
 
 contact_elements = {
