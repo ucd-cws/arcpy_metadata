@@ -1,6 +1,6 @@
 import os
 import xml.etree.ElementTree as ET
-from languages import languages
+from arcpy_metadata.languages import languages
 
 
 class MetadataItemConstructor(object):
