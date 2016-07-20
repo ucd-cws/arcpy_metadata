@@ -7,16 +7,16 @@ import arcpy
 # if it is a feature class, arcpy can be loaded on demand using importlib
 # from importlib import import_module
 
-from metadata_items import MetadataItem
-from metadata_items import MetadataList
-from metadata_items import MetadataLanguage
-from metadata_items import MetadataContact
-from metadata_items import MetadataLocals
+from arcpy_metadata.metadata_items import MetadataItem
+from arcpy_metadata.metadata_items import MetadataList
+from arcpy_metadata.metadata_items import MetadataLanguage
+from arcpy_metadata.metadata_items import MetadataContact
+from arcpy_metadata.metadata_items import MetadataLocals
 
 import xml
 
-from elements import elements
-from languages import languages
+from arcpy_metadata.elements import elements
+from arcpy_metadata.languages import languages
 
 from datetime import date
 from datetime import datetime
