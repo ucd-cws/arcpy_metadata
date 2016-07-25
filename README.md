@@ -171,7 +171,7 @@ Known limitations
 ---------------
 Does not yet support all metadata items.
 
-Currently only works with 32-bit Python. Module crashes under 64-bit Python due to a bug in arcpy (v10.3.1), when using arcpy.XSLTransform_conversion().
+arcpy_metadata only works with 32-bit Python. We use arcpy.XSLTransform_conversion() to extract metadata from geodatabases. 64bit arcpy python bindings for background processing [do not support](http://desktop.arcgis.com/en/arcmap/latest/analyze/executing-tools/64bit-background.htm) tools inside the metadata conversion toolset.
 
 
 Acknowledgements
