@@ -1,12 +1,12 @@
 __author__ = 'Thomas.Maschler'
 
-from metadata_constructors import MetadataItemConstructor
-from metadata_constructors import MetadataListConstructor
-from metadata_constructors import MetadataItemsConstructor
-from metadata_constructors import MetadataParentItemConstructor
+from arcpy_metadata.metadata_constructors import MetadataItemConstructor
+from arcpy_metadata.metadata_constructors import MetadataListConstructor
+from arcpy_metadata.metadata_constructors import MetadataItemsConstructor
+from arcpy_metadata.metadata_constructors import MetadataParentItemConstructor
 
-from elements import contact_elements
-from languages import languages
+from arcpy_metadata.elements import contact_elements
+from arcpy_metadata.languages import languages
 
 
 
