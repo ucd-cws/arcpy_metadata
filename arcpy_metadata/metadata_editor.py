@@ -14,6 +14,7 @@ from arcpy_metadata.metadata_items import MetadataContact
 from arcpy_metadata.metadata_items import MetadataLocals
 
 import xml
+import six
 
 from arcpy_metadata.elements import elements
 from arcpy_metadata.languages import languages
@@ -145,7 +146,7 @@ class MetadataEditor(object):
 
         if n in elements.keys():
             if elements[n]['type'] == "string":
-                if isinstance(v, str) or isinstance(v, unicode):
+                if isinstance(v, str) or isinstance(v, six.text_type):
                     self.__dict__["_{}".format(n)].value = v
                 elif v is None:
                     self.__dict__["_{}".format(n)].value = ""
@@ -156,7 +157,7 @@ class MetadataEditor(object):
                 if isinstance(v, date):
                     self.__dict__["_{}".format(n)].value = date.strftime(v, "%Y%m%d")
 
-                elif isinstance(v, str) or isinstance(v, unicode):
+                elif isinstance(v, str) or isinstance(v, six.text_type):
                     try:
                         new_value = datetime.strptime(v, "%Y%m%d").date()
                         self.__dict__["_{}".format(n)].value = date.strftime(new_value, "%Y%m%d")
@@ -185,7 +186,7 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "float":
                 if isinstance(v, float):
                     self.__dict__["_{}".format(n)].value = str(v)
-                elif isinstance(v, str) or isinstance(v, unicode):
+                elif isinstance(v, str) or isinstance(v, six.text_type):
                     try:
                         new_value = float(v)
                         self.__dict__["_{}".format(n)].value = str(new_value)
@@ -293,9 +294,6 @@ class MetadataEditor(object):
                 print(item.value)
             except:
                 print(item)
-
-        #for item in self.items:
-        #    item._write()
 
         self.elements.write(self.metadata_file)  # overwrites itself
 
