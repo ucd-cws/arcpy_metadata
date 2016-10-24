@@ -59,7 +59,7 @@ elements = {
                 "type": "string"},
             
             "identifier_code4": {
-                "path": "dqInfo/dataLineage/dataSource/srcRefSys/identCode/identAuth/citId/identCode",
+				"path": "dqInfo/dataLineage/dataSource/srcRefSys/identAuth/citId/identCode",
                 "type": "string"},
                         
             "language": {
@@ -277,6 +277,3 @@ language_elements = {
                 "parent": "element",
                 "path": "countryCode"}
             }
-
-
-
