@@ -22,6 +22,10 @@ elements = {
                 "path": "dataIdInfo/idCredit",
                 "type": "string"},
 
+            "dataset_uri": {
+                "path": "dataSetURI",
+                "type": "string"},
+
             "distance_resolution": {  # TODO: Allow to add units
                 "path": "dataIdInfo/dataScale/scaleDist/value",
                 "type": "string"},
@@ -38,6 +42,26 @@ elements = {
                 "path": "dataIdInfo/idCitation/citOnlineRes/linkage",
                 "type": "string"},
 
+            "file_identifier": {
+                "path": "mdFileID",
+                "type": "string"},
+            
+            "identifier_code1": {
+                "path": "dataIdInfo/idCitation/citId/identCode",
+                "type": "string"},
+            
+            "identifier_code2": {
+                "path": "dataIdInfo/idCitation/citId/identAuth/citId/identCode",
+                "type": "string"},
+            
+            "identifier_code3": {
+                "path": "dataIdInfo/idCitation/citId/identAuth/citId/identAuth/citId/identCode",
+                "type": "string"},
+            
+            "identifier_code4": {
+                "path": "dqInfo/dataLineage/dataSource/srcRefSys/identCode/identAuth/citId/identCode",
+                "type": "string"},
+                        
             "language": {
                 "path": "dataIdInfo/dataLang",
                 "type": "language"},
@@ -86,7 +110,11 @@ elements = {
             "purpose": {
                 "path": "dataIdInfo/idPurp",
                 "type": "string"},
-
+            
+            "resource_label": {
+                "path": "eainfo/detailed/enttyp/enttypl",
+                "type": "string"},
+            
             "scale_resolution": {
                 "path": "dataIdInfo/dataScale/equScale/rfDenom",
                 "type": "integer"},
