@@ -137,7 +137,7 @@ Supported items
 |Citation Contacts|citation_contact|ContactObj|Overview/ Citation Contact/ Contact/|dataIdInfo/idCitation/citRespParty|
 |Language|language|String|Resource/ Detail/ Languages/ Language|dataIdInfo/dataLang|
 |Metadata Language|metadata_language|String|Metadata/ Detail/ Language|dataIdInfo/mdLang|
-|Alternative Title|alternative_title|String|Overview/Citation/Titles/Alternate Title|dataIdInfo/idCitation/resAltTitle|
+|Alternate Title|alternate_title|String|Overview/Citation/Titles/Alternate Title|dataIdInfo/idCitation/resAltTitle|
 |Identifier Code (1)|identifier_code1|String|Overview/Citation/Identifier/Code|dataIdInfo/idCitation/citId/identCode|
 |Identifier Code (2)|identifier_code2|String|Overview/Citation/Identifier/Authority Citation/Identifier/Code|dataIdInfo/idCitation/citId/identAuth/citId/identCode|
 |Identifier Code (3)|identifier_code3|String|Overview/Citation/Identifier/Authority Citation/Identifier/Authority Citation/Identifier/Code|dataIdInfo/idCitation/citId/identAuth/citId/identAuth/citId/identCode|
