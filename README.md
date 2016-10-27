@@ -137,6 +137,14 @@ Supported items
 |Citation Contacts|citation_contact|ContactObj|Overview/ Citation Contact/ Contact/|dataIdInfo/idCitation/citRespParty|
 |Language|language|String|Resource/ Detail/ Languages/ Language|dataIdInfo/dataLang|
 |Metadata Language|metadata_language|String|Metadata/ Detail/ Language|dataIdInfo/mdLang|
+|Alternate Title|alternate_title|String|Overview/Citation/Titles/Alternate Title|dataIdInfo/idCitation/resAltTitle|
+|Identifier Code (1)|identifier_code1|String|Overview/Citation/Identifier/Code|dataIdInfo/idCitation/citId/identCode|
+|Identifier Code (2)|identifier_code2|String|Overview/Citation/Identifier/Authority Citation/Identifier/Code|dataIdInfo/idCitation/citId/identAuth/citId/identCode|
+|Identifier Code (3)|identifier_code3|String|Overview/Citation/Identifier/Authority Citation/Identifier/Authority Citation/Identifier/Code|dataIdInfo/idCitation/citId/identAuth/citId/identAuth/citId/identCode|
+|Identifier Code (4)|identifier_code4|String|Resource/Lineage/Data Source/Reference System/Authority Citation/Identifier/Code|dqInfo/dataLineage/dataSource/srcRefSys/identAuth/citId/identCode|
+|Metadata File Identifier|file_identifier|String|Metadata/Details/File Idnetifier|mdFileID|
+|Dataset URI|dataset_uri|String|Metadata/Details/Dataset URI|dataSetURI|
+|Resource Label|resource_label|String|Resource/Fields/Details/Label|eainfo/detailed/enttyp/enttypl|
 
 Contact items
 ---------------

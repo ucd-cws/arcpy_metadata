@@ -6,7 +6,7 @@ elements = {
                 "path": "dataIdInfo/idAbs",
                 "type": "string"},
 
-            "alternative_title": {
+            "alternate_title": {
                 "path": "dataIdInfo/idCitation/resAltTitle",
                 "type": "string"},
 
