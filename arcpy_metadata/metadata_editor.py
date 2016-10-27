@@ -58,8 +58,8 @@ class MetadataEditor(object):
         self.dataset = dataset
 
         self._gdb_datasets = ["FeatureClass", "Table", "RasterDataset", "RasterCatalog", "MosaicDataset"]
-        self._simple_datasets = ["ShapeFile", "RasterDataset"]
-        self._layers = ["FeatureLayer", "Layer"]
+        self._simple_datasets = ["ShapeFile", "RasterDataset", "Layer"]
+        self._layers = ["FeatureLayer"]
 
         if self.dataset:  # for both, we want to export the metadata out
             # export the metadata to the temporary location
@@ -69,7 +69,7 @@ class MetadataEditor(object):
             if self.data_type in self._layers:
                 desc = arcpy.Describe(self.dataset)
                 self.data_type = desc.dataElement.dataType
-                self.dataset = desc.dataElement.catalogPath
+                self.dataset = desc.dataElement.catalogPath  # overwrite path to dataset with layer's data source
 
             self._workspace = self.get_workspace()
             self._workspace_type = self.get_workspace_type()
