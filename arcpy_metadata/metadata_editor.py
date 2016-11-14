@@ -273,6 +273,8 @@ class MetadataEditor(object):
                 return workspace
             else:
                 workspace = os.path.dirname(workspace)
+                if workspace == '' and arcpy.env.workspace:
+                    return arcpy.env.workspace
                 desc = arcpy.Describe(workspace)
 
     def get_workspace_type(self):
