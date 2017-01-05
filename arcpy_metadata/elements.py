@@ -29,6 +29,10 @@ elements = {
             "download": {  # TODO: Allow to add multiple download links with names
                 "path": "distInfo/distTranOps/onLineSrc/linkage",
                 "type": "string"},
+           
+            "download_name": {
+                 "path": "distInfo/distTranOps/onLineSrc/orName",
+                 "type": "string"},
 
             "extent_description": {
                 "path": "dataIdInfo/dataExt/exDesc",
