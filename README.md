@@ -124,7 +124,7 @@ Supported items
 |Temporal Extent End Date|temporal_extent_end|Date|Resource/ Extents/ Temporal Period Extent/ End Date|dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmEnd|
 |Minimum Scale|min_scale|Integer|Item Description/ Appropriate Scale Range/ Min Scale|Esri/scaleRange/minScale|
 |Maximum Scale|max_scale|Integer|Item Description/ Appropriate Scale Range/ Max Scale|Esri/scaleRange/maxScale|
-|Scale Resolution|scale_resolution|String|Resource/ Details/ Scale Resolution|dataIdInfo/dataScale/equScale/rfDenom|
+|Scale Resolution|scale_resolution|Integer|Resource/ Details/ Scale Resolution|dataIdInfo/dataScale/equScale/rfDenom|
 |Last Update|last_update|Date|Overview/ Citation/ Dates/ Revised|dataIdInfo/idCitation/date/reviseDate|
 |Update Frequency Description|update_frequency_description|String|Resource/ Maintenance/ Custom Frequency|dataIdInfo/resMaint/usrDefFreq/duration|
 |Credits|credits|String|Overview/ Item Description/ Credits|dataIdInfo/idCredit|
