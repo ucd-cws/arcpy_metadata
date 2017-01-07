@@ -5,20 +5,19 @@ from arcpy_metadata.languages import languages
 
 class ListValues(object):
     def __init__(self, list_items):
-        self.list_values = list_items.value
         self.list_items = list_items
 
     def __getitem__(self, index):
         return self.list_items.current_items[index].text
 
-
     def __setitem__(self, index, value):
-        self.list_values[index] = value
         self.list_items.current_items[index].text = value
 
     def __repr__(self):
-        return repr(self.list_values)
+        return repr(self.list_items.value)
 
+    def append(self, value):
+        self.list_items.append(value)
 
 class MetadataItemConstructor(object):
     '''
@@ -156,11 +155,11 @@ class MetadataListConstructor(MetadataItemConstructor):
             pass
         elif isinstance(v, (list, ListValues)):
             for value in v:
-                self._append(value)
+                self.append(value)
         else:
             raise RuntimeWarning("Input value must be a List or None")
 
-    def _append(self, item):
+    def append(self, item):
         """
             Adds an individual item to the section
             :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag
