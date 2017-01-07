@@ -7,16 +7,17 @@ import arcpy
 # if it is a feature class, arcpy can be loaded on demand using importlib
 # from importlib import import_module
 
-from metadata_items import MetadataItem
-from metadata_items import MetadataList
-from metadata_items import MetadataLanguage
-from metadata_items import MetadataContact
-from metadata_items import MetadataLocals
+from arcpy_metadata.metadata_items import MetadataItem
+from arcpy_metadata.metadata_items import MetadataList
+from arcpy_metadata.metadata_items import MetadataLanguage
+from arcpy_metadata.metadata_items import MetadataContact
+from arcpy_metadata.metadata_items import MetadataLocals
 
 import xml
+import six
 
-from elements import elements
-from languages import languages
+from arcpy_metadata.elements import elements
+from arcpy_metadata.languages import languages
 
 from datetime import date
 from datetime import datetime
@@ -33,9 +34,6 @@ except ImportError:
 
     def logwarning(log_string):
         print("WARNING: {0:s}".format(log_string))
-
-
-
 
 
 installDir = arcpy.GetInstallInfo("desktop")["InstallDir"]
@@ -60,8 +58,8 @@ class MetadataEditor(object):
         self.dataset = dataset
 
         self._gdb_datasets = ["FeatureClass", "Table", "RasterDataset", "RasterCatalog", "MosaicDataset"]
-        self._simple_datasets = ["ShapeFile", "RasterDataset"]
-        self._layers = ["FeatureLayer", "Layer"]
+        self._simple_datasets = ["ShapeFile", "RasterDataset", "Layer"]
+        self._layers = ["FeatureLayer"]
 
         if self.dataset:  # for both, we want to export the metadata out
             # export the metadata to the temporary location
@@ -71,7 +69,7 @@ class MetadataEditor(object):
             if self.data_type in self._layers:
                 desc = arcpy.Describe(self.dataset)
                 self.data_type = desc.dataElement.dataType
-                self.dataset = desc.dataElement.catalogPath
+                self.dataset = desc.dataElement.catalogPath  # overwrite path to dataset with layer's data source
 
             self._workspace = self.get_workspace()
             self._workspace_type = self.get_workspace_type()
@@ -145,7 +143,7 @@ class MetadataEditor(object):
 
         if n in elements.keys():
             if elements[n]['type'] == "string":
-                if isinstance(v, str) or isinstance(v, unicode):
+                if isinstance(v, str) or isinstance(v, six.text_type):
                     self.__dict__["_{}".format(n)].value = v
                 elif v is None:
                     self.__dict__["_{}".format(n)].value = ""
@@ -156,7 +154,7 @@ class MetadataEditor(object):
                 if isinstance(v, date):
                     self.__dict__["_{}".format(n)].value = date.strftime(v, "%Y%m%d")
 
-                elif isinstance(v, str) or isinstance(v, unicode):
+                elif isinstance(v, str) or isinstance(v, six.text_type):
                     try:
                         new_value = datetime.strptime(v, "%Y%m%d").date()
                         self.__dict__["_{}".format(n)].value = date.strftime(new_value, "%Y%m%d")
@@ -185,7 +183,7 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "float":
                 if isinstance(v, float):
                     self.__dict__["_{}".format(n)].value = str(v)
-                elif isinstance(v, str) or isinstance(v, unicode):
+                elif isinstance(v, str) or isinstance(v, six.text_type):
                     try:
                         new_value = float(v)
                         self.__dict__["_{}".format(n)].value = str(new_value)
@@ -275,6 +273,8 @@ class MetadataEditor(object):
                 return workspace
             else:
                 workspace = os.path.dirname(workspace)
+                if workspace == '' and arcpy.env.workspace:
+                    return arcpy.env.workspace
                 desc = arcpy.Describe(workspace)
 
     def get_workspace_type(self):
@@ -293,9 +293,6 @@ class MetadataEditor(object):
                 print(item.value)
             except:
                 print(item)
-
-        #for item in self.items:
-        #    item._write()
 
         self.elements.write(self.metadata_file)  # overwrites itself
 
