@@ -315,6 +315,23 @@ class MetadataEditor(object):
         for item in self.items:
             item.parent = self
 
+    def rm_gp_history(self):
+        """
+        Remove all items form the geoprocessing history
+        :return:
+        """
+        element = self.elements.find("Esri/DataProperties/lineage")
+        if element is not None:
+            i = 0
+            children = element.findall("Process")
+            for child in children:
+                element.remove(child)
+                i += 1
+            logwrite("Remove {} item(s) from the geoprocessing history".format(i), True)
+        else:
+            logwrite("There are no items in the geoprocessing history", True)
+
+
     def save(self, Enable_automatic_updates=False):
         """
         Save pending edits to file
