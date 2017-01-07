@@ -19,6 +19,9 @@ class ListValues(object):
     def append(self, value):
         self.list_items.append(value)
 
+    def remove(self, value):
+        self.list_items.remove(value)
+
 class MetadataItemConstructor(object):
     '''
     A standard Metadata Item
@@ -171,6 +174,17 @@ class MetadataListConstructor(MetadataItemConstructor):
         element.text = item
         self.current_items.append(element)
         self.element._children = self.current_items
+
+    def remove(self, item):
+
+        items_to_remove = []
+
+        for i in self.current_items:
+            if i.text == item:
+                items_to_remove.append(i)
+
+        for i in items_to_remove:
+            self.current_items.remove(i)
 
     def _removeall(self):
         items_to_remove = []
