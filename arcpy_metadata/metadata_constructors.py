@@ -20,12 +20,26 @@ class ListValues(object):
         return repr(self.list_items.value)
 
     def append(self, value):
+        """
+        Append given item to list
+        :param value:
+        :return:
+        """
         self.list_items.append(value)
 
     def remove(self, value):
+        """
+        Remove given item from list
+        :param value:
+        :return:
+        """
         self.list_items.remove(value)
 
     def pop(self):
+        """
+        Remove last list item
+        :return: object
+        """
         return self.list_items.pop()
 
 class MetadataItemConstructor(object):
@@ -173,7 +187,7 @@ class MetadataListConstructor(MetadataItemConstructor):
             Adds an individual item to the section
             :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag
                 configured on parent object
-            :return: None
+            :return:
         """
 
         element = ET.Element(self.tag_name)
@@ -182,6 +196,10 @@ class MetadataListConstructor(MetadataItemConstructor):
         self.element._children = self.current_items
 
     def pop(self):
+        """
+        Remove the last element in element tree
+        :return: object
+        """
 
         item_to_remove = None
 
@@ -196,7 +214,11 @@ class MetadataListConstructor(MetadataItemConstructor):
         return j
 
     def remove(self, item):
-
+        """
+        Remove the given item from element tree
+        :param item:
+        :return:
+        """
         items_to_remove = []
 
         for i in self.current_items:
@@ -207,6 +229,10 @@ class MetadataListConstructor(MetadataItemConstructor):
             self.current_items.remove(i)
 
     def _removeall(self):
+        """
+        removes all items from element tree
+        :return:
+        """
         items_to_remove = []
 
         for i in self.current_items:
