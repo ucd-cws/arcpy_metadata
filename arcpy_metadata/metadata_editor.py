@@ -36,8 +36,8 @@ except ImportError:
         print("WARNING: {0:s}".format(log_string))
 
 
-installDir = arcpy.GetInstallInfo("desktop")["InstallDir"]
-xslt = os.path.join(installDir, r"Metadata\Stylesheets\gpTools\exact copy of.xslt")
+install_dir = arcpy.GetInstallInfo("desktop")["InstallDir"]
+xslt = os.path.join(install_dir, r"Metadata\Stylesheets\gpTools\exact copy of.xslt")
 metadata_temp_folder = arcpy.env.scratchFolder  # a default temp folder to use - settable by other applications so they can set it once
 
 
