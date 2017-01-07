@@ -12,7 +12,12 @@ from arcpy_metadata.languages import languages
 
 # ########## General Info
 
+
 class MetadataItem(MetadataItemConstructor):
+    """
+    A simple metadata item
+    Define path and position
+    """
     def __init__(self, path, name, parent):
         self.path = path
         self.name = name
@@ -21,6 +26,10 @@ class MetadataItem(MetadataItemConstructor):
 # ########## Keywords
 
 class MetadataList(MetadataListConstructor):
+    """
+    A list metadata item
+    Define path, parent item position and item tag name
+    """
 
     def __init__(self, tagname, path, name, parent=None):
         self.name = name
@@ -79,7 +88,7 @@ class MetadataLanguage(MetadataParentItemConstructor):
                 self._attr_country.attributes = v
         else:
             if n in self.child_elements.keys():
-                if isinstance(v, str) or isinstance(v, unicode):
+                if isinstance(v, (str, unicode)):
                     self.__dict__["_{}".format(n)].element.text = v
                 elif v is None:
                     self.__dict__["_{}".format(n)].element.text = ""

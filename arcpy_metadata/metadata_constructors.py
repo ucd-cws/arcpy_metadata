@@ -254,7 +254,7 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
             self.__dict__[n] = v
         else:
             if n in self.child_elements.keys():
-                if isinstance(v, str) or isinstance(v, unicode):
+                if isinstance(v, (str, unicode)):
                     self.__dict__["_{}".format(n)].element.text = v
                 elif v is None:
                     self.__dict__["_{}".format(n)].element.text = ""
@@ -272,8 +272,9 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
         else:
             return self.__dict__[name]
 
-    def _create_item(self, iter, parent, tag_name):
-        for i in iter:
+    @staticmethod
+    def _create_item(iterator, parent, tag_name):
+        for i in iterator:
             if i.tag == tag_name:
                 return MetadataSubItemConstructor(i, parent, True)
         i = ET.Element(tag_name)
@@ -318,7 +319,7 @@ class MetadataSubItemConstructor(object):
 
     @value.setter
     def value(self, v):
-        if isinstance(v, str) or isinstance(v, unicode):
+        if isinstance(v, (str, unicode)):
             self.element.text = v
         elif v is None:
             self.element.text = ""

@@ -140,10 +140,17 @@ class MetadataEditor(object):
             self.initialize_items()
 
     def __setattr__(self, n, v):
+        """
+        Check if input value type matches required type for metadata element
+        and write value to internal property
+        :param n: string
+        :param v: strinng
+        :return:
+        """
 
         if n in elements.keys():
             if elements[n]['type'] == "string":
-                if isinstance(v, str) or isinstance(v, six.text_type):
+                if isinstance(v, (str, six.text_type)):
                     self.__dict__["_{}".format(n)].value = v
                 elif v is None:
                     self.__dict__["_{}".format(n)].value = ""
@@ -154,7 +161,7 @@ class MetadataEditor(object):
                 if isinstance(v, date):
                     self.__dict__["_{}".format(n)].value = date.strftime(v, "%Y%m%d")
 
-                elif isinstance(v, str) or isinstance(v, six.text_type):
+                elif isinstance(v, (str, six.text_type)):
                     try:
                         new_value = datetime.strptime(v, "%Y%m%d").date()
                         self.__dict__["_{}".format(n)].value = date.strftime(new_value, "%Y%m%d")
@@ -183,7 +190,7 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "float":
                 if isinstance(v, float):
                     self.__dict__["_{}".format(n)].value = str(v)
-                elif isinstance(v, str) or isinstance(v, six.text_type):
+                elif isinstance(v, (str, six.text_type)):
                     try:
                         new_value = float(v)
                         self.__dict__["_{}".format(n)].value = str(new_value)
@@ -240,6 +247,11 @@ class MetadataEditor(object):
             self.__dict__[n] = v
 
     def __getattr__(self, n):
+        """
+        Type cast output values according to required element type
+        :param n: string
+        :return:
+        """
         if n in elements.keys():
             if self.__dict__["_{}".format(n)].value == "" and elements[n]['type'] in ["integer", "float", "date"]:
                 return None
@@ -259,11 +271,21 @@ class MetadataEditor(object):
             return self.__dict__["_{}".format(n)]
 
     def get_datatype(self):
+        """
+        Get ArcGIS datatype datatype of current dataset
+        :return:
+        """
         # get datatype
         desc = arcpy.Describe(self.dataset)
         return desc.dataType
 
     def get_workspace(self):
+        """
+        Find the workspace for current dataset
+        In case, base directory is not a workspace (ie when feature class is located in a feature dataset)
+        check next lower base directory of current base directory until criteria matches
+        :return:
+        """
         workspace = self.dataset
         desc = arcpy.Describe(workspace)
 
@@ -278,14 +300,29 @@ class MetadataEditor(object):
                 desc = arcpy.Describe(workspace)
 
     def get_workspace_type(self):
+        """
+        Get ArcGIS Workspace type for current dataset
+        :return:
+        """
         desc = arcpy.Describe(self._workspace)
         return desc.workspaceType
 
     def initialize_items(self):
+        """
+        Initialize all items
+        :return:
+        """
         for item in self.items:
             item.parent = self
 
     def save(self, Enable_automatic_updates=False):
+        """
+        Save pending edits to file
+        If feature class, import temporary XML file back into GDB
+
+        :param Enable_automatic_updates: boolean
+        :return:
+        """
         logwrite("Saving metadata", True)
 
         for item in self.items:
@@ -300,7 +337,11 @@ class MetadataEditor(object):
             arcpy.ImportMetadata_conversion(self.metadata_file, "FROM_ARCGIS", self.dataset,
                                             Enable_automatic_updates=Enable_automatic_updates)
 
-    def cleanup(self, delete_created_fc=False):
+    def cleanup(self):
+        """
+        Remove all temporary files
+        :return:
+        """
         try:
             logwrite("cleaning up from metadata operation")
             if self._workspace_type != 'FileSystem':
@@ -317,8 +358,8 @@ class MetadataEditor(object):
     def finish(self, Enable_automatic_updates=False):
         """
         Alias for saving and cleaning up
+        :param Enable_automatic_updates: boolean
         :return:
         """
-
         self.save(Enable_automatic_updates)
         self.cleanup()
