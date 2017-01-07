@@ -93,10 +93,21 @@ metadata.point_of_contact.contact_name = "First and Last Name"
 metadata.point_of_contact.email = "email@address.com"
 ```
 
+Remove all items from the geoprocessing history
+```python
+metadata.rm_gp_history()
+```
+
+
 Saving the changes back to the file
 
 ```python
-metadata.finish()  # save the metadata back to the original source feature class and cleanup. Without calling finish(), your edits are NOT saved!
+metadata.save() # save the metadata back to file.
+metadata.cleanup() # remove all temporary files.
+```
+or
+```
+metadata.finish()  # save() and cleanup() as one call
 ```
 If you want to enable automatic updates of your metadata (feature classes only) call.
 ```python
