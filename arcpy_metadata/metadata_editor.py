@@ -96,7 +96,7 @@ class MetadataEditor(object):
                     self.metadata_file = os.path.join(self.temp_folder, metadata_filename)
                     if os.path.exists(self.metadata_file):
                         os.remove(self.metadata_file)
-                    logwrite("Exporting metadata to temporary file %s" % self.metadata_file)
+                    logwrite("Exporting metadata to temporary file {0!s}".format(self.metadata_file))
                     arcpy.XSLTransform_conversion(self.dataset, xslt, self.metadata_file)
                 else:
                     raise TypeError("Datatype is not supported")
@@ -106,7 +106,7 @@ class MetadataEditor(object):
         # create these all after the parsing happens so that if they have any self initialization, they can correctly perform it
 
         for name in elements.keys():
-            setattr(self, "_%s" % name, None)
+            setattr(self, "_{0!s}".format(name), None)
 
             if elements[name]['type'] in ["string", "date", "integer", "float"]:
                 setattr(self, "_{}".format(name), MetadataItem(elements[name]['path'], name, self))
@@ -213,7 +213,7 @@ class MetadataEditor(object):
 
             elif elements[n]['type'] == "local":
                 if isinstance(v, MetadataLocals):
-                    self.__dict__["_%s" % n] = v
+                    self.__dict__["_{0!s}".format(n)] = v
                 else:
                     raise RuntimeWarning("Input value must be of type MetadataLocals")
 
@@ -232,7 +232,7 @@ class MetadataEditor(object):
                 # elif v is None:
                 #     self.__dict__["_%s" % n].value = []
                 if isinstance(v, MetadataContact):
-                    self.__dict__["_%s" % n] = v
+                    self.__dict__["_{0!s}".format(n)] = v
                 else:
                     raise RuntimeWarning("Input value must be a MetadataContact object")
 
