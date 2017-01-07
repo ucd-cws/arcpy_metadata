@@ -10,6 +10,7 @@ class MetadataItemConstructor(object):
 
     path = None
     value = ""
+    sync = True
 
     def __init__(self, parent=None):
         self.parent = parent
@@ -26,6 +27,8 @@ class MetadataItemConstructor(object):
         else:
             self.value = self.parent.elements.find(self.path).text
         self.attributes = self.parent.elements.find(self.path).attrib
+        if "Sync" in self.attributes.keys() and not self.sync:
+            self.attributes["Sync"] = "FALSE"
 
     @property
     def attributes(self):

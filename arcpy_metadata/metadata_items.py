@@ -18,9 +18,10 @@ class MetadataItem(MetadataItemConstructor):
     A simple metadata item
     Define path and position
     """
-    def __init__(self, path, name, parent):
+    def __init__(self, path, name, parent, sync=True):
         self.path = path
         self.name = name
+        self.sync = sync
         super(MetadataItem, self).__init__(parent)
 
 # ########## Keywords
@@ -31,8 +32,9 @@ class MetadataList(MetadataListConstructor):
     Define path, parent item position and item tag name
     """
 
-    def __init__(self, tagname, path, name, parent=None):
+    def __init__(self, tagname, path, name, parent=None, sync=True):
         self.name = name
+        self.sync = sync
         super(MetadataList, self).__init__(parent, tagname=tagname, path=path)
 
 
@@ -46,10 +48,11 @@ class MetadataLanguage(MetadataParentItemConstructor):
         Predefined language pairs are stored in the global language_code dictionary
     """
 
-    def __init__(self, path, name, parent):
+    def __init__(self, path, name, parent, sync=True):
         self.parent = parent
         self.name = name
         self.path = path
+        self.sync = sync
 
         language_elements = {
             "attr_lang": {
@@ -74,18 +77,26 @@ class MetadataLanguage(MetadataParentItemConstructor):
             return ""
 
     def __setattr__(self, n, v):
-        if n in ["path", "parent", "child_elements", "name", "value"]:
+        if n in ["path", "parent", "child_elements", "name", "value", "sync"]:
             self.__dict__[n] = v
         elif n == "attr_lang":
             if v == "" or v is None:
                 self._attr_lang.attributes = {}
             else:
                 self._attr_lang.attributes = v
+                if self.sync:
+                    self._attr_lang.attributes["Sync"] = "TRUE"
+                else:
+                    self._attr_lang.attributes["Sync"] = "FALSE"
         elif n == "attr_country":
             if v == "" or v is None:
                 self._attr_country.attributes = {}
             else:
                 self._attr_country.attributes = v
+                if self.sync:
+                    self._attr_country.attributes["Sync"] = "TRUE"
+                else:
+                    self._attr_country.attributes["Sync"] = "FALSE"
         else:
             if n in self.child_elements.keys():
                 if isinstance(v, (str, unicode)):
@@ -117,10 +128,11 @@ class MetadataLocal(MetadataParentItemConstructor):
         A MetadataLocal Item
     """
 
-    def __init__(self, parent, path, language, country):
+    def __init__(self, parent, path, language, country, sync=True):
 
         self.parent = parent
         self.path = "{0!s}[@language='{1!s}'][@country='{2!s}']".format(path, language, country)
+        self.sync = sync
 
         super(MetadataLocal, self).__init__(self.parent)
 
@@ -140,12 +152,13 @@ class MetadataLocals(MetadataItemsConstructor):
         There can be many MetadataLocals instances
     """
 
-    def __init__(self, path, name, parent=None):
+    def __init__(self, path, name, parent=None, sync=True):
 
         self.parent = parent
 
         self.name = name
         self.path = path
+        self.sync = sync
 
         super(MetadataLocals, self).__init__(parent, self.path)
         self._locals = {}

@@ -129,7 +129,9 @@ elements = {
 
             "title": {
                 "path": "dataIdInfo/idCitation/resTitle",
-                "type": "string"},
+                #"path": "Esri/DataProperties/itemProps/itemName",
+                "type": "string",
+                "sync": False},
 
             "tags": {
                 "path": "dataIdInfo/searchKeys[last()]",

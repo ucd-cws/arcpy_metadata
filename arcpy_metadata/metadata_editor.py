@@ -61,7 +61,7 @@ class MetadataEditor(object):
         self._simple_datasets = ["ShapeFile", "RasterDataset", "Layer"]
         self._layers = ["FeatureLayer"]
 
-        if self.dataset:  # for both, we want to export the metadata out
+        if self.dataset:  # Check if dataset is set
             # export the metadata to the temporary location
             self.data_type = self.get_datatype()
 
@@ -81,8 +81,7 @@ class MetadataEditor(object):
                     xml_file = self.dataset + ".xml"
                     #if no XML file exists create one and add most basic metadata item to it
                     if not os.path.exists(xml_file):
-                        with open(xml_file, "w") as f:
-                            f.write('<metadata xml:lang="en"></metadata>')
+                        self._create_xml_file(xml_file)
                     self.metadata_file = xml_file
 
                 else:
@@ -101,36 +100,49 @@ class MetadataEditor(object):
                 else:
                     raise TypeError("Datatype is not supported")
 
+        elif self.metadata_file:  # Check if metadata file is set instead
+            if self.metadata_file.endswith('.xml'):
+                if not os.path.exists(self.metadata_file):
+                    self._create_xml_file(self.metadata_file)
+                self._workspace_type = 'FileSystem'
+            else:
+                raise TypeError("Metadata file is not an XML file. Check file extension")
+
+
         self.elements.parse(self.metadata_file)
 
         # create these all after the parsing happens so that if they have any self initialization, they can correctly perform it
 
         for name in elements.keys():
+            if "sync" in elements[name].keys():
+                sync = elements[name]["sync"]
+            else:
+                sync = True
             setattr(self, "_{0!s}".format(name), None)
 
             if elements[name]['type'] in ["string", "date", "integer", "float"]:
-                setattr(self, "_{}".format(name), MetadataItem(elements[name]['path'], name, self))
+                setattr(self, "_{}".format(name), MetadataItem(elements[name]['path'], name, self, sync))
                 if self.__dict__["_{}".format(name)].value is not None:
                     setattr(self, name, self.__dict__["_{}".format(name)].value.strip())
                 else:
                     setattr(self, name, self.__dict__["_{}".format(name)].value)
 
             elif elements[name]['type'] == "list":
-                setattr(self, "_{}".format(name), MetadataList(elements[name]["tagname"], elements[name]['path'], name, self))
+                setattr(self, "_{}".format(name), MetadataList(elements[name]["tagname"], elements[name]['path'], name, self, sync))
                 setattr(self, name, self.__dict__["_{}".format(name)].value)
 
             elif elements[name]['type'] == "language":
-                setattr(self, "_{}".format(name), MetadataLanguage(elements[name]['path'], name, self))
+                setattr(self, "_{}".format(name), MetadataLanguage(elements[name]['path'], name, self, sync))
                 if self.__dict__["_{}".format(name)].value is not None:
                     setattr(self, name, self.__dict__["_{}".format(name)].value.strip())
                 else:
                     setattr(self, name, self.__dict__["_{}".format(name)].value)
 
             elif elements[name]['type'] == "local":
-                setattr(self, name, MetadataLocals(elements[name]['path'], name, self))
+                setattr(self, name, MetadataLocals(elements[name]['path'], name, self, sync))
 
             elif elements[name]['type'] == "contact":
-                setattr(self, "_{}".format(name), MetadataContact(elements[name]['path'], name, self))
+                setattr(self, "_{}".format(name), MetadataContact(elements[name]['path'], name, self, sync))
                 setattr(self, name, self.__dict__["_{}".format(name)])
 
             if elements[name] in self.__dict__.keys():
@@ -138,6 +150,13 @@ class MetadataEditor(object):
 
         if items:
             self.initialize_items()
+
+    @staticmethod
+    def _create_xml_file(xml_file):
+        with open(xml_file, "w") as f:
+            logwrite("Create new file {0!s}".format(xml_file))
+            f.write('<metadata xml:lang="en"></metadata>')
+
 
     def __setattr__(self, n, v):
         """
