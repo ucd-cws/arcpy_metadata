@@ -111,7 +111,7 @@ class MetadataLocal(MetadataParentItemConstructor):
     def __init__(self, parent, path, language, country):
 
         self.parent = parent
-        self.path = "%s[@language='%s'][@country='%s']" % (path, language, country)
+        self.path = "{0!s}[@language='{1!s}'][@country='{2!s}']".format(path, language, country)
 
         super(MetadataLocal, self).__init__(self.parent)
 
@@ -189,7 +189,7 @@ class MetadataContact(MetadataParentItemConstructor):
     # TODO: Define Role, Country and Online Resource list
     def __init__(self, path, name, parent=None, index=0):
         self.name = name
-        self.path = "%s[%i]" % (path, index)
+        self.path = "{0!s}[{1:d}]".format(path, index)
         super(MetadataContact, self).__init__(parent, contact_elements)
 
 
