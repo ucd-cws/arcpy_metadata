@@ -156,6 +156,7 @@ Supported items
 |Metadata File Identifier|file_identifier|String|Metadata/Details/File Idnetifier|mdFileID|
 |Dataset URI|dataset_uri|String|Metadata/Details/Dataset URI|dataSetURI|
 |Resource Label|resource_label|String|Resource/Fields/Details/Label|eainfo/detailed/enttyp/enttypl|
+|Format|format|String|Resource/Distribution/Distribution Format/Format Name|distInfo/distFormat/formatName|
 
 Contact items
 ---------------

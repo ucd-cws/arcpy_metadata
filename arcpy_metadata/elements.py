@@ -42,6 +42,11 @@ elements = {
                 "path": "dataIdInfo/idCitation/citOnlineRes/linkage",
                 "type": "string"},
 
+            "format": {
+                "path": "",
+                "type": "distInfo/distFormat/formatName"
+            },
+
             "file_identifier": {
                 "path": "mdFileID",
                 "type": "string"},
@@ -97,6 +102,10 @@ elements = {
             "min_scale": {
                 "path": "Esri/scaleRange/minScale",
                 "type": "integer"},
+
+            "online_resource": {
+                "path": "distInfo/distTranOps/onLineSrc",
+                "type": "online_resource"},
 
             "place_keywords": {
                 "path": "dataIdInfo/searchKeys[last()]",
@@ -278,4 +287,27 @@ language_elements = {
             "country": {
                 "parent": "element",
                 "path": "countryCode"}
+            }
+
+online_resource_elements = {
+            "link": {
+                "parent": "element",
+                "path": "linkage"},
+            "protocole": {
+                "parent": "element",
+                "path": "protocol"},
+            "profile": {
+                "parent": "element",
+                "path": "appProfile"},
+            "name": {
+                "parent": "element",
+                "path": "orName"},
+            "description": {
+                "parent": "element",
+                "path": "orDesc"}
+
+            # TODO: allow to add function based on dropdown list
+            #"function": {
+            #    "parent": "element",
+            #    "path": "orFunct"},
             }

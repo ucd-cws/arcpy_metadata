@@ -12,6 +12,8 @@ from arcpy_metadata.metadata_items import MetadataList
 from arcpy_metadata.metadata_items import MetadataLanguage
 from arcpy_metadata.metadata_items import MetadataContact
 from arcpy_metadata.metadata_items import MetadataLocals
+from arcpy_metadata.metadata_items import MetadataOnlineResource
+from arcpy_metadata.metadata_constructors import ListValues
 
 import xml
 import six
@@ -41,6 +43,7 @@ xslt = os.path.join(install_dir, r"Metadata\Stylesheets\gpTools\exact copy of.xs
 metadata_temp_folder = arcpy.env.scratchFolder  # a default temp folder to use - settable by other applications so they can set it once
 
 
+
 class MetadataEditor(object):
     """
     The metadata editor
@@ -49,6 +52,7 @@ class MetadataEditor(object):
 
     def __init__(self, dataset=None, metadata_file=None, items=None,
                  temp_folder=metadata_temp_folder):
+
         if items is None:
             items = list()
         self.items = items
@@ -129,7 +133,9 @@ class MetadataEditor(object):
 
             elif elements[name]['type'] == "list":
                 setattr(self, "_{}".format(name), MetadataList(elements[name]["tagname"], elements[name]['path'], name, self, sync))
-                setattr(self, name, self.__dict__["_{}".format(name)].value)
+                #setattr(self, name, self.__dict__["_{}".format(name)].value)
+                #setattr(self, name, ListValues(self.__dict__["_{}".format(name)], name))
+
 
             elif elements[name]['type'] == "language":
                 setattr(self, "_{}".format(name), MetadataLanguage(elements[name]['path'], name, self, sync))
@@ -143,6 +149,10 @@ class MetadataEditor(object):
 
             elif elements[name]['type'] == "contact":
                 setattr(self, "_{}".format(name), MetadataContact(elements[name]['path'], name, self, sync))
+                setattr(self, name, self.__dict__["_{}".format(name)])
+
+            elif elements[name]['type'] == "online_resource":
+                setattr(self, "_{}".format(name), MetadataOnlineResource(elements[name]['path'], name, self, sync))
                 setattr(self, name, self.__dict__["_{}".format(name)])
 
             if elements[name] in self.__dict__.keys():
@@ -222,6 +232,9 @@ class MetadataEditor(object):
 
             elif elements[n]['type'] == "list":
                 if isinstance(v, list):
+                    #self.__dict__[n].value = ListValues(self.__dict__["_{}".format(n)], v)
+                    self.__dict__["_{}".format(n)].value = v
+                elif isinstance(v, ListValues):
                     self.__dict__["_{}".format(n)].value = v
                 else:
                     raise RuntimeWarning("Input value must be of type List")
@@ -262,6 +275,12 @@ class MetadataEditor(object):
                 else:
                     raise RuntimeWarning("Input value must be a MetadataContact object")
 
+            elif elements[n]['type'] == "online_resource":
+                if isinstance(v, MetadataOnlineResource):
+                    self.__dict__["_{0!s}".format(n)] = v
+                else:
+                    raise RuntimeWarning("Input value must be a MetadataOnlineResource object")
+
         else:
             self.__dict__[n] = v
 
@@ -282,8 +301,12 @@ class MetadataEditor(object):
                 return datetime.strptime(self.__dict__["_{}".format(n)].value, "%Y%m%d").date()
             elif elements[n]['type'] == "contact":
                 return self.__dict__["_{}".format(n)]
+            elif elements[n]['type'] == "online_resource":
+                return self.__dict__["_{}".format(n)]
             elif elements[n]['type'] == "language":
                 return self.__dict__["_{}".format(n)].get_lang()
+            elif elements[n]['type'] == "list":
+                return ListValues(self.__dict__["_{}".format(n)])
             else:
                 return self.__dict__["_{}".format(n)].value
         else:

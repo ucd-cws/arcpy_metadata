@@ -6,6 +6,7 @@ from arcpy_metadata.metadata_constructors import MetadataItemsConstructor
 from arcpy_metadata.metadata_constructors import MetadataParentItemConstructor
 
 from arcpy_metadata.elements import contact_elements
+from arcpy_metadata.elements import online_resource_elements
 from arcpy_metadata.languages import languages
 
 
@@ -215,4 +216,12 @@ class MetadataContact(MetadataParentItemConstructor):
         super(MetadataContact, self).__init__(parent, contact_elements)
 
 
-
+class MetadataOnlineResource(MetadataParentItemConstructor):
+    """
+        Just a shortcut MetadataContacts that predefines the paths and position
+    """
+    # TODO: Define Role, Country and Online Resource list
+    def __init__(self, path, name, parent=None, index=0):
+        self.name = name
+        self.path = "{0!s}[{1:d}]".format(path, index)
+        super(MetadataOnlineResource, self).__init__(parent, online_resource_elements)

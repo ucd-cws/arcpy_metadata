@@ -3,6 +3,23 @@ import xml.etree.ElementTree as ET
 from arcpy_metadata.languages import languages
 
 
+class ListValues(object):
+    def __init__(self, list_items):
+        self.list_values = list_items.value
+        self.list_items = list_items
+
+    def __getitem__(self, index):
+        return self.list_items.current_items[index].text
+
+
+    def __setitem__(self, index, value):
+        self.list_values[index] = value
+        self.list_items.current_items[index].text = value
+
+    def __repr__(self):
+        return repr(self.list_values)
+
+
 class MetadataItemConstructor(object):
     '''
     A standard Metadata Item
@@ -27,8 +44,7 @@ class MetadataItemConstructor(object):
         else:
             self.value = self.parent.elements.find(self.path).text
         self.attributes = self.parent.elements.find(self.path).attrib
-        if "Sync" in self.attributes.keys() and not self.sync:
-            self.attributes["Sync"] = "FALSE"
+        self.attributes["Sync"] = "FALSE"
 
     @property
     def attributes(self):
@@ -138,7 +154,7 @@ class MetadataListConstructor(MetadataItemConstructor):
         self._removeall()
         if v is None or v == "":
             pass
-        elif isinstance(v, list):
+        elif isinstance(v, (list, ListValues)):
             for value in v:
                 self._append(value)
         else:
