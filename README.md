@@ -49,6 +49,7 @@ metadata.tags = ["tag1", "tag2"]
 metadata.tags[1] = "another tag"
 metadata.tags.append("new tag")
 metadata.tags.remove("tag1")
+metadata.tags.pop()
 ```
 
 Get numeric items (return int or float)

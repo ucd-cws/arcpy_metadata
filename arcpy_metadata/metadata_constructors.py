@@ -1,9 +1,12 @@
 import os
+import copy
 import xml.etree.ElementTree as ET
-from arcpy_metadata.languages import languages
 
 
 class ListValues(object):
+    """
+    A helper class to have list items behave like a lists
+    """
     def __init__(self, list_items):
         self.list_items = list_items
 
@@ -21,6 +24,9 @@ class ListValues(object):
 
     def remove(self, value):
         self.list_items.remove(value)
+
+    def pop(self):
+        return self.list_items.pop()
 
 class MetadataItemConstructor(object):
     '''
@@ -174,6 +180,20 @@ class MetadataListConstructor(MetadataItemConstructor):
         element.text = item
         self.current_items.append(element)
         self.element._children = self.current_items
+
+    def pop(self):
+
+        item_to_remove = None
+
+        for i in self.current_items:
+            item_to_remove = i
+
+        j = copy.deepcopy(item_to_remove)
+
+        if item_to_remove is not None:
+            self.current_items.remove(item_to_remove)
+
+        return j
 
     def remove(self, item):
 
