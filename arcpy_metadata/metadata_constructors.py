@@ -3,7 +3,7 @@ import copy
 import xml.etree.ElementTree as ET
 
 
-class MetadataValueList(object):
+class MetadataValueListHelper(object):
     """
     A helper class to have value list items behave like a python lists
     """
@@ -49,7 +49,7 @@ class MetadataValueList(object):
         return self.list_items.pop()
 
 
-class MetadataObjectList(object):
+class MetadataObjectListHelper(object):
     """
     A helper class to have value list items behave like a python lists
     """
@@ -228,7 +228,7 @@ class MetadataListConstructor(MetadataItemConstructor):
         self._removeall()
         if v is None or v == "":
             pass
-        elif isinstance(v, (list, MetadataValueList)):
+        elif isinstance(v, (list, MetadataValueListHelper)):
             for value in v:
                 self.append(value)
         else:

@@ -7,7 +7,6 @@ from arcpy_metadata.metadata_constructors import MetadataItemsConstructor
 from arcpy_metadata.metadata_constructors import MetadataParentItemConstructor
 
 from arcpy_metadata.elements import contact_elements
-from arcpy_metadata.elements import online_resource_elements
 from arcpy_metadata.languages import languages
 
 
@@ -40,7 +39,7 @@ class MetadataList(MetadataListConstructor):
         super(MetadataList, self).__init__(parent, tagname=tagname, path=path)
 
 
-class MetadataOnlineResource(MetadataObjectListConstructor):
+class MetadataObjectList(MetadataObjectListConstructor):
     """
     A list metadata item
     Define path, parent item position and item tag name
@@ -48,11 +47,9 @@ class MetadataOnlineResource(MetadataObjectListConstructor):
 
     child_elements = {}
 
-    def __init__(self, tagname, path, name, parent=None, sync=True):
-        #self.child_elements = online_resource_elements
-        self.name = name
+    def __init__(self, tagname, path, parent, elements, sync=True):
         self.sync = sync
-        super(MetadataOnlineResource, self).__init__(parent, tagname=tagname, path=path, child_elements=online_resource_elements)
+        super(MetadataObjectList, self).__init__(parent, tagname=tagname, path=path, child_elements=elements)
 
 
 class MetadataLanguage(MetadataParentItemConstructor):
@@ -226,11 +223,10 @@ class MetadataContact(MetadataParentItemConstructor):
         Just a shortcut MetadataContacts that predefines the paths and position
     """
     # TODO: Define Role, Country and Online Resource list
-    def __init__(self, path, name, parent=None, sync=True, index=0):
+    def __init__(self, path, parent, elements, sync=True, index=0):
         #self.sync = sync
-        self.name = name
         self.path = "{0!s}[{1:d}]".format(path, index)
-        super(MetadataContact, self).__init__(parent, contact_elements)
+        super(MetadataContact, self).__init__(parent, elements)
 
 
 

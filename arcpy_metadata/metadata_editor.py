@@ -12,9 +12,9 @@ from arcpy_metadata.metadata_items import MetadataList
 from arcpy_metadata.metadata_items import MetadataLanguage
 from arcpy_metadata.metadata_items import MetadataContact
 from arcpy_metadata.metadata_items import MetadataLocals
-from arcpy_metadata.metadata_items import MetadataOnlineResource
-from arcpy_metadata.metadata_constructors import MetadataValueList
-from arcpy_metadata.metadata_constructors import MetadataObjectList
+from arcpy_metadata.metadata_items import MetadataObjectList
+from arcpy_metadata.metadata_constructors import MetadataValueListHelper
+from arcpy_metadata.metadata_constructors import MetadataObjectListHelper
 
 import xml
 import six
@@ -149,11 +149,11 @@ class MetadataEditor(object):
                 setattr(self, name, MetadataLocals(elements[name]['path'], name, self, sync))
 
             elif elements[name]['type'] == "contact":
-                setattr(self, "_{}".format(name), MetadataContact(elements[name]['path'], name, self, sync))
+                setattr(self, "_{}".format(name), MetadataContact(elements[name]['path'], self, elements[name]['elements'], sync))
                 setattr(self, name, self.__dict__["_{}".format(name)])
 
-            elif elements[name]['type'] == "online_resource":
-                setattr(self, "_{}".format(name), MetadataOnlineResource(elements[name]["tagname"], elements[name]['path'], name, self, sync))
+            elif elements[name]['type'] == "object_list":
+                setattr(self, "_{}".format(name), MetadataObjectList(elements[name]["tagname"], elements[name]['path'], self, elements[name]['elements'], sync))
                 #setattr(self, name, self.__dict__["_{}".format(name)])
 
             if elements[name] in self.__dict__.keys():
@@ -235,7 +235,7 @@ class MetadataEditor(object):
                 if isinstance(v, list):
                     #self.__dict__[n].value = ListValues(self.__dict__["_{}".format(n)], v)
                     self.__dict__["_{}".format(n)].value = v
-                elif isinstance(v, MetadataValueList):
+                elif isinstance(v, MetadataValueListHelper):
                     self.__dict__["_{}".format(n)].value = v
                 else:
                     raise RuntimeWarning("Input value must be of type List")
@@ -258,28 +258,15 @@ class MetadataEditor(object):
                     raise RuntimeWarning("Input value must be of type MetadataLocals")
 
             elif elements[n]['type'] == "contact":
-                # if isinstance(v, list):
-                #     is_contact = True
-                #     for i in v:
-                #         print type(i)
-                #         if not isinstance(i, MetadataContact):
-                #             is_contact = False
-                #             break
-                #     if is_contact:
-                #         self.__dict__["_%s" % n].value = v
-                #     else:
-                #         raise RuntimeWarning("Input value must be of a List of MetadataContact object")
-                # elif v is None:
-                #     self.__dict__["_%s" % n].value = []
                 if isinstance(v, MetadataContact):
                     self.__dict__["_{0!s}".format(n)] = v
                 else:
                     raise RuntimeWarning("Input value must be a MetadataContact object")
 
-            elif elements[n]['type'] == "online_resource":
+            elif elements[n]['type'] == "object_list":
                 if isinstance(v, list):
                     self.__dict__["_{}".format(n)].value = v
-                elif isinstance(v, MetadataOnlineResource):
+                elif isinstance(v, MetadataObjectList):
                     self.__dict__["_{}".format(n)].value = v
                 else:
                     raise RuntimeWarning("Input value must be a MetadataOnlineResource object")
@@ -307,9 +294,9 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "language":
                 return self.__dict__["_{}".format(n)].get_lang()
             elif elements[n]['type'] == "list":
-                return MetadataValueList(self.__dict__["_{}".format(n)])
-            elif elements[n]['type'] == "online_resource":
-                return MetadataObjectList(self.__dict__["_{}".format(n)])
+                return MetadataValueListHelper(self.__dict__["_{}".format(n)])
+            elif elements[n]['type'] == "object_list":
+                return MetadataObjectListHelper(self.__dict__["_{}".format(n)])
             else:
                 return self.__dict__["_{}".format(n)].value
         else:
