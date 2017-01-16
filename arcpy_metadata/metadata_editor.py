@@ -32,7 +32,7 @@ import traceback
 warnings.simplefilter('once', DeprecationWarning)
 # Make warnings look nice
 def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
-    return '%s:%s\n' % (category.__name__, message)
+    return '{}: {}\n'.format(category.__name__, message)
 warnings.formatwarning = warning_on_one_line
 
 # TODO: Convert to using logging or logbook - probably logging to keep dependencies down
@@ -188,7 +188,7 @@ class MetadataEditor(object):
 
         if n in elements.keys():
 
-            # Warn if property got deprecated
+            # Warn if property got deprecated, but only if call is made by user, not during initialization
             if "deprecated" in elements[n].keys() and traceback.extract_stack()[-2][2] != "__init__":
                 warnings.warn("Call to deprecated property {}. {}".format(n, elements[n]["deprecated"]), category=DeprecationWarning)
 
