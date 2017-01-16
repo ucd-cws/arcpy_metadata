@@ -2,13 +2,12 @@ import os
 import copy
 import xml.etree.ElementTree as ET
 
-
 class MetadataValueListHelper(object):
     """
     A helper class to have value list items behave like a python lists
     """
     def __init__(self, list_items):
-        if isinstance(list_items, MetadataListConstructor):
+        if isinstance(list_items, MetadataValueListConstructor):
             self.list_items = list_items
         else:
             raise TypeError("Must be an instance of MetadataListConstructor")
@@ -190,7 +189,7 @@ class MetadataItemConstructor(object):
                     done = True
 
 
-class MetadataListConstructor(MetadataItemConstructor):
+class MetadataValueListConstructor(MetadataItemConstructor):
     """
         A metadata item for groups of items (like tags). Define the root element (self.path) and then the name of the
         subitem to store there (self.tag_name) and you can use list-like methods to edit the group
@@ -208,7 +207,7 @@ class MetadataListConstructor(MetadataItemConstructor):
         if path:
             self.path = path
 
-        super(MetadataListConstructor, self).__init__(parent)
+        super(MetadataValueListConstructor, self).__init__(parent)
 
         self.current_items = []
         values = []
@@ -320,12 +319,12 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
         for item in self.parent.elements.find(self.path):
             if item.tag == self.tag_name:
                 new_path = "{}/{}".format(self.path, tagname)
-                child = MetadataLO(new_path, self.parent, child_elements, len(self.current_items))
+                child = MetadataParentItem(new_path, self.parent, child_elements, len(self.current_items))
                 self.current_items.append(child)
 
     def new(self):
         new_path = "{}/{}".format(self.path, self.tag_name)
-        child = MetadataLO(new_path, self.parent, self.child_elements, len(self.current_items)+1)
+        child = MetadataParentItem(new_path, self.parent, self.child_elements, len(self.current_items)+1)
         self.current_items.append(child)
 
     def pop(self):
@@ -544,11 +543,51 @@ class MetadataSubItemConstructor(object):
         self.element.append(element)
 
 
-class MetadataLO(MetadataParentItemConstructor):
+####################################################
+
+
+class MetadataItem(MetadataItemConstructor):
+    """
+    A simple metadata item
+    Define path and position
+    """
+    def __init__(self, path, name, parent, sync=True):
+        self.path = path
+        self.name = name
+        self.sync = sync
+        super(MetadataItem, self).__init__(parent)
+
+
+class MetadataValueList(MetadataValueListConstructor):
+    """
+    A list metadata item
+    Define path, parent item position and item tag name
+    """
+
+    def __init__(self, tagname, path, name, parent=None, sync=True):
+        self.name = name
+        self.sync = sync
+        super(MetadataValueList, self).__init__(parent, tagname=tagname, path=path)
+
+
+class MetadataObjectList(MetadataObjectListConstructor):
+    """
+    A list metadata item
+    Define path, parent item position and item tag name
+    """
+
+    child_elements = {}
+
+    def __init__(self, tagname, path, parent, elements, sync=True):
+        self.sync = sync
+        super(MetadataObjectList, self).__init__(parent, tagname=tagname, path=path, child_elements=elements)
+
+
+class MetadataParentItem(MetadataParentItemConstructor):
     """
         Just a shortcut MetadataContacts that predefines the paths and position
     """
     # TODO: Define Role, Country and Online Resource list
-    def __init__(self, path, parent, child_elements, index=0):
+    def __init__(self, path, parent, elements, index=0):
         self.path = "{0!s}[{1:d}]".format(path, index)
-        super(MetadataLO, self).__init__(parent, child_elements)
+        super(MetadataParentItem, self).__init__(parent, elements)

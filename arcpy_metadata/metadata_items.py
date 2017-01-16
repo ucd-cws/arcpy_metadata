@@ -1,56 +1,17 @@
 __author__ = 'Thomas.Maschler'
 
 from arcpy_metadata.metadata_constructors import MetadataItemConstructor
-from arcpy_metadata.metadata_constructors import MetadataListConstructor
+from arcpy_metadata.metadata_constructors import MetadataValueListConstructor
 from arcpy_metadata.metadata_constructors import MetadataObjectListConstructor
 from arcpy_metadata.metadata_constructors import MetadataItemsConstructor
 from arcpy_metadata.metadata_constructors import MetadataParentItemConstructor
-
-from arcpy_metadata.elements import contact_elements
 from arcpy_metadata.languages import languages
-
 
 
 # ########## General Info
 
 
-class MetadataItem(MetadataItemConstructor):
-    """
-    A simple metadata item
-    Define path and position
-    """
-    def __init__(self, path, name, parent, sync=True):
-        self.path = path
-        self.name = name
-        self.sync = sync
-        super(MetadataItem, self).__init__(parent)
-
-# ########## Keywords
-
-class MetadataList(MetadataListConstructor):
-    """
-    A list metadata item
-    Define path, parent item position and item tag name
-    """
-
-    def __init__(self, tagname, path, name, parent=None, sync=True):
-        self.name = name
-        self.sync = sync
-        super(MetadataList, self).__init__(parent, tagname=tagname, path=path)
-
-
-class MetadataObjectList(MetadataObjectListConstructor):
-    """
-    A list metadata item
-    Define path, parent item position and item tag name
-    """
-
-    child_elements = {}
-
-    def __init__(self, tagname, path, parent, elements, sync=True):
-        self.sync = sync
-        super(MetadataObjectList, self).__init__(parent, tagname=tagname, path=path, child_elements=elements)
-
+# #### locals
 
 class MetadataLanguage(MetadataParentItemConstructor):
 
@@ -135,7 +96,6 @@ class MetadataLanguage(MetadataParentItemConstructor):
         else:
             return self.__dict__[name]
 
-# #### locals
 
 class MetadataLocal(MetadataParentItemConstructor):
     """
@@ -218,15 +178,10 @@ class MetadataLocals(MetadataItemsConstructor):
         self._write()
 
 
-class MetadataContact(MetadataParentItemConstructor):
-    """
-        Just a shortcut MetadataContacts that predefines the paths and position
-    """
-    # TODO: Define Role, Country and Online Resource list
-    def __init__(self, path, parent, elements, sync=True, index=0):
-        #self.sync = sync
-        self.path = "{0!s}[{1:d}]".format(path, index)
-        super(MetadataContact, self).__init__(parent, elements)
+
+
+
+
 
 
 

@@ -1,33 +1,26 @@
 import os
 import arcpy
-
-# TODO: reduce dependencies from arcpy
-# it is actually only needed to extract metadata from GDB items
-# everything else can be done with out the module since metadata are access directly
-# if it is a feature class, arcpy can be loaded on demand using importlib
-# from importlib import import_module
-
-from arcpy_metadata.metadata_items import MetadataItem
-from arcpy_metadata.metadata_items import MetadataList
-from arcpy_metadata.metadata_items import MetadataLanguage
-from arcpy_metadata.metadata_items import MetadataContact
-from arcpy_metadata.metadata_items import MetadataLocals
-from arcpy_metadata.metadata_items import MetadataObjectList
-from arcpy_metadata.metadata_constructors import MetadataValueListHelper
-from arcpy_metadata.metadata_constructors import MetadataObjectListHelper
-
 import xml
 import six
-
-from arcpy_metadata.elements import elements
-from arcpy_metadata.languages import languages
+import warnings
+import traceback
 
 from datetime import date
 from datetime import datetime
 
+from arcpy_metadata.metadata_constructors import MetadataItem
+from arcpy_metadata.metadata_constructors import MetadataValueList
+from arcpy_metadata.metadata_constructors import MetadataParentItem
+from arcpy_metadata.metadata_constructors import MetadataObjectList
+from arcpy_metadata.metadata_constructors import MetadataValueListHelper
+from arcpy_metadata.metadata_constructors import MetadataObjectListHelper
 
-import warnings
-import traceback
+from arcpy_metadata.metadata_items import MetadataLanguage
+from arcpy_metadata.metadata_items import MetadataLocals
+
+from arcpy_metadata.elements import elements
+from arcpy_metadata.languages import languages
+
 # turn on warnings for deprecation once
 warnings.simplefilter('once', DeprecationWarning)
 # Make warnings look nice
@@ -140,7 +133,7 @@ class MetadataEditor(object):
                     setattr(self, name, self.__dict__["_{}".format(name)].value)
 
             elif elements[name]['type'] == "list":
-                setattr(self, "_{}".format(name), MetadataList(elements[name]["tagname"], elements[name]['path'], name, self, sync))
+                setattr(self, "_{}".format(name), MetadataValueList(elements[name]["tagname"], elements[name]['path'], name, self, sync))
                 #setattr(self, name, self.__dict__["_{}".format(name)].value)
                 #setattr(self, name, ListValues(self.__dict__["_{}".format(name)], name))
 
@@ -156,7 +149,7 @@ class MetadataEditor(object):
                 setattr(self, name, MetadataLocals(elements[name]['path'], name, self, sync))
 
             elif elements[name]['type'] == "contact":
-                setattr(self, "_{}".format(name), MetadataContact(elements[name]['path'], self, elements[name]['elements'], sync))
+                setattr(self, "_{}".format(name), MetadataParentItem(elements[name]['path'], self, elements[name]['elements']))
                 setattr(self, name, self.__dict__["_{}".format(name)])
 
             elif elements[name]['type'] == "object_list":
@@ -182,7 +175,7 @@ class MetadataEditor(object):
         Check if input value type matches required type for metadata element
         and write value to internal property
         :param n: string
-        :param v: strinng
+        :param v: string
         :return:
         """
 
@@ -271,7 +264,7 @@ class MetadataEditor(object):
                     raise RuntimeWarning("Input value must be of type MetadataLocals")
 
             elif elements[n]['type'] == "contact":
-                if isinstance(v, MetadataContact):
+                if isinstance(v, MetadataParentItem):
                     self.__dict__["_{0!s}".format(n)] = v
                 else:
                     raise RuntimeWarning("Input value must be a MetadataContact object")
