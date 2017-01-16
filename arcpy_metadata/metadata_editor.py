@@ -25,15 +25,23 @@ from arcpy_metadata.languages import languages
 from datetime import date
 from datetime import datetime
 
-# TODO: Convert to using logging or logbook - probably logging to keep dependencies down
 
+import warnings
+import traceback
+# turn on warnings for deprecation once
+warnings.simplefilter('once', DeprecationWarning)
+# Make warnings look nice
+def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
+    return '%s:%s\n' % (category.__name__, message)
+warnings.formatwarning = warning_on_one_line
+
+# TODO: Convert to using logging or logbook - probably logging to keep dependencies down
 try:  # made as part of a larger package - using existing logger, but logging to screen for now if not in that package
     from log import write as logwrite
     from log import warning as logwarning
 except ImportError:
     def logwrite(log_string, autoprint=1):  # match the signature of the expected log function
         print(log_string)
-
 
     def logwarning(log_string):
         print("WARNING: {0:s}".format(log_string))
@@ -113,7 +121,6 @@ class MetadataEditor(object):
             else:
                 raise TypeError("Metadata file is not an XML file. Check file extension")
 
-
         self.elements.parse(self.metadata_file)
 
         # create these all after the parsing happens so that if they have any self initialization, they can correctly perform it
@@ -162,6 +169,7 @@ class MetadataEditor(object):
         if items:
             self.initialize_items()
 
+
     @staticmethod
     def _create_xml_file(xml_file):
         with open(xml_file, "w") as f:
@@ -179,6 +187,11 @@ class MetadataEditor(object):
         """
 
         if n in elements.keys():
+
+            # Warn if property got deprecated
+            if "deprecated" in elements[n].keys() and traceback.extract_stack()[-2][2] != "__init__":
+                warnings.warn("Call to deprecated property {}. {}".format(n, elements[n]["deprecated"]), category=DeprecationWarning)
+
             if elements[n]['type'] == "string":
                 if isinstance(v, (str, six.text_type)):
                     self.__dict__["_{}".format(n)].value = v
@@ -281,6 +294,11 @@ class MetadataEditor(object):
         :return:
         """
         if n in elements.keys():
+
+            # Warn if property got deprecated
+            if "deprecated" in elements[n].keys():
+                warnings.warn("Call to deprecated property {}. {}".format(n, elements[n]["deprecated"]), category=DeprecationWarning)
+
             if self.__dict__["_{}".format(n)].value == "" and elements[n]['type'] in ["integer", "float", "date"]:
                 return None
             elif elements[n]['type'] == "integer":
