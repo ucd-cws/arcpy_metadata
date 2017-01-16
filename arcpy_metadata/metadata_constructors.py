@@ -3,12 +3,15 @@ import copy
 import xml.etree.ElementTree as ET
 
 
-class ListValues(object):
+class MetadataValueList(object):
     """
-    A helper class to have list items behave like a lists
+    A helper class to have value list items behave like a python lists
     """
     def __init__(self, list_items):
-        self.list_items = list_items
+        if isinstance(list_items, MetadataListConstructor):
+            self.list_items = list_items
+        else:
+            raise TypeError("Must be an instance of MetadataListConstructor")
 
     def __getitem__(self, index):
         return self.list_items.current_items[index].text
@@ -18,6 +21,9 @@ class ListValues(object):
 
     def __repr__(self):
         return repr(self.list_items.value)
+
+    def __len__(self):
+        return len(self.list_items.current_items)
 
     def append(self, value):
         """
@@ -41,6 +47,52 @@ class ListValues(object):
         :return: object
         """
         return self.list_items.pop()
+
+
+class MetadataObjectList(object):
+    """
+    A helper class to have value list items behave like a python lists
+    """
+    def __init__(self, list_objects):
+        if isinstance(list_objects, MetadataObjectListConstructor):
+            self.list_objects = list_objects
+        else:
+            raise TypeError("Must be an instance of MetadataObjectListConstructor")
+
+    def __getitem__(self, index):
+        return self.list_objects.current_items[index]
+
+    def __setitem__(self, index, value):
+        self.list_objects.current_items[index] = value
+
+    def __repr__(self):
+        return repr(self.list_objects.current_items)
+
+    def __len__(self):
+        return len(self.list_objects.current_items)
+
+    def new(self):
+        """
+        Add a new object to the list
+        :return:
+        """
+        self.list_objects.new()
+
+    def remove(self, value):
+        """
+        Remove given item from list
+        :param value:
+        :return:
+        """
+        self.list_objects.remove(value)
+
+    def pop(self):
+        """
+        Remove last list item
+        :return: object
+        """
+        return self.list_objects.pop()
+
 
 class MetadataItemConstructor(object):
     '''
@@ -176,7 +228,7 @@ class MetadataListConstructor(MetadataItemConstructor):
         self._removeall()
         if v is None or v == "":
             pass
-        elif isinstance(v, (list, ListValues)):
+        elif isinstance(v, (list, MetadataValueList)):
             for value in v:
                 self.append(value)
         else:
@@ -240,6 +292,90 @@ class MetadataListConstructor(MetadataItemConstructor):
 
         for i in items_to_remove:
             self.current_items.remove(i)
+
+
+class MetadataObjectListConstructor(MetadataItemConstructor):
+    """
+        A metadata item for groups of items (like tags). Define the root element (self.path) and then the name of the
+        subitem to store there (self.tag_name) and you can use list-like methods to edit the group
+    """
+
+    tag_name = None
+    current_items = []
+    path = None
+
+    def __init__(self, parent=None, tagname=None, path=None, child_elements=None):
+
+        self.child_elements = child_elements
+
+        if not self.tag_name:
+            self.tag_name = tagname
+
+        if path:
+            self.path = path
+
+        super(MetadataObjectListConstructor, self).__init__(parent)
+
+        self.current_items = []
+        for item in self.parent.elements.find(self.path):
+            if item.tag == self.tag_name:
+                new_path = "{}/{}".format(self.path, tagname)
+                child = MetadataLO(new_path, self.parent, child_elements, len(self.current_items))
+                self.current_items.append(child)
+
+    def new(self):
+        new_path = "{}/{}".format(self.path, self.tag_name)
+        child = MetadataLO(new_path, self.parent, self.child_elements, len(self.current_items)+1)
+        self.current_items.append(child)
+
+    def pop(self):
+        """
+        Remove the last element in element tree
+        :return: object
+        """
+
+        item_to_remove = None
+
+        for i in self.current_items:
+            item_to_remove = i
+
+        #j = copy.deepcopy(item_to_remove)
+
+        if item_to_remove is not None:
+            for item in self.parent.elements.find(self.path):
+                if item == item_to_remove.element:
+                    self.parent.elements.find(self.path).remove(item)
+            self.current_items.remove(item_to_remove)
+
+        return item_to_remove
+
+    def remove(self, item):
+        """
+        Remove the given item from element tree
+        :param item:
+        :return:
+        """
+
+        for i in self.parent.elements.find(self.path):
+            if i == item.element:
+                self.parent.elements.find(self.path).remove(i)
+        self.current_items.remove(item)
+
+    def _removeall(self):
+        """
+        removes all items from element tree
+        :return:
+        """
+        items_to_remove = []
+
+        for item in self.current_items:
+            items_to_remove.append(item)
+
+        for item in items_to_remove:
+            for i in self.parent.elements.find(self.path):
+                if i == item.element:
+                    self.parent.elements.find(self.path).remove(i)
+            self.current_items.remove(item)
 
 
 class MetadataItemsConstructor(MetadataItemConstructor):
@@ -406,3 +542,13 @@ class MetadataSubItemConstructor(object):
 
     def append(self, element):
         self.element.append(element)
+
+
+class MetadataLO(MetadataParentItemConstructor):
+    """
+        Just a shortcut MetadataContacts that predefines the paths and position
+    """
+    # TODO: Define Role, Country and Online Resource list
+    def __init__(self, path, parent, child_elements, index=0):
+        self.path = "{0!s}[{1:d}]".format(path, index)
+        super(MetadataLO, self).__init__(parent, child_elements)

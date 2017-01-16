@@ -13,7 +13,8 @@ from arcpy_metadata.metadata_items import MetadataLanguage
 from arcpy_metadata.metadata_items import MetadataContact
 from arcpy_metadata.metadata_items import MetadataLocals
 from arcpy_metadata.metadata_items import MetadataOnlineResource
-from arcpy_metadata.metadata_constructors import ListValues
+from arcpy_metadata.metadata_constructors import MetadataValueList
+from arcpy_metadata.metadata_constructors import MetadataObjectList
 
 import xml
 import six
@@ -152,8 +153,8 @@ class MetadataEditor(object):
                 setattr(self, name, self.__dict__["_{}".format(name)])
 
             elif elements[name]['type'] == "online_resource":
-                setattr(self, "_{}".format(name), MetadataOnlineResource(elements[name]['path'], name, self, sync))
-                setattr(self, name, self.__dict__["_{}".format(name)])
+                setattr(self, "_{}".format(name), MetadataOnlineResource(elements[name]["tagname"], elements[name]['path'], name, self, sync))
+                #setattr(self, name, self.__dict__["_{}".format(name)])
 
             if elements[name] in self.__dict__.keys():
                 self.items.append(getattr(self, "_{}".format(elements[name])))
@@ -234,7 +235,7 @@ class MetadataEditor(object):
                 if isinstance(v, list):
                     #self.__dict__[n].value = ListValues(self.__dict__["_{}".format(n)], v)
                     self.__dict__["_{}".format(n)].value = v
-                elif isinstance(v, ListValues):
+                elif isinstance(v, MetadataValueList):
                     self.__dict__["_{}".format(n)].value = v
                 else:
                     raise RuntimeWarning("Input value must be of type List")
@@ -276,8 +277,10 @@ class MetadataEditor(object):
                     raise RuntimeWarning("Input value must be a MetadataContact object")
 
             elif elements[n]['type'] == "online_resource":
-                if isinstance(v, MetadataOnlineResource):
-                    self.__dict__["_{0!s}".format(n)] = v
+                if isinstance(v, list):
+                    self.__dict__["_{}".format(n)].value = v
+                elif isinstance(v, MetadataOnlineResource):
+                    self.__dict__["_{}".format(n)].value = v
                 else:
                     raise RuntimeWarning("Input value must be a MetadataOnlineResource object")
 
@@ -301,12 +304,12 @@ class MetadataEditor(object):
                 return datetime.strptime(self.__dict__["_{}".format(n)].value, "%Y%m%d").date()
             elif elements[n]['type'] == "contact":
                 return self.__dict__["_{}".format(n)]
-            elif elements[n]['type'] == "online_resource":
-                return self.__dict__["_{}".format(n)]
             elif elements[n]['type'] == "language":
                 return self.__dict__["_{}".format(n)].get_lang()
             elif elements[n]['type'] == "list":
-                return ListValues(self.__dict__["_{}".format(n)])
+                return MetadataValueList(self.__dict__["_{}".format(n)])
+            elif elements[n]['type'] == "online_resource":
+                return MetadataObjectList(self.__dict__["_{}".format(n)])
             else:
                 return self.__dict__["_{}".format(n)].value
         else:

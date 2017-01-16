@@ -104,7 +104,8 @@ elements = {
                 "type": "integer"},
 
             "online_resource": {
-                "path": "distInfo/distTranOps/onLineSrc",
+                "path": "distInfo/distTranOps",
+                "tagname": "onLineSrc",
                 "type": "online_resource"},
 
             "place_keywords": {
@@ -292,19 +293,24 @@ language_elements = {
 online_resource_elements = {
             "link": {
                 "parent": "element",
-                "path": "linkage"},
-            "protocole": {
+                "path": "linkage",
+                "type": "string"},
+            "protocol": {
                 "parent": "element",
-                "path": "protocol"},
+                "path": "protocol",
+                "type": "string"},
             "profile": {
                 "parent": "element",
-                "path": "appProfile"},
-            "name": {
+                "path": "appProfile",
+                "type": "string"},
+            "or_name": {
                 "parent": "element",
-                "path": "orName"},
+                "path": "orName",
+                "type": "string"},
             "description": {
                 "parent": "element",
-                "path": "orDesc"}
+                "path": "orDesc",
+                "type": "string"}
 
             # TODO: allow to add function based on dropdown list
             #"function": {

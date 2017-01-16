@@ -2,6 +2,7 @@ __author__ = 'Thomas.Maschler'
 
 from arcpy_metadata.metadata_constructors import MetadataItemConstructor
 from arcpy_metadata.metadata_constructors import MetadataListConstructor
+from arcpy_metadata.metadata_constructors import MetadataObjectListConstructor
 from arcpy_metadata.metadata_constructors import MetadataItemsConstructor
 from arcpy_metadata.metadata_constructors import MetadataParentItemConstructor
 
@@ -37,6 +38,21 @@ class MetadataList(MetadataListConstructor):
         self.name = name
         self.sync = sync
         super(MetadataList, self).__init__(parent, tagname=tagname, path=path)
+
+
+class MetadataOnlineResource(MetadataObjectListConstructor):
+    """
+    A list metadata item
+    Define path, parent item position and item tag name
+    """
+
+    child_elements = {}
+
+    def __init__(self, tagname, path, name, parent=None, sync=True):
+        #self.child_elements = online_resource_elements
+        self.name = name
+        self.sync = sync
+        super(MetadataOnlineResource, self).__init__(parent, tagname=tagname, path=path, child_elements=online_resource_elements)
 
 
 class MetadataLanguage(MetadataParentItemConstructor):
@@ -210,18 +226,14 @@ class MetadataContact(MetadataParentItemConstructor):
         Just a shortcut MetadataContacts that predefines the paths and position
     """
     # TODO: Define Role, Country and Online Resource list
-    def __init__(self, path, name, parent=None, index=0):
+    def __init__(self, path, name, parent=None, sync=True, index=0):
+        #self.sync = sync
         self.name = name
         self.path = "{0!s}[{1:d}]".format(path, index)
         super(MetadataContact, self).__init__(parent, contact_elements)
 
 
-class MetadataOnlineResource(MetadataParentItemConstructor):
-    """
-        Just a shortcut MetadataContacts that predefines the paths and position
-    """
-    # TODO: Define Role, Country and Online Resource list
-    def __init__(self, path, name, parent=None, index=0):
-        self.name = name
-        self.path = "{0!s}[{1:d}]".format(path, index)
-        super(MetadataOnlineResource, self).__init__(parent, online_resource_elements)
+
+
+
+
