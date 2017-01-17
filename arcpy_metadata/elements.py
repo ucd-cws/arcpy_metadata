@@ -135,10 +135,18 @@ online_resource_elements = {
         "parent": "element",
         "path": "orDesc",
         "type": "string"},
-    # TODO: allow to add function based on dropdown list
-    #"function": {
-    #    "parent": "element",
-    #    "path": "orFunct"},
+
+    "function": {
+        "parent": "element",
+        "path": "orFunct/OnFunctCd",
+        "type": "attribute",
+        "key": "value",
+        "values": [("download", "001"),
+                   ("information", "002"),
+                   ("offline access", "003"),
+                   ("order", "004"),
+                   ("search", "005")]
+    },
 }
 
 elements = {
@@ -159,7 +167,7 @@ elements = {
 
     "citation_contact": {
         "path": "dataIdInfo/idCitation/citRespParty",
-        "type": "contact",
+        "type": "parent_item",
         "elements": contact_elements},
 
     "credits": {
@@ -235,7 +243,7 @@ elements = {
 
     "maintenance_contact": {
         "path": "dataIdInfo/maintCont",
-        "type": "contact",
+        "type": "parent_item",
         "elements": contact_elements},
 
     "max_scale": {
@@ -263,7 +271,7 @@ elements = {
 
     "point_of_contact": {
         "path": "dataIdInfo/idPoC",
-        "type": "contact",
+        "type": "parent_item",
         "elements": contact_elements},
 
     "purpose": {

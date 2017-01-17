@@ -16,7 +16,6 @@ from arcpy_metadata.metadata_constructors import MetadataValueListHelper
 from arcpy_metadata.metadata_constructors import MetadataObjectListHelper
 
 from arcpy_metadata.metadata_items import MetadataLanguage
-from arcpy_metadata.metadata_items import MetadataLocals
 
 from arcpy_metadata.elements import elements
 from arcpy_metadata.languages import languages
@@ -43,7 +42,6 @@ except ImportError:
 install_dir = arcpy.GetInstallInfo("desktop")["InstallDir"]
 xslt = os.path.join(install_dir, r"Metadata\Stylesheets\gpTools\exact copy of.xslt")
 metadata_temp_folder = arcpy.env.scratchFolder  # a default temp folder to use - settable by other applications so they can set it once
-
 
 
 class MetadataEditor(object):
@@ -137,7 +135,6 @@ class MetadataEditor(object):
                 #setattr(self, name, self.__dict__["_{}".format(name)].value)
                 #setattr(self, name, ListValues(self.__dict__["_{}".format(name)], name))
 
-
             elif elements[name]['type'] == "language":
                 setattr(self, "_{}".format(name), MetadataLanguage(elements[name]['path'], name, self, sync))
                 if self.__dict__["_{}".format(name)].value is not None:
@@ -145,10 +142,7 @@ class MetadataEditor(object):
                 else:
                     setattr(self, name, self.__dict__["_{}".format(name)].value)
 
-            elif elements[name]['type'] == "local":
-                setattr(self, name, MetadataLocals(elements[name]['path'], name, self, sync))
-
-            elif elements[name]['type'] == "contact":
+            elif elements[name]['type'] == "parent_item":
                 setattr(self, "_{}".format(name), MetadataParentItem(elements[name]['path'], self, elements[name]['elements']))
                 setattr(self, name, self.__dict__["_{}".format(name)])
 
@@ -257,17 +251,11 @@ class MetadataEditor(object):
                 else:
                     raise RuntimeWarning("Input value must be in {}, an empty String or None".format(str(languages.keys())))
 
-            elif elements[n]['type'] == "local":
-                if isinstance(v, MetadataLocals):
-                    self.__dict__["_{0!s}".format(n)] = v
-                else:
-                    raise RuntimeWarning("Input value must be of type MetadataLocals")
-
-            elif elements[n]['type'] == "contact":
+            elif elements[n]['type'] == "parent_item":
                 if isinstance(v, MetadataParentItem):
                     self.__dict__["_{0!s}".format(n)] = v
                 else:
-                    raise RuntimeWarning("Input value must be a MetadataContact object")
+                    raise RuntimeWarning("Input value must be a MetadataParentItem object")
 
             elif elements[n]['type'] == "object_list":
                 if isinstance(v, list):
@@ -300,7 +288,7 @@ class MetadataEditor(object):
                 return float(self.__dict__["_{}".format(n)].value)
             elif elements[n]['type'] == "date":
                 return datetime.strptime(self.__dict__["_{}".format(n)].value, "%Y%m%d").date()
-            elif elements[n]['type'] == "contact":
+            elif elements[n]['type'] == "parent_item":
                 return self.__dict__["_{}".format(n)]
             elif elements[n]['type'] == "language":
                 return self.__dict__["_{}".format(n)].get_lang()

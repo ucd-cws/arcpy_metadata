@@ -2,6 +2,7 @@ import os
 import copy
 import xml.etree.ElementTree as ET
 
+
 class MetadataValueListHelper(object):
     """
     A helper class to have value list items behave like a python lists
@@ -377,61 +378,10 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
             self.current_items.remove(item)
 
 
-class MetadataItemsConstructor(MetadataItemConstructor):
-    """
-        A helper objects for more complex items like Locals or Contacts.
-        This object will allow to iterage though multiple items of the same type
-    """
-
-    def __init__(self, parent, path):
-        self.path = os.path.dirname(path)
-        self.tag_name = os.path.basename(path)
-        super(MetadataItemsConstructor, self).__init__(parent)
-        self.path = path
-        self.elements = self.parent.elements.findall(self.path)
-        self.value = self.elements
-
-    @property
-    def value(self):
-        return self.elements
-
-    @value.setter
-    def value(self, v):
-        if not hasattr(self, 'elements'):
-            self.elements = self.parent.elements.findall(self.path)
-
-        self._removeall()
-        if v is None:
-            pass
-        elif isinstance(v, list):
-            for value in v:
-                self._append(value)
-        else:
-            raise RuntimeWarning("Input value must be a List or None")
-
-    def _append(self, element):
-        """
-            Adds an individual item to the section
-            :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag
-                configured on parent object
-            :return: None
-        """
-        self.elements.append(element)
-
-    def _removeall(self):
-        items_to_remove = []
-
-        for i in self.elements:
-            items_to_remove.append(i)
-
-        for i in items_to_remove:
-            self.elements.remove(i)
-
-
 class MetadataParentItemConstructor(MetadataItemConstructor):
     """
-    A helper object for more complex items like Contact and Locals
-    This object will allow to add child elements to an item
+    A helper object for more complex items like Contact, Online Resources and Locals
+    This object will allow to add child elements to an item based on supplied element list
     """
 
     def __init__(self, parent, child_elements):
@@ -463,7 +413,7 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
         #self.value = self.element
 
     def __setattr__(self, n, v):
-        if n in ["path", "parent", "child_elements", "name", "value", "attr_lang", "attr_country"]:
+        if n in ["path", "parent", "child_elements", "value", "attr_lang", "attr_country"]:
             self.__dict__[n] = v
         else:
             if n in self.child_elements.keys():
