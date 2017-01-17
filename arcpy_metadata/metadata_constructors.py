@@ -392,32 +392,38 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
         i = 0
         while i < len(self.child_elements):
             for element in self.child_elements.keys():
-                if self.child_elements[element]["parent"] == "element" and \
-                                "_{}".format(element) not in self.__dict__.keys():
-                    setattr(self, "_{}".format(element),
-                            self._create_item(self.element.iter(), self.element, self.child_elements[element]["path"]))
-                    setattr(self, element, self.__dict__["_{}".format(element)].value)
-                    i = 0
 
-                elif "_{}".format(self.child_elements[element]["parent"]) in self.__dict__.keys() and \
-                                "_{}".format(element) not in self.__dict__.keys():
-                    setattr(self, "_{}".format(element),
-                            self._create_item(self.element.iter(),
-                                              self.__dict__["_{}".format(self.child_elements[element]["parent"])],
-                                              self.child_elements[element]["path"]))
-                    setattr(self, element, self.__dict__["_{}".format(element)].value)
-                    i = 0
+                path = self.child_elements[element]["path"]
 
+                if "_{}".format(element) not in self.__dict__.keys():
+                    setattr(self, "_{}".format(element), self._create_item(path))
+                    i = 0
                 else:
                     i += 1
-        #self.value = self.element
 
     def __setattr__(self, n, v):
         if n in ["path", "parent", "child_elements", "value", "attr_lang", "attr_country"]:
             self.__dict__[n] = v
         else:
             if n in self.child_elements.keys():
-                if isinstance(v, (str, unicode)):
+                element_type = self.child_elements[n]["type"]
+                key = self.child_elements[n]["key"]
+
+                if element_type == "attribute":
+                    if v is None or v == "":
+                        self.__dict__["_{}".format(n)].element.attrib[key] = ""
+                    else:
+                        allowed_values = []
+                        found = False
+                        for value in self.child_elements[n]["values"]:
+                            allowed_values.append(value[0])
+                            if v == value[0]:
+                                self.__dict__["_{}".format(n)].element.attrib[key] = value[1]
+                                found = True
+                        if not found:
+                            raise TypeError("Value must be in {}".format(allowed_values))
+
+                elif isinstance(v, (str, unicode)):
                     self.__dict__["_{}".format(n)].element.text = v
                 elif v is None:
                     self.__dict__["_{}".format(n)].element.text = ""
@@ -429,19 +435,57 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
     def __getattr__(self, name):
 
         if name != "child_elements" and name in self.child_elements.keys():
-                return self.__dict__["_{}".format(name)].element.text
-        #elif name == "value":
-        #    return self.element
+
+            element_type = self.child_elements[name]["type"]
+            if element_type == "attribute":
+                key = self.child_elements[name]["key"]
+                values = self.child_elements[name]["values"]
+                if key in self.__dict__["_{}".format(name)].element.attrib.keys():
+                    v = self.__dict__["_{}".format(name)].element.attrib[key]
+                    for value in values:
+                        if v in value:
+                            return value[0]
+                else:
+                    return None
+
+            else:
+                #return self.__dict__["_{}".format(name)].value
+                return self.__dict__["_{}".format(name)].element.text # should be the same"
+
         else:
             return self.__dict__[name]
 
-    @staticmethod
-    def _create_item(iterator, parent, tag_name):
-        for i in iterator:
-            if i.tag == tag_name:
-                return MetadataSubItemConstructor(i, parent, True)
-        i = ET.Element(tag_name)
-        return MetadataSubItemConstructor(i, parent)
+    def _create_item(self, tag_name):
+
+        tags = tag_name.split("/")
+        i = 0
+
+        parent = self.element
+
+        # search for tag
+        while i < len(tags):
+            tag = tags[i]
+            p = None
+            iterator = parent.iter()
+
+            for item in iterator:
+                # item exists already but is not the final one
+                if item.tag == tag and i < len(tags)-1:
+                    p = item
+                    break
+                # item exists already and is final one
+                elif item.tag == tag and i == len(tags)-1:
+                    return MetadataSubItemConstructor(item)
+            # item does not yet exist
+            if not p:
+                p = ET.Element(tag)
+                parent.append(p)
+                # if it is the final one
+                if i == len(tags)-1:
+                    return MetadataSubItemConstructor(p)
+
+            parent = p
+            i += 1
 
 
 class MetadataSubItemConstructor(object):
@@ -450,13 +494,9 @@ class MetadataSubItemConstructor(object):
     This object can be placed as single item inside a parent items
     """
 
-    def __init__(self, element, parent, exists=False):
+    def __init__(self, element):
 
-        self.parent = parent
         self.element = element
-
-        if not exists:
-            self.parent.append(element)
 
         if self.element.text is not None:
             self.value = self.element.text.strip()

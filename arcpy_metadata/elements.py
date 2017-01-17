@@ -1,117 +1,145 @@
 contact_elements = {
-    "role_p": {
-        "parent": "element",
-        "path": "role"},
+    #"role_p": {
+    #    "parent": "element",
+    #    "path": "role"},
 
-    #"role": {
-    #    "parent": "role_p",
-    #    "path": "RoleCd"},
+    "role": {
+        "parent": "role_p",
+        "path": "role/RoleCd",
+        "type": "string"},
 
     "contact_name": {
         "parent": "element",
-        "path": "rpIndName"},
+        "path": "rpIndName",
+        "type": "string"},
 
     "position": {
         "parent": "element",
-        "path": "rpPosName"},
+        "path": "rpPosName",
+        "type": "string"},
 
     "organization": {
         "parent": "element",
-        "path": "rpOrgName"},
+        "path": "rpOrgName",
+        "type": "string"},
 
     "contact_info": {
         "parent": "element",
-        "path": "rpCntInfo"},
+        "path": "rpCntInfo",
+        "type": "string"},
 
-    "address_p": {
-        "parent": "contact_info",
-        "path": "cntAddress"},
+    #"address_p": {
+    #    "parent": "contact_info",
+    #    "path": "rpCntInfo/cntAddress"},
 
     "email": {
         "parent": "address_p",
-        "path": "eMailAdd"},
+        "path": "rpCntInfo/cntAddress/eMailAdd",
+        "type": "string"},
 
     "address": {
         "parent": "address_p",
-        "path": "delPoint"},
+        "path": "rpCntInfo/cntAddress/delPoint",
+        "type": "string"},
 
     "city": {
         "parent": "address_p",
-        "path": "city"},
+        "path": "rpCntInfo/cntAddress/city",
+        "type": "string"},
 
     "state": {
         "parent": "address_p",
-        "path": "adminArea"},
+        "path": "rpCntInfo/cntAddress/adminArea",
+        "type": "string"},
 
     "zip": {
         "parent": "address_p",
-        "path": "postCode"},
+        "path": "rpCntInfo/cntAddress/postCode",
+        "type": "string"},
 
     "country": {
         "parent": "address_p",
-        "path": "country"},
+        "path": "rpCntInfo/cntAddress/country",
+        "type": "string"},
 
     "phone": {
         "parent": "contact_info",
-        "path": "cntPhone"},
+        "path": "rpCntInfo/cntPhone",
+        "type": "string"},
 
     "phone_nb": {
         "parent": "phone",
-        "path": "voiceNum"},
+        "path": "rpCntInfo/voiceNum",
+        "type": "string"},
 
     "fax_nb": {
         "parent": "phone",
-        "path": "faxNum"},
+        "path": "rpCntInfo/faxNum",
+        "type": "string"},
 
     "hours": {
         "parent": "contact_info",
-        "path": "cntHours"},
+        "path": "rpCntInfo/cntHours",
+        "type": "string"},
 
     "instructions": {
         "parent": "contact_info",
-        "path": "cntInstr"},
+        "path": "rpCntInfo/cntInstr",
+        "type": "string"},
 
     "online_resource": {
         "parent": "contact_info",
-        "path": "cntOnlineRes"},
+        "path": "rpCntInfo/cntOnlineRes",
+        "type": "string"},
 
     "link": {
         "parent": "online_resource",
-        "path": "linkage"},
+        "path": "rpCntInfo/cntOnlineRes/linkage",
+        "type": "string"},
 
     "protocol": {
         "parent": "online_resource",
-        "path": "protocol"},
+        "path": "rpCntInfo/cntOnlineRes/protocol",
+        "type": "string"},
 
     "profile": {
         "parent": "online_resource",
-        "path": "appProfile"},
+        "path": "rpCntInfo/cntOnlineRes/appProfile",
+        "type": "string"},
 
     "or_name": {
         "parent": "online_resource",
-        "path": "orName"},
+        "path": "rpCntInfo/cntOnlineRes/orName",
+        "type": "string"},
 
     "or_desc": {
         "parent": "online_resource",
-        "path": "orDesc"},
+        "path": "rpCntInfo/cntOnlineRes/orDesc",
+        "type": "string"},
 
     "or_function": {
-        "parent": "online_resource",
-        "path": "orFunct"} #,
-
-    #"or_function_cd": {
-    #    "parent": "or_function",
-    #    "path": "OnFunctCd"}
+        "parent": "element",
+        "path": "orFunct/OnFunctCd",
+        "type": "attribute",
+        "key": "value",
+        "values": [("download", "001"),
+                   ("information", "002"),
+                   ("offline access", "003"),
+                   ("order", "004"),
+                   ("search", "005")]
+    }
 }
 
 language_elements = {
     "language": {
         "parent": "element",
-        "path": "languageCode"},
+        "path": "languageCode",
+        "type": "string"},
 
     "country": {
         "parent": "element",
-        "path": "countryCode"}
+        "path": "countryCode",
+        "type": "string"}
 }
 
 online_resource_elements = {

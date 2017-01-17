@@ -28,11 +28,13 @@ class MetadataLanguage(MetadataParentItemConstructor):
         language_elements = {
             "attr_lang": {
                 "parent": "element",
-                "path": "languageCode"},
+                "path": "languageCode",
+                "type": "string"},
 
             "attr_country": {
                 "parent": "element",
-                "path": "countryCode"}
+                "path": "countryCode",
+                "type": "string"}
             }
 
         super(MetadataLanguage, self).__init__(self.parent, language_elements)
