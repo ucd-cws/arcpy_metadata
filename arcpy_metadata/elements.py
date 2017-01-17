@@ -1,124 +1,94 @@
 contact_elements = {
-    #"role_p": {
-    #    "parent": "element",
-    #    "path": "role"},
 
     "role": {
-        "parent": "role_p",
         "path": "role/RoleCd",
         "type": "string"},
 
     "contact_name": {
-        "parent": "element",
         "path": "rpIndName",
         "type": "string"},
 
     "position": {
-        "parent": "element",
         "path": "rpPosName",
         "type": "string"},
 
     "organization": {
-        "parent": "element",
         "path": "rpOrgName",
         "type": "string"},
 
     "contact_info": {
-        "parent": "element",
         "path": "rpCntInfo",
         "type": "string"},
 
-    #"address_p": {
-    #    "parent": "contact_info",
-    #    "path": "rpCntInfo/cntAddress"},
-
     "email": {
-        "parent": "address_p",
         "path": "rpCntInfo/cntAddress/eMailAdd",
         "type": "string"},
 
     "address": {
-        "parent": "address_p",
         "path": "rpCntInfo/cntAddress/delPoint",
         "type": "string"},
 
     "city": {
-        "parent": "address_p",
         "path": "rpCntInfo/cntAddress/city",
         "type": "string"},
 
     "state": {
-        "parent": "address_p",
         "path": "rpCntInfo/cntAddress/adminArea",
         "type": "string"},
 
     "zip": {
-        "parent": "address_p",
         "path": "rpCntInfo/cntAddress/postCode",
         "type": "string"},
 
     "country": {
-        "parent": "address_p",
         "path": "rpCntInfo/cntAddress/country",
         "type": "string"},
 
     "phone": {
-        "parent": "contact_info",
         "path": "rpCntInfo/cntPhone",
         "type": "string"},
 
     "phone_nb": {
-        "parent": "phone",
         "path": "rpCntInfo/voiceNum",
         "type": "string"},
 
     "fax_nb": {
-        "parent": "phone",
         "path": "rpCntInfo/faxNum",
         "type": "string"},
 
     "hours": {
-        "parent": "contact_info",
         "path": "rpCntInfo/cntHours",
         "type": "string"},
 
     "instructions": {
-        "parent": "contact_info",
         "path": "rpCntInfo/cntInstr",
         "type": "string"},
 
     "online_resource": {
-        "parent": "contact_info",
         "path": "rpCntInfo/cntOnlineRes",
         "type": "string"},
 
     "link": {
-        "parent": "online_resource",
         "path": "rpCntInfo/cntOnlineRes/linkage",
         "type": "string"},
 
     "protocol": {
-        "parent": "online_resource",
         "path": "rpCntInfo/cntOnlineRes/protocol",
         "type": "string"},
 
     "profile": {
-        "parent": "online_resource",
         "path": "rpCntInfo/cntOnlineRes/appProfile",
         "type": "string"},
 
     "or_name": {
-        "parent": "online_resource",
         "path": "rpCntInfo/cntOnlineRes/orName",
         "type": "string"},
 
     "or_desc": {
-        "parent": "online_resource",
         "path": "rpCntInfo/cntOnlineRes/orDesc",
         "type": "string"},
 
     "or_function": {
-        "parent": "element",
         "path": "orFunct/OnFunctCd",
         "type": "attribute",
         "key": "value",
@@ -132,40 +102,32 @@ contact_elements = {
 
 language_elements = {
     "language": {
-        "parent": "element",
         "path": "languageCode",
         "type": "string"},
 
     "country": {
-        "parent": "element",
         "path": "countryCode",
         "type": "string"}
 }
 
 online_resource_elements = {
     "link": {
-        "parent": "element",
         "path": "linkage",
         "type": "string"},
     "protocol": {
-        "parent": "element",
         "path": "protocol",
         "type": "string"},
     "profile": {
-        "parent": "element",
         "path": "appProfile",
         "type": "string"},
-    "or_name": {
-        "parent": "element",
+    "name": {
         "path": "orName",
         "type": "string"},
     "description": {
-        "parent": "element",
         "path": "orDesc",
         "type": "string"},
 
     "function": {
-        "parent": "element",
         "path": "orFunct/OnFunctCd",
         "type": "attribute",
         "key": "value",

@@ -477,7 +477,7 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
                 elif item.tag == tag and i == len(tags)-1:
                     return MetadataSubItemConstructor(item)
             # item does not yet exist
-            if not p:
+            if p is None:
                 p = ET.Element(tag)
                 parent.append(p)
                 # if it is the final one
