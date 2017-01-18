@@ -407,9 +407,9 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
         else:
             if n in self.child_elements.keys():
                 element_type = self.child_elements[n]["type"]
-                key = self.child_elements[n]["key"]
 
                 if element_type == "attribute":
+                    key = self.child_elements[n]["key"]
                     if v is None or v == "":
                         self.__dict__["_{}".format(n)].element.attrib[key] = ""
                     else:
