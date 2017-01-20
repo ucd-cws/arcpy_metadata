@@ -89,7 +89,7 @@ class MetadataEditor(object):
                     self.metadata_file = xml_file
 
                 else:
-                    raise TypeError("Datatype is not supported")
+                    raise TypeError("Cannot read {}. Data type is not supported".format(self.dataset))
 
             # Metadata for GDB datasets are stored inside the GDB itself.
             # We need to first export them to a temporary file, modify them and then import them back
@@ -102,7 +102,7 @@ class MetadataEditor(object):
                     logwrite("Exporting metadata to temporary file {0!s}".format(self.metadata_file))
                     arcpy.XSLTransform_conversion(self.dataset, xslt, self.metadata_file)
                 else:
-                    raise TypeError("Datatype is not supported")
+                    raise TypeError("Cannot read {}. Data type is not supported".format(self.dataset))
 
         elif self.metadata_file:  # Check if metadata file is set instead
             if self.metadata_file.endswith('.xml'):
