@@ -256,9 +256,9 @@ class MetadataEditor(object):
                             done = True
                             break
                     if not done:
-                        raise RuntimeWarning("Input value must be one of: {}".fomrat(values))
+                        raise RuntimeWarning("Input value must be one of: {}".format(values))
                 else:
-                    raise RuntimeWarning("Input value must be one of: {}".fomrat(values))
+                    raise RuntimeWarning("Input value must be one of: {}".format(values))
 
             elif elements[n]['type'] == "list":
                 if isinstance(v, list):
