@@ -324,10 +324,13 @@ class MetadataEditor(object):
             elif elements[n]['type'] == 'attribute':
                 key = elements[n]['key']
                 values = elements[n]['values']
-                v = self.__dict__["_{}".format(n)].attributes[key]
-                for value in values:
-                    if v in value:
-                        return value[0]
+                if key in self.__dict__["_{}".format(n)].attributes:
+                    v = self.__dict__["_{}".format(n)].attributes[key]
+                    for value in values:
+                        if v in value:
+                            return value[0]
+                else:
+                    return None
             elif elements[n]['type'] == "list":
                 return MetadataValueListHelper(self.__dict__["_{}".format(n)])
             elif elements[n]['type'] == "object_list":
@@ -364,6 +367,8 @@ class MetadataEditor(object):
                 workspace = os.path.dirname(workspace)
                 if workspace == '' and arcpy.env.workspace:
                     return arcpy.env.workspace
+                if workspace == '':
+                    return os.path.curdir
                 desc = arcpy.Describe(workspace)
 
     def get_workspace_type(self):
