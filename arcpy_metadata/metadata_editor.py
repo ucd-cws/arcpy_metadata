@@ -130,6 +130,20 @@ class MetadataEditor(object):
                 else:
                     setattr(self, name, self.__dict__["_{}".format(name)].value)
 
+            elif elements[name]['type'] == "attribute":
+                setattr(self, "_{}".format(name), MetadataItem(elements[name]['path'], name, self, sync))
+                if isinstance(self.__dict__["_{}".format(name)].attributes, dict):
+                    key = elements[name]['key']
+                    values = elements[name]['values']
+                    if key in self.__dict__["_{}".format(name)].attributes.keys():
+                        v = self.__dict__["_{}".format(name)].attributes[elements[name]['key']]
+                        for value in values:
+                            if v in value:
+                                setattr(self, name, value[0])
+                                break
+                else:
+                    setattr(self, name, None)
+
             elif elements[name]['type'] == "list":
                 setattr(self, "_{}".format(name), MetadataValueList(elements[name]["tagname"], elements[name]['path'], name, self, sync))
                 #setattr(self, name, self.__dict__["_{}".format(name)].value)
@@ -231,6 +245,21 @@ class MetadataEditor(object):
                 else:
                     raise RuntimeWarning("Input value must be of type Float")
 
+            elif elements[n]['type'] == 'attribute':
+                key = elements[n]['key']
+                values = elements[n]['values']
+                if isinstance(v,(str, six.text_type)):
+                    done = False
+                    for value in values:
+                        if v in value:
+                            self.__dict__["_{}".format(n)].attributes[key] = value[1]
+                            done = True
+                            break
+                    if not done:
+                        raise RuntimeWarning("Input value must be one of: {}".fomrat(values))
+                else:
+                    raise RuntimeWarning("Input value must be one of: {}".fomrat(values))
+
             elif elements[n]['type'] == "list":
                 if isinstance(v, list):
                     #self.__dict__[n].value = ListValues(self.__dict__["_{}".format(n)], v)
@@ -292,6 +321,13 @@ class MetadataEditor(object):
                 return self.__dict__["_{}".format(n)]
             elif elements[n]['type'] == "language":
                 return self.__dict__["_{}".format(n)].get_lang()
+            elif elements[n]['type'] == 'attribute':
+                key = elements[n]['key']
+                values = elements[n]['values']
+                v = self.__dict__["_{}".format(n)].attributes[key]
+                for value in values:
+                    if v in value:
+                        return value[0]
             elif elements[n]['type'] == "list":
                 return MetadataValueListHelper(self.__dict__["_{}".format(n)])
             elif elements[n]['type'] == "object_list":

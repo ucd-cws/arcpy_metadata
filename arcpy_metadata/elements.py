@@ -186,8 +186,8 @@ elements = {
         "type": "string"},
 
     "format": {
-        "path": "",
-        "type": "distInfo/distFormat/formatName"
+        "path": "distInfo/distFormat/formatName",
+        "type": "string"
     },
 
     "file_identifier": {
@@ -311,9 +311,15 @@ elements = {
         "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmBegin",
         "type": "date"},
 
-    #"update_frequency": {
-    #    "path": "dataIdInfo/resMaint/maintFreq/MaintFreqCd",
-    #    "type": "string"},
+    "update_frequency": {
+        "path": "dataIdInfo/resMaint/maintFreq/MaintFreqCd",
+        "type": "attribute",
+        "key": "value",
+        "values": [("continual", "001"),
+                   ("daily", "002"),
+                   ("weekly", "003"),
+                   ("fortnightly", "004"),
+                   ("monthly", "005")]},
 
     "update_frequency_description": {
         "path": "dataIdInfo/resMaint/usrDefFreq/duration",
