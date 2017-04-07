@@ -48,6 +48,12 @@ class MetadataValueListHelper(object):
         """
         return self.list_items.pop()
 
+    def sort(self):
+        """
+        Sort list items
+        :return: list
+        """
+        return self.list_items.sort()
 
 class MetadataObjectListHelper(object):
     """
@@ -292,6 +298,13 @@ class MetadataValueListConstructor(MetadataItemConstructor):
 
         for i in items_to_remove:
             self.current_items.remove(i)
+
+    def sort(self):
+        """
+        sort items
+        :return:
+        """
+        return self.current_items.sort()
 
 
 class MetadataObjectListConstructor(MetadataItemConstructor):

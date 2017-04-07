@@ -2,7 +2,19 @@ contact_elements = {
 
     "role": {
         "path": "role/RoleCd",
-        "type": "string"},
+        "type": "attribute",
+        "key": "value",
+        "values": [("resource provider", "001"),
+                   ("custodian", "002"),
+                   ("owner", "003"),
+                   ("user", "004"),
+                   ("distributer", "005"),
+                   ("originator", "006"),
+                   ("point of contact", "007"),
+                   ("principal investigator", "008"),
+                   ("processor", "009"),
+                   ("publisher", "010"),
+                   ("author", "011")]},
 
     "contact_name": {
         "path": "rpIndName",
@@ -24,6 +36,14 @@ contact_elements = {
         "path": "rpCntInfo/cntAddress/eMailAdd",
         "type": "string"},
 
+    "address_type": {
+        "path": "rpCntInfo/cntAddress",
+        "type": "attribute",
+        "key": "addressType",
+        "values": [("postal", "postal"),
+                   ("physical", "physical"),
+                   ("both", "both")]},
+
     "address": {
         "path": "rpCntInfo/cntAddress/delPoint",
         "type": "string"},
@@ -42,11 +62,7 @@ contact_elements = {
 
     "country": {
         "path": "rpCntInfo/cntAddress/country",
-        "type": "string"},
-
-    "phone": {
-        "path": "rpCntInfo/cntPhone",
-        "type": "string"},
+        "type": "string"},  # TODO: make this a dropdown list for ISO2 code. Write to value
 
     "phone_nb": {
         "path": "rpCntInfo/voiceNum",
@@ -64,10 +80,7 @@ contact_elements = {
         "path": "rpCntInfo/cntInstr",
         "type": "string"},
 
-    "online_resource": {
-        "path": "rpCntInfo/cntOnlineRes",
-        "type": "string"},
-
+    # TODO: Make Online Resources a sub elemennt list
     "link": {
         "path": "rpCntInfo/cntOnlineRes/linkage",
         "type": "string"},
@@ -192,7 +205,8 @@ elements = {
 
     "file_identifier": {
         "path": "mdFileID",
-        "type": "string"},
+        "type": "string",
+        "sync": False},
 
     "identifier_code1": {
         "path": "dataIdInfo/idCitation/citId/identCode",

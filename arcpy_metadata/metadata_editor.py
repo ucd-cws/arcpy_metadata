@@ -215,7 +215,7 @@ class MetadataEditor(object):
                 elif v is None:
                     self.__dict__["_{}".format(n)].value = ""
                 else:
-                    raise RuntimeWarning("Input value must be of type a Date or a Sting ('yyyymmdd')")
+                    raise RuntimeWarning("Input value must be of type a Date or a String ('yyyymmdd')")
 
             elif elements[n]['type'] == "integer":
                 if isinstance(v, int):
