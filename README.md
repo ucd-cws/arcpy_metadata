@@ -97,11 +97,30 @@ metadata.point_of_contact.contact_name = "First and Last Name"
 metadata.point_of_contact.email = "email@address.com"
 ```
 
+Edited nested lists
+```python
+# make sure you have the right number of elements
+# add new ones
+while metadata.online_resource < 3:
+    metadata.online_resource.new()
+# or delete spare once
+while metadata.online_resource > 3:
+	metadata.online_resource.pop()
+	
+metadata.online_resource[0].name = "First download link"
+metadata.online_resource[0].link = "http://somelink"
+metadata.online_resource[0].function = "download"
+metadata.online_resource[1].name = "Second download link"
+metadata.online_resource[1].link = "http://someotherlink"
+metadata.online_resource[1].function = "download"
+metadata.online_resource[2].name = "Third download link"
+metadata.online_resource[2].link = "http://yetanotherdownloadlink"
+metadata.online_resource[2].function = "download"
+```
 Remove all items from the geoprocessing history
 ```python
 metadata.rm_gp_history()
 ```
-
 
 Saving the changes back to the file
 
