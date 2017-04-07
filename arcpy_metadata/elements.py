@@ -1,279 +1,345 @@
-# TODO: Add category item
-# category = dataIdInfo/tpCat/TopicCatCd
-
-elements = {
-            "abstract": {
-                "path": "dataIdInfo/idAbs",
-                "type": "string"},
-
-            "alternate_title": {
-                "path": "dataIdInfo/idCitation/resAltTitle",
-                "type": "string"},
-
-            "citation": {
-                "path": "dataIdInfo/idCitation/otherCitDet",
-                "type": "string"},
-
-            "citation_contact": {
-                "path": "dataIdInfo/idCitation/citRespParty",
-                "type": "contact"},
-
-            "credits": {
-                "path": "dataIdInfo/idCredit",
-                "type": "string"},
-
-            "dataset_uri": {
-                "path": "dataSetURI",
-                "type": "string"},
-
-            "distance_resolution": {  # TODO: Allow to add units
-                "path": "dataIdInfo/dataScale/scaleDist/value",
-                "type": "string"},
-
-            "download": {  # TODO: Allow to add multiple download links with names
-                "path": "distInfo/distTranOps/onLineSrc/linkage",
-                "type": "string"},
-
-            "extent_description": {
-                "path": "dataIdInfo/dataExt/exDesc",
-                "type": "string"},
-
-            "external_link": {
-                "path": "dataIdInfo/idCitation/citOnlineRes/linkage",
-                "type": "string"},
-
-            "file_identifier": {
-                "path": "mdFileID",
-                "type": "string"},
-            
-            "identifier_code1": {
-                "path": "dataIdInfo/idCitation/citId/identCode",
-                "type": "string"},
-            
-            "identifier_code2": {
-                "path": "dataIdInfo/idCitation/citId/identAuth/citId/identCode",
-                "type": "string"},
-            
-            "identifier_code3": {
-                "path": "dataIdInfo/idCitation/citId/identAuth/citId/identAuth/citId/identCode",
-                "type": "string"},
-            
-            "identifier_code4": {
-				"path": "dqInfo/dataLineage/dataSource/srcRefSys/identAuth/citId/identCode",
-                "type": "string"},
-                        
-            "language": {
-                "path": "dataIdInfo/dataLang",
-                "type": "language"},
-
-            "last_update": {
-                "path": "dataIdInfo/idCitation/date/reviseDate",
-                "type": "date"},
-
-            "license": {
-                "path": "dataIdInfo/resConst/LegConsts/useLimit",
-                "type": "string"},
-
-            "limitation": {  #TODO: does read correctly when entered though ArcGIS Online. They are stored in a seperated resConst element
-                "path": "dataIdInfo/resConst/Consts/useLimit",
-                "type": "string"},
-
-            #"locals": {
-            #    "path": "Esri/locales/locale",
-            #    "type": "local"},
-
-            "maintenance_contact": {
-                "path": "dataIdInfo/maintCont",
-                "type": "contact"},
-
-            "max_scale": {
-                "path": "Esri/scaleRange/maxScale",
-                "type": "integer"},
-
-            "metadata_language": {
-                "path": "dataIdInfo/mdLang",
-                "type": "language"},
-
-            "min_scale": {
-                "path": "Esri/scaleRange/minScale",
-                "type": "integer"},
-
-            "place_keywords": {
-                "path": "dataIdInfo/searchKeys[last()]",
-                "tagname": "keyword",
-                "type": "list"},
-
-            "point_of_contact": {
-                "path": "dataIdInfo/idPoC",
-                "type": "contact"},
-
-            "purpose": {
-                "path": "dataIdInfo/idPurp",
-                "type": "string"},
-            
-            "resource_label": {
-                "path": "eainfo/detailed/enttyp/enttypl",
-                "type": "string"},
-            
-            "scale_resolution": {
-                "path": "dataIdInfo/dataScale/equScale/rfDenom",
-                "type": "integer"},
-
-            "source": {
-                "path": "dqInfo/dataLineage/dataSource/srcDesc",
-                "type": "string"},
-
-            "supplemental_information": {
-                "path": "dataIdInfo/suppInfo",
-                "type": "string"},
-
-            "title": {
-                "path": "dataIdInfo/idCitation/resTitle",
-                "type": "string"},
-
-            "tags": {
-                "path": "dataIdInfo/searchKeys[last()]",
-                "tagname": "keyword",
-                "type": "list"},
-
-            "temporal_extent_description": {
-                "path": "dataIdInfo/dataExt/tempDesc",
-                "type": "string"},
-
-            "temporal_extent_end": {
-                "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmEnd",
-                "type": "date"},
-
-            "temporal_extent_instance": {
-                "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Instant/tmPosition",
-                "type": "date"},
-
-            "temporal_extent_start": {
-                "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmBegin",
-                "type": "date"},
-
-            #"update_frequency": {
-            #    "path": "dataIdInfo/resMaint/maintFreq/MaintFreqCd",
-            #    "type": "string"},
-
-            "update_frequency_description": {
-                "path": "dataIdInfo/resMaint/usrDefFreq/duration",
-                "type": "string"}
-
-            }
-
 contact_elements = {
-            "role_p": {
-                "parent": "element",
-                "path": "role"},
 
-            #"role": {
-            #    "parent": "role_p",
-            #    "path": "RoleCd"},
+    "role": {
+        "path": "role/RoleCd",
+        "type": "attribute",
+        "key": "value",
+        "values": [("resource provider", "001"),
+                   ("custodian", "002"),
+                   ("owner", "003"),
+                   ("user", "004"),
+                   ("distributer", "005"),
+                   ("originator", "006"),
+                   ("point of contact", "007"),
+                   ("principal investigator", "008"),
+                   ("processor", "009"),
+                   ("publisher", "010"),
+                   ("author", "011")]},
 
-            "contact_name": {
-                "parent": "element",
-                "path": "rpIndName"},
+    "contact_name": {
+        "path": "rpIndName",
+        "type": "string"},
 
-            "position": {
-                "parent": "element",
-                "path": "rpPosName"},
+    "position": {
+        "path": "rpPosName",
+        "type": "string"},
 
-            "organization": {
-                "parent": "element",
-                "path": "rpOrgName"},
+    "organization": {
+        "path": "rpOrgName",
+        "type": "string"},
 
-            "contact_info": {
-                "parent": "element",
-                "path": "rpCntInfo"},
+    "contact_info": {
+        "path": "rpCntInfo",
+        "type": "string"},
 
-            "address_p": {
-                "parent": "contact_info",
-                "path": "cntAddress"},
+    "email": {
+        "path": "rpCntInfo/cntAddress/eMailAdd",
+        "type": "string"},
 
-            "email": {
-                "parent": "address_p",
-                "path": "eMailAdd"},
+    "address_type": {
+        "path": "rpCntInfo/cntAddress",
+        "type": "attribute",
+        "key": "addressType",
+        "values": [("postal", "postal"),
+                   ("physical", "physical"),
+                   ("both", "both")]},
 
-            "address": {
-                "parent": "address_p",
-                "path": "delPoint"},
+    "address": {
+        "path": "rpCntInfo/cntAddress/delPoint",
+        "type": "string"},
 
-            "city": {
-                "parent": "address_p",
-                "path": "city"},
+    "city": {
+        "path": "rpCntInfo/cntAddress/city",
+        "type": "string"},
 
-            "state": {
-                "parent": "address_p",
-                "path": "adminArea"},
+    "state": {
+        "path": "rpCntInfo/cntAddress/adminArea",
+        "type": "string"},
 
-            "zip": {
-                "parent": "address_p",
-                "path": "postCode"},
+    "zip": {
+        "path": "rpCntInfo/cntAddress/postCode",
+        "type": "string"},
 
-            "country": {
-                "parent": "address_p",
-                "path": "country"},
+    "country": {
+        "path": "rpCntInfo/cntAddress/country",
+        "type": "string"},  # TODO: make this a dropdown list for ISO2 code. Write to value
 
-            "phone": {
-                "parent": "contact_info",
-                "path": "cntPhone"},
+    "phone_nb": {
+        "path": "rpCntInfo/voiceNum",
+        "type": "string"},
 
-            "phone_nb": {
-                "parent": "phone",
-                "path": "voiceNum"},
+    "fax_nb": {
+        "path": "rpCntInfo/faxNum",
+        "type": "string"},
 
-            "fax_nb": {
-                "parent": "phone",
-                "path": "faxNum"},
+    "hours": {
+        "path": "rpCntInfo/cntHours",
+        "type": "string"},
 
-            "hours": {
-                "parent": "contact_info",
-                "path": "cntHours"},
+    "instructions": {
+        "path": "rpCntInfo/cntInstr",
+        "type": "string"},
 
-            "instructions": {
-                "parent": "contact_info",
-                "path": "cntInstr"},
+    # TODO: Make Online Resources a sub elemennt list
+    "link": {
+        "path": "rpCntInfo/cntOnlineRes/linkage",
+        "type": "string"},
 
-            "online_resource": {
-                "parent": "contact_info",
-                "path": "cntOnlineRes"},
+    "protocol": {
+        "path": "rpCntInfo/cntOnlineRes/protocol",
+        "type": "string"},
 
-            "link": {
-                "parent": "online_resource",
-                "path": "linkage"},
+    "profile": {
+        "path": "rpCntInfo/cntOnlineRes/appProfile",
+        "type": "string"},
 
-            "protocol": {
-                "parent": "online_resource",
-                "path": "protocol"},
+    "or_name": {
+        "path": "rpCntInfo/cntOnlineRes/orName",
+        "type": "string"},
 
-            "profile": {
-                "parent": "online_resource",
-                "path": "appProfile"},
+    "or_desc": {
+        "path": "rpCntInfo/cntOnlineRes/orDesc",
+        "type": "string"},
 
-            "or_name": {
-                "parent": "online_resource",
-                "path": "orName"},
-
-            "or_desc": {
-                "parent": "online_resource",
-                "path": "orDesc"},
-
-            "or_function": {
-                "parent": "online_resource",
-                "path": "orFunct"} #,
-
-            #"or_function_cd": {
-            #    "parent": "or_function",
-            #    "path": "OnFunctCd"}
-            }
+    "or_function": {
+        "path": "orFunct/OnFunctCd",
+        "type": "attribute",
+        "key": "value",
+        "values": [("download", "001"),
+                   ("information", "002"),
+                   ("offline access", "003"),
+                   ("order", "004"),
+                   ("search", "005")]
+    }
+}
 
 language_elements = {
-            "language": {
-                "parent": "element",
-                "path": "languageCode"},
+    "language": {
+        "path": "languageCode",
+        "type": "string"},
 
-            "country": {
-                "parent": "element",
-                "path": "countryCode"}
-            }
+    "country": {
+        "path": "countryCode",
+        "type": "string"}
+}
+
+online_resource_elements = {
+    "link": {
+        "path": "linkage",
+        "type": "string"},
+    "protocol": {
+        "path": "protocol",
+        "type": "string"},
+    "profile": {
+        "path": "appProfile",
+        "type": "string"},
+    "name": {
+        "path": "orName",
+        "type": "string"},
+    "description": {
+        "path": "orDesc",
+        "type": "string"},
+
+    "function": {
+        "path": "orFunct/OnFunctCd",
+        "type": "attribute",
+        "key": "value",
+        "values": [("download", "001"),
+                   ("information", "002"),
+                   ("offline access", "003"),
+                   ("order", "004"),
+                   ("search", "005")]
+    },
+}
+
+elements = {
+    "abstract": {
+        "path": "dataIdInfo/idAbs",
+        "type": "string"},
+
+    "alternate_title": {
+        "path": "dataIdInfo/idCitation/resAltTitle",
+        "type": "string"},
+
+    # TODO: Add category item
+    # category = dataIdInfo/tpCat/TopicCatCd
+
+    "citation": {
+        "path": "dataIdInfo/idCitation/otherCitDet",
+        "type": "string"},
+
+    "citation_contact": {
+        "path": "dataIdInfo/idCitation/citRespParty",
+        "type": "parent_item",
+        "elements": contact_elements},
+
+    "credits": {
+        "path": "dataIdInfo/idCredit",
+        "type": "string"},
+
+    "dataset_uri": {
+        "path": "dataSetURI",
+        "type": "string"},
+
+    "distance_resolution": {  # TODO: Allow to add units
+        "path": "dataIdInfo/dataScale/scaleDist/value",
+        "type": "string"},
+
+    "download": {  #
+        "path": "distInfo/distTranOps/onLineSrc/linkage",
+        "type": "string",
+        "deprecated": "Use online_resource instead"},
+
+    "extent_description": {
+        "path": "dataIdInfo/dataExt/exDesc",
+        "type": "string"},
+
+    "external_link": {
+        "path": "dataIdInfo/idCitation/citOnlineRes/linkage",
+        "type": "string"},
+
+    "format": {
+        "path": "distInfo/distFormat/formatName",
+        "type": "string"
+    },
+
+    "file_identifier": {
+        "path": "mdFileID",
+        "type": "string",
+        "sync": False},
+
+    "identifier_code1": {
+        "path": "dataIdInfo/idCitation/citId/identCode",
+        "type": "string"},
+
+    "identifier_code2": {
+        "path": "dataIdInfo/idCitation/citId/identAuth/citId/identCode",
+        "type": "string"},
+
+    "identifier_code3": {
+        "path": "dataIdInfo/idCitation/citId/identAuth/citId/identAuth/citId/identCode",
+        "type": "string"},
+
+    "identifier_code4": {
+        "path": "dqInfo/dataLineage/dataSource/srcRefSys/identAuth/citId/identCode",
+        "type": "string"},
+
+    "language": {
+        "path": "dataIdInfo/dataLang",
+        "type": "language",
+        "elements": language_elements},
+
+    "last_update": {
+        "path": "dataIdInfo/idCitation/date/reviseDate",
+        "type": "date"},
+
+    "license": {
+        "path": "dataIdInfo/resConst/LegConsts/useLimit",
+        "type": "string"},
+
+    "limitation": {  #TODO: does read correctly when entered though ArcGIS Online. They are stored in a seperated resConst element
+        "path": "dataIdInfo/resConst/Consts/useLimit",
+        "type": "string"},
+
+    #"locals": {
+    #    "path": "Esri/locales/locale",
+    #    "type": "local"},
+
+    "maintenance_contact": {
+        "path": "dataIdInfo/maintCont",
+        "type": "parent_item",
+        "elements": contact_elements},
+
+    "max_scale": {
+        "path": "Esri/scaleRange/maxScale",
+        "type": "integer"},
+
+    "metadata_language": {
+        "path": "dataIdInfo/mdLang",
+        "type": "language"},
+
+    "min_scale": {
+        "path": "Esri/scaleRange/minScale",
+        "type": "integer"},
+
+    "online_resource": {
+        "path": "distInfo/distTranOps",
+        "tagname": "onLineSrc",
+        "type": "object_list",
+        "elements": online_resource_elements},
+
+    "place_keywords": {
+        "path": "dataIdInfo/searchKeys[last()]",
+        "tagname": "keyword",
+        "type": "list"},
+
+    "point_of_contact": {
+        "path": "dataIdInfo/idPoC",
+        "type": "parent_item",
+        "elements": contact_elements},
+
+    "purpose": {
+        "path": "dataIdInfo/idPurp",
+        "type": "string"},
+
+    "resource_label": {
+        "path": "eainfo/detailed/enttyp/enttypl",
+        "type": "string"},
+
+    "scale_resolution": {
+        "path": "dataIdInfo/dataScale/equScale/rfDenom",
+        "type": "integer"},
+
+    "source": {
+        "path": "dqInfo/dataLineage/dataSource/srcDesc",
+        "type": "string"},
+
+    "supplemental_information": {
+        "path": "dataIdInfo/suppInfo",
+        "type": "string"},
+
+    "title": {
+        "path": "dataIdInfo/idCitation/resTitle",
+        #"path": "Esri/DataProperties/itemProps/itemName",
+        "type": "string",
+        "sync": False},
+
+    "tags": {
+        "path": "dataIdInfo/searchKeys[last()]",
+        "tagname": "keyword",
+        "type": "list"},
+
+    "temporal_extent_description": {
+        "path": "dataIdInfo/dataExt/tempDesc",
+        "type": "string"},
+
+    "temporal_extent_end": {
+        "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmEnd",
+        "type": "date"},
+
+    "temporal_extent_instance": {
+        "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Instant/tmPosition",
+        "type": "date"},
+
+    "temporal_extent_start": {
+        "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmBegin",
+        "type": "date"},
+
+    "update_frequency": {
+        "path": "dataIdInfo/resMaint/maintFreq/MaintFreqCd",
+        "type": "attribute",
+        "key": "value",
+        "values": [("continual", "001"),
+                   ("daily", "002"),
+                   ("weekly", "003"),
+                   ("fortnightly", "004"),
+                   ("monthly", "005")]},
+
+    "update_frequency_description": {
+        "path": "dataIdInfo/resMaint/usrDefFreq/duration",
+        "type": "string"}
+
+}
+
+
+

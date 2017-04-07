@@ -46,6 +46,10 @@ Change list items
 
 ```python
 metadata.tags = ["tag1", "tag2"]
+metadata.tags[1] = "another tag"
+metadata.tags.append("new tag")
+metadata.tags.remove("tag1")
+metadata.tags.pop()
 ```
 
 Get numeric items (return int or float)
@@ -93,10 +97,21 @@ metadata.point_of_contact.contact_name = "First and Last Name"
 metadata.point_of_contact.email = "email@address.com"
 ```
 
+Remove all items from the geoprocessing history
+```python
+metadata.rm_gp_history()
+```
+
+
 Saving the changes back to the file
 
 ```python
-metadata.finish()  # save the metadata back to the original source feature class and cleanup. Without calling finish(), your edits are NOT saved!
+metadata.save() # save the metadata back to file.
+metadata.cleanup() # remove all temporary files.
+```
+or
+```
+metadata.finish()  # save() and cleanup() as one call
 ```
 If you want to enable automatic updates of your metadata (feature classes only) call.
 ```python
@@ -145,6 +160,7 @@ Supported items
 |Metadata File Identifier|file_identifier|String|Metadata/Details/File Idnetifier|mdFileID|
 |Dataset URI|dataset_uri|String|Metadata/Details/Dataset URI|dataSetURI|
 |Resource Label|resource_label|String|Resource/Fields/Details/Label|eainfo/detailed/enttyp/enttypl|
+|Format|format|String|Resource/Distribution/Distribution Format/Format Name|distInfo/distFormat/formatName|
 
 Contact items
 ---------------

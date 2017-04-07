@@ -1,1 +1,1 @@
-__author__ = 'dsx'
+__author__ = 'dsx, nickrsan, thomas.maschler'
