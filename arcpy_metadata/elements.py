@@ -269,7 +269,7 @@ elements = {
         "elements": online_resource_elements},
 
     "place_keywords": {
-        "path": "dataIdInfo/searchKeys[last()]",
+        "path": "dataIdInfo/placeKeys",
         "tagname": "keyword",
         "type": "list"},
 
