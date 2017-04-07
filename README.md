@@ -206,6 +206,8 @@ Contact items
 
 Online Resource Items
 --------------
+|Item description|Internal name|Type|Relative path in ArcGIS XML file|
+|---|---|---|---|
 |Link|link|String|./linkage|
 |Protocol|protocol|String|./protocol|
 |Profil|profile|String|./appProfile|
