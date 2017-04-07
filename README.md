@@ -185,24 +185,34 @@ Contact items
 ---------------
 |Item description|Internal name|Type|Relative path in ArcGIS XML file|
 |---|---|---|---|
-|Contact Name|contact_name|String|rpIndName|
-|Position|position|String|rpPosName|
-|Organization|organization|String|rpOrgName|
-|Email|email|String|rpCntInfo/eMailAdd|
-|Address|address|String|rpCntInfo/cntAddress/delPoint|
-|City|city|String|rpCntInfo/cntAddress/City|
-|State|state|String|rpCntInfo/cntAddress/adminArea|
-|Zip|zip|String|rpCntInfo/cntAddress/postCode|
-|Country|country|String|rpCntInfo/cntAddress/country|
-|Phone Nb|phone_nb|String|rpCntInfo/cntPhone/voiceNum|
-|Fax Nb|fax_nb|String|rpCntInfo/cntPhone/faxNum|
-|Hours|hours|String|rpCntInfo/cntHours|
-|Instructions|instructions|String|rpCntInfo/cntInstr|
-|Website Link|link|String|rpCntInfo/cntOnlineRes/linkage|
-|Protocol|protocol|String|rpCntInfo/cntOnlineRes/protocol|
-|Profile|profile|String|rpCntInfo/cntOnlineRes/appProfile|
-|Website Name|or_name|String|rpCntInfo/cntOnlineRes/orName|
-|Website Description|or_desc|String|rpCntInfo/cntOnlineRes/orDesc|
+|Contact Name|contact_name|String|./rpIndName|
+|Position|position|String|./rpPosName|
+|Organization|organization|String|./rpOrgName|
+|Email|email|String|./rpCntInfo/eMailAdd|
+|Address|address|String|./rpCntInfo/cntAddress/delPoint|
+|City|city|String|rpCntInfo/./cntAddress/City|
+|State|state|String|rpCntInfo/./cntAddress/adminArea|
+|Zip|zip|String|rpCntInfo/./cntAddress/postCode|
+|Country|country|String|./rpCntInfo/cntAddress/country|
+|Phone Nb|phone_nb|String|./rpCntInfo/cntPhone/voiceNum|
+|Fax Nb|fax_nb|String|./rpCntInfo/cntPhone/faxNum|
+|Hours|hours|String|./rpCntInfo/cntHours|
+|Instructions|instructions|String|./rpCntInfo/cntInstr|
+|Website Link|link|String|./rpCntInfo/cntOnlineRes/linkage|
+|Protocol|protocol|String|./rpCntInfo/cntOnlineRes/protocol|
+|Profile|profile|String|./rpCntInfo/cntOnlineRes/appProfile|
+|Website Name|or_name|String|./rpCntInfo/cntOnlineRes/orName|
+|Website Description|or_desc|String|./rpCntInfo/cntOnlineRes/orDesc|
+
+Online Resource Items
+--------------
+|Link|link|String|./linkage|
+|Protocol|protocol|String|./protocol|
+|Profil|profile|String|./appProfile|
+|Name|name|String|./orName|
+|Description|description|String|./orDesc|
+|Function|function|String|./orFunct/OnFunctCd|
+
 
 
 Under the hood
