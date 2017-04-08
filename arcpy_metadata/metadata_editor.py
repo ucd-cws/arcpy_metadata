@@ -394,9 +394,9 @@ class MetadataEditor(object):
             for child in children:
                 element.remove(child)
                 i += 1
-            log.info("Remove {} item(s) from the geoprocessing history".format(i), True)
+            log.info("Remove {} item(s) from the geoprocessing history".format(i))
         else:
-            log.info("There are no items in the geoprocessing history", True)
+            log.info("There are no items in the geoprocessing history")
 
 
     def save(self, Enable_automatic_updates=False):
@@ -407,7 +407,7 @@ class MetadataEditor(object):
         :param Enable_automatic_updates: boolean
         :return:
         """
-        log.info("Saving metadata", True)
+        log.info("Saving metadata")
 
         for item in self.items:  # TODO: What's going on here?
             try:
