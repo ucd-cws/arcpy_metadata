@@ -3,7 +3,6 @@ from __future__ import print_function
 import unittest
 import os
 import sys
-import shutil
 import distutils
 from distutils import dir_util
 import tempfile
@@ -19,8 +18,6 @@ import arcpy_metadata as md
 
 # import test element dictionary
 from test_elements import test_elements
-
-
 
 
 class TestMetadataWriteRead(unittest.TestCase):
@@ -202,6 +199,10 @@ class TestMetadataWriteRead(unittest.TestCase):
         print("Raster file")
         self._write_metadata(os.path.join(self.temp_data_folder, r"simple_raster.tif"))
         self._read_metadata(os.path.join(self.temp_data_folder, r"simple_raster.tif"))
+
+
+
+
 
 
 if __name__ == '__main__':
