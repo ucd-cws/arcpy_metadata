@@ -27,17 +27,13 @@ def warning_on_one_line(message, category, filename, lineno, file=None, line=Non
     return '{}: {}\n'.format(category.__name__, message)
 warnings.formatwarning = warning_on_one_line
 
-# TODO: Convert to using logging or logbook - probably logging to keep dependencies down
-try:  # made as part of a larger package - using existing logger, but logging to screen for now if not in that package
-    from log import write as logwrite
-    from log import warning as logwarning
-except ImportError:
-    def logwrite(log_string, autoprint=1):  # match the signature of the expected log function
-        print(log_string)
+import logging
 
-    def logwarning(log_string):
-        print("WARNING: {0:s}".format(log_string))
-
+log = logging.getLogger("arcpy_metadata")
+screen_handler = logging.StreamHandler()  # set up the logging level at debug, but only write INFO or higher to the screen
+log.setLevel(logging.DEBUG)
+screen_handler.setLevel(logging.INFO)
+log.addHandler(screen_handler)
 
 install_dir = arcpy.GetInstallInfo("desktop")["InstallDir"]
 xslt = os.path.join(install_dir, r"Metadata\Stylesheets\gpTools\exact copy of.xslt")
@@ -99,7 +95,7 @@ class MetadataEditor(object):
                     self.metadata_file = os.path.join(self.temp_folder, metadata_filename)
                     if os.path.exists(self.metadata_file):
                         os.remove(self.metadata_file)
-                    logwrite("Exporting metadata to temporary file {0!s}".format(self.metadata_file))
+                    log.debug("Exporting metadata to temporary file {0!s}".format(self.metadata_file))
                     arcpy.XSLTransform_conversion(self.dataset, xslt, self.metadata_file)
                 else:
                     raise TypeError("Cannot read {}. Data type is not supported".format(self.dataset))
@@ -174,9 +170,8 @@ class MetadataEditor(object):
     @staticmethod
     def _create_xml_file(xml_file):
         with open(xml_file, "w") as f:
-            logwrite("Create new file {0!s}".format(xml_file))
+            log.debug("Create new file {0!s}".format(xml_file))
             f.write('<metadata xml:lang="en"></metadata>')
-
 
     def __setattr__(self, n, v):
         """
@@ -399,9 +394,9 @@ class MetadataEditor(object):
             for child in children:
                 element.remove(child)
                 i += 1
-            logwrite("Remove {} item(s) from the geoprocessing history".format(i), True)
+            log.info("Remove {} item(s) from the geoprocessing history".format(i), True)
         else:
-            logwrite("There are no items in the geoprocessing history", True)
+            log.info("There are no items in the geoprocessing history", True)
 
 
     def save(self, Enable_automatic_updates=False):
@@ -412,13 +407,13 @@ class MetadataEditor(object):
         :param Enable_automatic_updates: boolean
         :return:
         """
-        logwrite("Saving metadata", True)
+        log.info("Saving metadata", True)
 
-        for item in self.items:
+        for item in self.items:  # TODO: What's going on here?
             try:
-                print(item.value)
+                log.debug(item.value)
             except:
-                print(item)
+                log.warn(item)
 
         self.elements.write(self.metadata_file)  # overwrites itself
 
@@ -432,7 +427,7 @@ class MetadataEditor(object):
         :return:
         """
         try:
-            logwrite("cleaning up from metadata operation")
+            log.debug("cleaning up from metadata operation")
             if self._workspace_type != 'FileSystem':
                 if os.path.exists(self.metadata_file):
                     os.remove(self.metadata_file)
@@ -442,7 +437,7 @@ class MetadataEditor(object):
                     os.remove(xsl_extras)
 
         except:
-            logwarning("Unable to remove temporary metadata files")
+            log.warning("Unable to remove temporary metadata files")
 
     def finish(self, Enable_automatic_updates=False):
         """
