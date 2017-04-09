@@ -24,7 +24,7 @@ from arcpy_metadata.languages import languages
 warnings.simplefilter('once', DeprecationWarning)
 # Make warnings look nice
 def warning_on_one_line(message, category, filename, lineno, file=None, line=None):
-    return '{}: {}\n'.format(category.__name__, message)
+    return '{0}: {1}\n'.format(category.__name__, message)
 warnings.formatwarning = warning_on_one_line
 
 
@@ -76,7 +76,7 @@ class MetadataEditor(object):
             screen_handler.setLevel(logging.NOTSET)
 
 
-        self.logger.debug("Set logging mode to {}".format(loglevel))
+        self.logger.debug("Set logging mode to {0}".format(loglevel))
 
         if items is None:
             items = list()
@@ -115,7 +115,7 @@ class MetadataEditor(object):
                     self.metadata_file = xml_file
 
                 else:
-                    raise TypeError("Cannot read {}. Data type is not supported".format(self.dataset))
+                    raise TypeError("Cannot read {0}. Data type is not supported".format(self.dataset))
 
             # Metadata for GDB datasets are stored inside the GDB itself.
             # We need to first export them to a temporary file, modify them and then import them back
@@ -128,7 +128,7 @@ class MetadataEditor(object):
                     self.logger.debug("Exporting metadata to temporary file {0!s}".format(self.metadata_file))
                     arcpy.XSLTransform_conversion(self.dataset, xslt, self.metadata_file)
                 else:
-                    raise TypeError("Cannot read {}. Data type is not supported".format(self.dataset))
+                    raise TypeError("Cannot read {0}. Data type is not supported".format(self.dataset))
 
         elif self.metadata_file:  # Check if metadata file is set instead
             self.data_type = 'MetadataFile'
@@ -151,25 +151,25 @@ class MetadataEditor(object):
 
             if "unsupported" in elements[name].keys():
                 if self.data_type in elements[name]["unsupported"]:
-                    self.logger.debug("{} not supported for {}. SKIP".format(name, self.data_type))
+                    self.logger.debug("{0} not supported for {1}. SKIP".format(name, self.data_type))
                     continue
 
             setattr(self, "_{0!s}".format(name), None)
 
             if elements[name]['type'] in ["string", "date", "integer", "float"]:
-                setattr(self, "_{}".format(name), MetadataItem(elements[name]['path'], name, self, sync))
-                if self.__dict__["_{}".format(name)].value is not None:
-                    setattr(self, name, self.__dict__["_{}".format(name)].value.strip())
+                setattr(self, "_{0}".format(name), MetadataItem(elements[name]['path'], name, self, sync))
+                if self.__dict__["_{0}".format(name)].value is not None:
+                    setattr(self, name, self.__dict__["_{0}".format(name)].value.strip())
                 else:
-                    setattr(self, name, self.__dict__["_{}".format(name)].value)
+                    setattr(self, name, self.__dict__["_{0}".format(name)].value)
 
             elif elements[name]['type'] == "attribute":
-                setattr(self, "_{}".format(name), MetadataItem(elements[name]['path'], name, self, sync))
-                if isinstance(self.__dict__["_{}".format(name)].attributes, dict):
+                setattr(self, "_{0}".format(name), MetadataItem(elements[name]['path'], name, self, sync))
+                if isinstance(self.__dict__["_{0}".format(name)].attributes, dict):
                     key = elements[name]['key']
                     values = elements[name]['values']
-                    if key in self.__dict__["_{}".format(name)].attributes.keys():
-                        v = self.__dict__["_{}".format(name)].attributes[elements[name]['key']]
+                    if key in self.__dict__["_{0}".format(name)].attributes.keys():
+                        v = self.__dict__["_{0}".format(name)].attributes[elements[name]['key']]
                         for value in values:
                             if v in value:
                                 setattr(self, name, value[0])
@@ -178,28 +178,28 @@ class MetadataEditor(object):
                     setattr(self, name, None)
 
             elif elements[name]['type'] == "list":
-                setattr(self, "_{}".format(name), MetadataValueList(elements[name]["tagname"], elements[name]['path'], name, self, sync))
+                setattr(self, "_{0}".format(name), MetadataValueList(elements[name]["tagname"], elements[name]['path'], name, self, sync))
                 #setattr(self, name, self.__dict__["_{}".format(name)].value)
                 #setattr(self, name, ListValues(self.__dict__["_{}".format(name)], name))
 
             elif elements[name]['type'] == "language":
-                setattr(self, "_{}".format(name), MetadataLanguage(elements[name]['path'], name, self, sync))
-                if self.__dict__["_{}".format(name)].value is not None:
-                    setattr(self, name, self.__dict__["_{}".format(name)].value.strip())
+                setattr(self, "_{0}".format(name), MetadataLanguage(elements[name]['path'], name, self, sync))
+                if self.__dict__["_{0}".format(name)].value is not None:
+                    setattr(self, name, self.__dict__["_{0}".format(name)].value.strip())
                 else:
-                    setattr(self, name, self.__dict__["_{}".format(name)].value)
+                    setattr(self, name, self.__dict__["_{0}".format(name)].value)
 
             # TODO: turn on sync
             elif elements[name]['type'] == "parent_item":
-                setattr(self, "_{}".format(name), MetadataParentItem(elements[name]['path'], self, elements[name]['elements']))
-                setattr(self, name, self.__dict__["_{}".format(name)])
+                setattr(self, "_{0}".format(name), MetadataParentItem(elements[name]['path'], self, elements[name]['elements']))
+                setattr(self, name, self.__dict__["_{0}".format(name)])
 
             elif elements[name]['type'] == "object_list":
-                setattr(self, "_{}".format(name), MetadataObjectList(elements[name]["tagname"], elements[name]['path'], self, elements[name]['elements'], sync))
+                setattr(self, "_{0}".format(name), MetadataObjectList(elements[name]["tagname"], elements[name]['path'], self, elements[name]['elements'], sync))
                 #setattr(self, name, self.__dict__["_{}".format(name)])
 
             if elements[name] in self.__dict__.keys():
-                self.items.append(getattr(self, "_{}".format(elements[name])))
+                self.items.append(getattr(self, "_{0}".format(elements[name])))
 
         if items:
             self.initialize_items()
@@ -222,65 +222,65 @@ class MetadataEditor(object):
 
             # Warn if property got deprecated, but only if call is made by user, not during initialization
             if "deprecated" in elements[n].keys() and traceback.extract_stack()[-2][2] != "__init__":
-                warnings.warn("Call to deprecated property {}. {}".format(n, elements[n]["deprecated"]), category=DeprecationWarning)
+                warnings.warn("Call to deprecated property {0}. {1}".format(n, elements[n]["deprecated"]), category=DeprecationWarning)
 
             if elements[n]['type'] == "string":
                 if isinstance(v, (str, six.text_type)):
-                    self.__dict__["_{}".format(n)].value = v
+                    self.__dict__["_{0}".format(n)].value = v
                 elif v is None:
-                    self.__dict__["_{}".format(n)].value = ""
+                    self.__dict__["_{0}".format(n)].value = ""
                 else:
                     raise RuntimeWarning("Input value must be of type String")
 
             elif elements[n]['type'] == "date":
                 if isinstance(v, datetime):
-                    self.__dict__["_{}".format(n)].value = datetime.strftime(v, "%Y-%m-%dT%H:%M:%S")
+                    self.__dict__["_{0}".format(n)].value = datetime.strftime(v, "%Y-%m-%dT%H:%M:%S")
                 elif isinstance(v, (str, six.text_type)):
                     try:
                         if len(v) == 8:
                             # try first to convert to datetime to check if format is correct
                             # then write string to file
                             new_value = datetime.strptime(v, "%Y%m%d")
-                            self.__dict__["_{}".format(n)].value = new_value.isoformat()
+                            self.__dict__["_{0}".format(n)].value = new_value.isoformat()
 
                         else:
                             # try first to convert to datetime to check if format is correct
                             # then write string to fil
                             new_value = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S")
-                            self.__dict__["_{}".format(n)].value = new_value.isoformat()
+                            self.__dict__["_{0}".format(n)].value = new_value.isoformat()
 
                     except ValueError:
                         RuntimeWarning("Input value must be of type a Datetime or a String ('%Y%m%d' or '%Y-%m-%dT%H:%M:%S')")
                 elif v is None:
-                    self.__dict__["_{}".format(n)].value = ""
+                    self.__dict__["_{0}".format(n)].value = ""
                 else:
                     raise RuntimeWarning("Input value must be of type a Date or a String ('yyyymmdd')")
 
             elif elements[n]['type'] == "integer":
                 if isinstance(v, int):
-                    self.__dict__["_{}".format(n)].value = str(v)
+                    self.__dict__["_{0}".format(n)].value = str(v)
                 elif isinstance(v, str):
                     try:
                         new_value = int(v)
-                        self.__dict__["_{}".format(n)].value = str(new_value)
+                        self.__dict__["_{0}".format(n)].value = str(new_value)
                     except ValueError:
                         RuntimeWarning("Input value must be of type Integer")
                 elif v is None:
-                    self.__dict__["_{}".format(n)].value = ""
+                    self.__dict__["_{0}".format(n)].value = ""
                 else:
                     raise RuntimeWarning("Input value must be of type Integer")
 
             elif elements[n]['type'] == "float":
                 if isinstance(v, float):
-                    self.__dict__["_{}".format(n)].value = str(v)
+                    self.__dict__["_{0}".format(n)].value = str(v)
                 elif isinstance(v, (str, six.text_type)):
                     try:
                         new_value = float(v)
-                        self.__dict__["_{}".format(n)].value = str(new_value)
+                        self.__dict__["_{0}".format(n)].value = str(new_value)
                     except ValueError:
                         RuntimeWarning("Input value must be of type Float")
                 elif v is None:
-                    self.__dict__["_{}".format(n)].value = ""
+                    self.__dict__["_{0}".format(n)].value = ""
                 else:
                     raise RuntimeWarning("Input value must be of type Float")
 
@@ -291,33 +291,33 @@ class MetadataEditor(object):
                     done = False
                     for value in values:
                         if v in value:
-                            self.__dict__["_{}".format(n)].attributes[key] = value[1]
+                            self.__dict__["_{0}".format(n)].attributes[key] = value[1]
                             done = True
                             break
                     if not done:
-                        raise RuntimeWarning("Input value must be one of: {}".format(values))
+                        raise RuntimeWarning("Input value must be one of: {0}".format(values))
                 else:
-                    raise RuntimeWarning("Input value must be one of: {}".format(values))
+                    raise RuntimeWarning("Input value must be one of: {0}".format(values))
 
             elif elements[n]['type'] == "list":
                 if isinstance(v, list):
                     #self.__dict__[n].value = ListValues(self.__dict__["_{}".format(n)], v)
-                    self.__dict__["_{}".format(n)].value = v
+                    self.__dict__["_{0}".format(n)].value = v
                 elif isinstance(v, MetadataValueListHelper):
-                    self.__dict__["_{}".format(n)].value = v
+                    self.__dict__["_{0}".format(n)].value = v
                 else:
                     raise RuntimeWarning("Input value must be of type List")
 
             elif elements[n]['type'] == "language":
                 if v in languages.keys():
                     #self.__dict__["_{}".format(n)].value = v
-                    self.__dict__["_{}".format(n)].attr_lang = {"value": languages[v][0]}
-                    self.__dict__["_{}".format(n)].attr_country = {"value": languages[v][1]}
+                    self.__dict__["_{0}".format(n)].attr_lang = {"value": languages[v][0]}
+                    self.__dict__["_{0}".format(n)].attr_country = {"value": languages[v][1]}
                     a = 1
                 elif v is None:
-                    self.__dict__["_{}".format(n)].value = ""
+                    self.__dict__["_{0}".format(n)].value = ""
                 else:
-                    raise RuntimeWarning("Input value must be in {}, an empty String or None".format(str(languages.keys())))
+                    raise RuntimeWarning("Input value must be in {0}, an empty String or None".format(str(languages.keys())))
 
             elif elements[n]['type'] == "parent_item":
                 if isinstance(v, MetadataParentItem):
@@ -327,9 +327,9 @@ class MetadataEditor(object):
 
             elif elements[n]['type'] == "object_list":
                 if isinstance(v, list):
-                    self.__dict__["_{}".format(n)].value = v
+                    self.__dict__["_{0}".format(n)].value = v
                 elif isinstance(v, MetadataObjectList):
-                    self.__dict__["_{}".format(n)].value = v
+                    self.__dict__["_{0}".format(n)].value = v
                 else:
                     raise RuntimeWarning("Input value must be a MetadataOnlineResource object")
 
@@ -346,39 +346,39 @@ class MetadataEditor(object):
 
             # Warn if property got deprecated
             if "deprecated" in elements[n].keys():
-                warnings.warn("Call to deprecated property {}. {}".format(n, elements[n]["deprecated"]), category=DeprecationWarning)
+                warnings.warn("Call to deprecated property {0}. {1}".format(n, elements[n]["deprecated"]), category=DeprecationWarning)
 
-            if self.__dict__["_{}".format(n)].value == "" and elements[n]['type'] in ["integer", "float", "date"]:
+            if self.__dict__["_{0}".format(n)].value == "" and elements[n]['type'] in ["integer", "float", "date"]:
                 return None
             elif elements[n]['type'] == "integer":
-                return int(self.__dict__["_{}".format(n)].value)
+                return int(self.__dict__["_{0}".format(n)].value)
             elif elements[n]['type'] == "float":
-                return float(self.__dict__["_{}".format(n)].value)
+                return float(self.__dict__["_{0}".format(n)].value)
             elif elements[n]['type'] == "date":
-                if len(self.__dict__["_{}".format(n)].value) == 8:
-                    return datetime.strptime(self.__dict__["_{}".format(n)].value, "%Y%m%d")
+                if len(self.__dict__["_{0}".format(n)].value) == 8:
+                    return datetime.strptime(self.__dict__["_{0}".format(n)].value, "%Y%m%d")
                 else:
-                    return datetime.strptime(self.__dict__["_{}".format(n)].value, "%Y-%m-%dT%H:%M:%S")
+                    return datetime.strptime(self.__dict__["_{0}".format(n)].value, "%Y-%m-%dT%H:%M:%S")
             elif elements[n]['type'] == "parent_item":
-                return self.__dict__["_{}".format(n)]
+                return self.__dict__["_{0}".format(n)]
             elif elements[n]['type'] == "language":
-                return self.__dict__["_{}".format(n)].get_lang()
+                return self.__dict__["_{0}".format(n)].get_lang()
             elif elements[n]['type'] == 'attribute':
                 key = elements[n]['key']
                 values = elements[n]['values']
-                if key in self.__dict__["_{}".format(n)].attributes:
-                    v = self.__dict__["_{}".format(n)].attributes[key]
+                if key in self.__dict__["_{0}".format(n)].attributes:
+                    v = self.__dict__["_{0}".format(n)].attributes[key]
                     for value in values:
                         if v in value:
                             return value[0]
                 else:
                     return None
             elif elements[n]['type'] == "list":
-                return MetadataValueListHelper(self.__dict__["_{}".format(n)])
+                return MetadataValueListHelper(self.__dict__["_{0}".format(n)])
             elif elements[n]['type'] == "object_list":
-                return MetadataObjectListHelper(self.__dict__["_{}".format(n)])
+                return MetadataObjectListHelper(self.__dict__["_{0}".format(n)])
             else:
-                return self.__dict__["_{}".format(n)].value
+                return self.__dict__["_{0}".format(n)].value
         else:
             # return self.__dict__["_{}".format(n)]
             return self.__dict__[n]
@@ -442,7 +442,7 @@ class MetadataEditor(object):
             for child in children:
                 element.remove(child)
                 i += 1
-            self.logger.info("Remove {} item(s) from the geoprocessing history".format(i))
+            self.logger.info("Remove {0} item(s) from the geoprocessing history".format(i))
         else:
             self.logger.info("There are no items in the geoprocessing history")
 
