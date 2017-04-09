@@ -4,8 +4,7 @@ import xml
 import six
 import warnings
 import traceback
-
-from datetime import date
+import logging
 from datetime import datetime
 
 from arcpy_metadata.metadata_constructors import MetadataItem
@@ -20,6 +19,7 @@ from arcpy_metadata.metadata_items import MetadataLanguage
 from arcpy_metadata.elements import elements
 from arcpy_metadata.languages import languages
 
+# TODO: Have logger handle deprecation warnings
 # turn on warnings for deprecation once
 warnings.simplefilter('once', DeprecationWarning)
 # Make warnings look nice
@@ -27,13 +27,7 @@ def warning_on_one_line(message, category, filename, lineno, file=None, line=Non
     return '{}: {}\n'.format(category.__name__, message)
 warnings.formatwarning = warning_on_one_line
 
-import logging
 
-log = logging.getLogger("arcpy_metadata")
-screen_handler = logging.StreamHandler()  # set up the logging level at debug, but only write INFO or higher to the screen
-log.setLevel(logging.DEBUG)
-screen_handler.setLevel(logging.INFO)
-log.addHandler(screen_handler)
 
 install_dir = arcpy.GetInstallInfo("desktop")["InstallDir"]
 xslt = os.path.join(install_dir, r"Metadata\Stylesheets\gpTools\exact copy of.xslt")
@@ -47,10 +41,46 @@ class MetadataEditor(object):
     """
 
     def __init__(self, dataset=None, metadata_file=None, items=None,
-                 temp_folder=metadata_temp_folder):
+                 temp_folder=metadata_temp_folder, loglevel='INFO'):
+
+        screen_handler = None
+        self.logger = logging.getLogger("__name__")
+        if not len(self.logger.handlers):
+            screen_handler = logging.StreamHandler()  # set up the logging level at debug, but only write INFO or higher to the screen
+            self.logger.setLevel(logging.DEBUG)
+            self.logger.addHandler(screen_handler)
+        else:
+            for handler in self.logger.handlers:
+                # take the first one available
+                if isinstance(handler, logging.StreamHandler):
+                    screen_handler = handler
+                    break
+
+            # just making sure that there is a screenhandler
+            if screen_handler is None:
+                screen_handler = logging.StreamHandler()
+                self.logger.setLevel(logging.DEBUG)
+                self.logger.addHandler(screen_handler)
+
+        if loglevel.upper() == "CRITICAL":
+            screen_handler.setLevel(logging.CRITICAL)
+        elif loglevel.upper() == "ERROR":
+            screen_handler.setLevel(logging.ERROR)
+        elif loglevel.upper() == "WARNING":
+            screen_handler.setLevel(logging.WARNING)
+        elif loglevel.upper() == "INFO":
+            screen_handler.setLevel(logging.INFO)
+        elif loglevel.upper() == "DEBUG":
+            screen_handler.setLevel(logging.DEBUG)
+        else:
+            screen_handler.setLevel(logging.NOTSET)
+
+
+        self.logger.debug("Set logging mode to {}".format(loglevel))
 
         if items is None:
             items = list()
+
         self.items = items
         self.metadata_file = metadata_file
         self.elements = xml.etree.ElementTree.ElementTree()
@@ -95,12 +125,13 @@ class MetadataEditor(object):
                     self.metadata_file = os.path.join(self.temp_folder, metadata_filename)
                     if os.path.exists(self.metadata_file):
                         os.remove(self.metadata_file)
-                    log.debug("Exporting metadata to temporary file {0!s}".format(self.metadata_file))
+                    self.logger.debug("Exporting metadata to temporary file {0!s}".format(self.metadata_file))
                     arcpy.XSLTransform_conversion(self.dataset, xslt, self.metadata_file)
                 else:
                     raise TypeError("Cannot read {}. Data type is not supported".format(self.dataset))
 
         elif self.metadata_file:  # Check if metadata file is set instead
+            self.data_type = 'MetadataFile'
             if self.metadata_file.endswith('.xml'):
                 if not os.path.exists(self.metadata_file):
                     self._create_xml_file(self.metadata_file)
@@ -116,7 +147,13 @@ class MetadataEditor(object):
             if "sync" in elements[name].keys():
                 sync = elements[name]["sync"]
             else:
-                sync = True
+                sync = None
+
+            if "unsupported" in elements[name].keys():
+                if self.data_type in elements[name]["unsupported"]:
+                    self.logger.debug("{} not supported for {}. SKIP".format(name, self.data_type))
+                    continue
+
             setattr(self, "_{0!s}".format(name), None)
 
             if elements[name]['type'] in ["string", "date", "integer", "float"]:
@@ -152,6 +189,7 @@ class MetadataEditor(object):
                 else:
                     setattr(self, name, self.__dict__["_{}".format(name)].value)
 
+            # TODO: turn on sync
             elif elements[name]['type'] == "parent_item":
                 setattr(self, "_{}".format(name), MetadataParentItem(elements[name]['path'], self, elements[name]['elements']))
                 setattr(self, name, self.__dict__["_{}".format(name)])
@@ -166,11 +204,9 @@ class MetadataEditor(object):
         if items:
             self.initialize_items()
 
-
-    @staticmethod
-    def _create_xml_file(xml_file):
+    def _create_xml_file(self, xml_file):
         with open(xml_file, "w") as f:
-            log.debug("Create new file {0!s}".format(xml_file))
+            self.logger.debug("Create new file {0!s}".format(xml_file))
             f.write('<metadata xml:lang="en"></metadata>')
 
     def __setattr__(self, n, v):
@@ -197,16 +233,24 @@ class MetadataEditor(object):
                     raise RuntimeWarning("Input value must be of type String")
 
             elif elements[n]['type'] == "date":
-                if isinstance(v, date):
-                    self.__dict__["_{}".format(n)].value = date.strftime(v, "%Y%m%d")
-
+                if isinstance(v, datetime):
+                    self.__dict__["_{}".format(n)].value = datetime.strftime(v, "%Y-%m-%dT%H:%M:%S")
                 elif isinstance(v, (str, six.text_type)):
                     try:
-                        new_value = datetime.strptime(v, "%Y%m%d").date()
-                        self.__dict__["_{}".format(n)].value = date.strftime(new_value, "%Y%m%d")
+                        if len(v) == 8:
+                            # try first to convert to datetime to check if format is correct
+                            # then write string to file
+                            new_value = datetime.strptime(v, "%Y%m%d")
+                            self.__dict__["_{}".format(n)].value = new_value.isoformat()
+
+                        else:
+                            # try first to convert to datetime to check if format is correct
+                            # then write string to fil
+                            new_value = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S")
+                            self.__dict__["_{}".format(n)].value = new_value.isoformat()
 
                     except ValueError:
-                        RuntimeWarning("Input value must be of type a Date or a String ('yyyymmdd')")
+                        RuntimeWarning("Input value must be of type a Datetime or a String ('%Y%m%d' or '%Y-%m-%dT%H:%M:%S')")
                 elif v is None:
                     self.__dict__["_{}".format(n)].value = ""
                 else:
@@ -311,7 +355,10 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "float":
                 return float(self.__dict__["_{}".format(n)].value)
             elif elements[n]['type'] == "date":
-                return datetime.strptime(self.__dict__["_{}".format(n)].value, "%Y%m%d").date()
+                if len(self.__dict__["_{}".format(n)].value) == 8:
+                    return datetime.strptime(self.__dict__["_{}".format(n)].value, "%Y%m%d")
+                else:
+                    return datetime.strptime(self.__dict__["_{}".format(n)].value, "%Y-%m-%dT%H:%M:%S")
             elif elements[n]['type'] == "parent_item":
                 return self.__dict__["_{}".format(n)]
             elif elements[n]['type'] == "language":
@@ -333,7 +380,8 @@ class MetadataEditor(object):
             else:
                 return self.__dict__["_{}".format(n)].value
         else:
-            return self.__dict__["_{}".format(n)]
+            # return self.__dict__["_{}".format(n)]
+            return self.__dict__[n]
 
     def get_datatype(self):
         """
@@ -394,9 +442,9 @@ class MetadataEditor(object):
             for child in children:
                 element.remove(child)
                 i += 1
-            log.info("Remove {} item(s) from the geoprocessing history".format(i))
+            self.logger.info("Remove {} item(s) from the geoprocessing history".format(i))
         else:
-            log.info("There are no items in the geoprocessing history")
+            self.logger.info("There are no items in the geoprocessing history")
 
 
     def save(self, Enable_automatic_updates=False):
@@ -407,19 +455,25 @@ class MetadataEditor(object):
         :param Enable_automatic_updates: boolean
         :return:
         """
-        log.info("Saving metadata")
+        self.logger.info("Saving metadata")
 
         for item in self.items:  # TODO: What's going on here?
             try:
-                log.debug(item.value)
+                self.logger.debug(item.value)
             except:
-                log.warn(item)
+                self.logger.warn(item)
 
         self.elements.write(self.metadata_file)  # overwrites itself
 
         if self._workspace_type != 'FileSystem':
+
+            if Enable_automatic_updates:
+                updates = 'ENABLED'
+            else:
+                updates = 'DISABLED'
+
             arcpy.ImportMetadata_conversion(self.metadata_file, "FROM_ARCGIS", self.dataset,
-                                            Enable_automatic_updates=Enable_automatic_updates)
+                                            Enable_automatic_updates=updates)
 
     def cleanup(self):
         """

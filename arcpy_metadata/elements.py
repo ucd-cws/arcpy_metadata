@@ -113,16 +113,6 @@ contact_elements = {
     }
 }
 
-language_elements = {
-    "language": {
-        "path": "languageCode",
-        "type": "string"},
-
-    "country": {
-        "path": "countryCode",
-        "type": "string"}
-}
-
 online_resource_elements = {
     "link": {
         "path": "linkage",
@@ -206,7 +196,9 @@ elements = {
     "file_identifier": {
         "path": "mdFileID",
         "type": "string",
-        "sync": False},
+        #"sync": False,
+        "unsupported": ["FeatureClass", "Table", "RasterDataset", "RasterCatalog", "MosaicDataset"]
+    },
 
     "identifier_code1": {
         "path": "dataIdInfo/idCitation/citId/identCode",
@@ -225,9 +217,13 @@ elements = {
         "type": "string"},
 
     "language": {
-        "path": "dataIdInfo/dataLang",
-        "type": "language",
-        "elements": language_elements},
+        "path": "dataIdInfo/dataLang/languageCode",
+        "type": "attribute",
+        "key": "value",
+        "values": [("english", "eng"),
+                   ("spanish", "spa"),
+                   ("french", "fre")]
+    },
 
     "last_update": {
         "path": "dataIdInfo/idCitation/date/reviseDate",
@@ -255,8 +251,13 @@ elements = {
         "type": "integer"},
 
     "metadata_language": {
-        "path": "dataIdInfo/mdLang",
-        "type": "language"},
+        "path": "dataIdInfo/mdLang/languageCode",
+        "type": "attribute",
+        "key": "value",
+        "values": [("english", "eng"),
+                   ("spanish", "spa"),
+                   ("french", "fre")]
+    },
 
     "min_scale": {
         "path": "Esri/scaleRange/minScale",
@@ -314,15 +315,15 @@ elements = {
         "type": "string"},
 
     "temporal_extent_end": {
-        "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmEnd",
+        "path": "dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Period/tmEnd",
         "type": "date"},
 
     "temporal_extent_instance": {
-        "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Instant/tmPosition",
+        "path": "dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Instant/tmPosition",
         "type": "date"},
 
     "temporal_extent_start": {
-        "path": "dataIdInfo/dataExt/tempEle/exTemp/TM_Period/tmBegin",
+        "path": "dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Period/tmBegin",
         "type": "date"},
 
     "update_frequency": {
