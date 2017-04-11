@@ -55,7 +55,7 @@ class TestMetadataWriteRead(unittest.TestCase):
             try:
                 arcpy.Delete_management(workspace)
             except arcpy.ExecuteError:
-                print("cannot delete {} due to lock".format(workspace))
+                print("cannot delete {0} due to lock".format(workspace))
                 done = False
 
         # delete directory with all remaining files
@@ -102,7 +102,7 @@ class TestMetadataWriteRead(unittest.TestCase):
                         setattr(metadata, key, test_elements[key])
 
             else:
-                print("{} does not exist. SKIP".format(key))
+                print("{0} does not exist. SKIP".format(key))
 
         metadata.save()  # save the metadata back to the original source feature class and cleanup. Without calling finish(), your edits are NOT saved!
 
@@ -132,23 +132,23 @@ class TestMetadataWriteRead(unittest.TestCase):
                         else:
                             test_date = datetime.strptime(test_elements[key], "%Y-%m-%dT%H:%M:%S")
 
-                        print("{}: before = {}; after = {}".format(key,test_date,item))
+                        print("{0}: before = {1}; after = {2}".format(key,test_date,item))
 
                         self.assertEqual(item, test_date,
-                                     'Value for element {} was not correctly saved'.format(key))
+                                     'Value for element {0} was not correctly saved'.format(key))
 
                     else:
-                        print("{}: before = {}; after = {}".format(key, test_elements[key], item))
+                        print("{0}: before = {1}; after = {2}".format(key, test_elements[key], item))
                         self.assertEqual(item, test_elements[key],
-                                     'Value for element {} was not correctly saved'.format(key))
+                                     'Value for element {0} was not correctly saved'.format(key))
 
                 # parent items (eg contacts)
                 elif isinstance(test_elements[key], dict):
                     for k in test_elements[key].keys():
                         child = test_elements[key][k]
-                        print("{}.{}: before = {}; after = {}".format(key, k, child, getattr(item, k)))
+                        print("{0}.{1}: before = {2}; after = {3}".format(key, k, child, getattr(item, k)))
                         self.assertEqual(getattr(item, k), child,
-                                         'Value for element {}.{} was not correctly saved'.format(key, k))
+                                         'Value for element {0}.{1} was not correctly saved'.format(key, k))
 
                 # lists
                 elif isinstance(test_elements[key], list):
@@ -164,18 +164,18 @@ class TestMetadataWriteRead(unittest.TestCase):
                         for sub_element in sorted_elements:
                             for k in sub_element:
                                 child = sub_element[k]
-                                print("{}[{}].{}: before = {}; after = {}".format(key, i, k, child, getattr(sorted_items[i], k)))
+                                print("{0}[{1}].{2}: before = {3}; after = {4}".format(key, i, k, child, getattr(sorted_items[i], k)))
                                 self.assertEqual(getattr(sorted_items[i], k), child,
-                                                 'Value for element {}[{}].{} was not correctly saved'.format(key, i, k))
+                                                 'Value for element {0}[{1}].{2} was not correctly saved'.format(key, i, k))
                             i += 1
                     # simple lists
                     else:
-                        print("{}: before = {}; after = {}".format(key, test_elements[key], item))
+                        print("{0}: before = {1}; after = {2}".format(key, test_elements[key], item))
                         self.assertEqual(item.sort(), test_elements[key].sort(),
-                                         'Value for element {} was not correctly saved'.format(key))
+                                         'Value for element {0} was not correctly saved'.format(key))
 
             else:
-                print("{} does not exist. SKIP".format(key))
+                print("{0} does not exist. SKIP".format(key))
 
         del metadata
         gc.collect()

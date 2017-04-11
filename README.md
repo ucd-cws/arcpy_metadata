@@ -15,9 +15,24 @@ Using arcpy_metadata
 
 Creating the Metadata Editor
 
+Edit existing metadata for Shapefiles, Rasters, FeatureClasses, RasterDatasets, MosaicDatasets or Layers
 ```python
 import arcpy_metadata as md
 metadata = md.MetadataEditor(path_to_some_feature_class)  # currently supports Shapefiles, FeatureClasses, RasterDatasets and Layers
+```
+
+
+Edit or create an XML file directly
+```python
+import arcpy_metadata as md
+metadata = md.MetadataEditor(metadata_file="path/to/metadata_file.xml")  # currently supports Shapefiles, FeatureClasses, RasterDatasets and Layers
+```
+
+
+Choose your log level
+```python
+metadata = md.MetadataEditor(path_to_some_feature_class, loglevel="DEBUG")  # use any of CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET, dafault is INFO
+
 ```
 
 Get text items (returns string)
@@ -73,7 +88,7 @@ last_update = metadata.last_update
 last_update_year = metadata.last_update.year
 ```
 
-Change date items (takes both date objects and formated string (yyyymmdd)
+Change date items (excepts datetime objects and formated string (yyyymmdd, yyyy-mm-ddThh:mm:ss)
 
 ```python
 from datetime import date
@@ -136,10 +151,6 @@ If you want to enable automatic updates of your metadata (feature classes only) 
 ```python
 metadata.finish(True) 
 ```
-This might overwrite some of your recent edits including the title.
-
-The code is based on a set of core classes that provide set/append/prepend operations, and we would love pull requests that add classes or attributes to cover additional portions of metadata specs.
-
 
 Supported items
 ---------------
@@ -227,6 +238,12 @@ Known limitations
 Does not yet support all metadata items.
 
 arcpy_metadata only works with 32-bit Python. We use arcpy.XSLTransform_conversion() to extract metadata from geodatabases. 64bit arcpy python bindings for background processing [do not support](http://desktop.arcgis.com/en/arcmap/latest/analyze/executing-tools/64bit-background.htm) tools inside the metadata conversion toolset.
+
+
+How to contribute
+-------------
+Contributions are well come! Please fork and submit pull requests.
+If you are missing a particular metadata attribute, you can easiy add them [here](https://github.com/ucd-cws/arcpy_metadata/blob/master/arcpy_metadata/elements.py). Don't forget to also add them to the [test cases](https://github.com/ucd-cws/arcpy_metadata/blob/master/tests/test_elements.py) to make sure everything works as expected
 
 
 Acknowledgements

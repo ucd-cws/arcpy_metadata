@@ -357,12 +357,12 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
         self.current_items = []
         for item in self.parent.elements.find(self.path):
             if item.tag == self.tag_name:
-                new_path = "{}/{}".format(self.path, tagname)
+                new_path = "{0}/{1}".format(self.path, tagname)
                 child = MetadataParentItem(new_path, self.parent, child_elements, len(self.current_items))
                 self.current_items.append(child)
 
     def new(self):
-        new_path = "{}/{}".format(self.path, self.tag_name)
+        new_path = "{0}/{1}".format(self.path, self.tag_name)
         child = MetadataParentItem(new_path, self.parent, self.child_elements, len(self.current_items)+1)
         self.current_items.append(child)
 
@@ -433,8 +433,8 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
 
                 path = self.child_elements[element]["path"]
 
-                if "_{}".format(element) not in self.__dict__.keys():
-                    setattr(self, "_{}".format(element), self._create_item(path))
+                if "_{0}".format(element) not in self.__dict__.keys():
+                    setattr(self, "_{0}".format(element), self._create_item(path))
                     i = 0
                 else:
                     i += 1
@@ -449,22 +449,22 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
                 if element_type == "attribute":
                     key = self.child_elements[n]["key"]
                     if v is None or v == "":
-                        self.__dict__["_{}".format(n)].element.attrib[key] = ""
+                        self.__dict__["_{0}".format(n)].element.attrib[key] = ""
                     else:
                         allowed_values = []
                         found = False
                         for value in self.child_elements[n]["values"]:
                             allowed_values.append(value[0])
                             if v == value[0]:
-                                self.__dict__["_{}".format(n)].element.attrib[key] = value[1]
+                                self.__dict__["_{0}".format(n)].element.attrib[key] = value[1]
                                 found = True
                         if not found:
-                            raise TypeError("Value must be in {}".format(allowed_values))
+                            raise TypeError("Value must be in {0}".format(allowed_values))
 
                 elif isinstance(v, (str, unicode)):
-                    self.__dict__["_{}".format(n)].element.text = v
+                    self.__dict__["_{0}".format(n)].element.text = v
                 elif v is None:
-                    self.__dict__["_{}".format(n)].element.text = ""
+                    self.__dict__["_{0}".format(n)].element.text = ""
                 else:
                     raise RuntimeWarning("Input value must be of type String or None")
             else:
@@ -478,8 +478,8 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
             if element_type == "attribute":
                 key = self.child_elements[name]["key"]
                 values = self.child_elements[name]["values"]
-                if key in self.__dict__["_{}".format(name)].element.attrib.keys():
-                    v = self.__dict__["_{}".format(name)].element.attrib[key]
+                if key in self.__dict__["_{0}".format(name)].element.attrib.keys():
+                    v = self.__dict__["_{0}".format(name)].element.attrib[key]
                     for value in values:
                         if v in value:
                             return value[0]
@@ -488,7 +488,7 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
 
             else:
                 #return self.__dict__["_{}".format(name)].value
-                return self.__dict__["_{}".format(name)].element.text # should be the same"
+                return self.__dict__["_{0}".format(name)].element.text # should be the same"
 
         else:
             return self.__dict__[name]
