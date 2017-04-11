@@ -73,9 +73,9 @@ class MetadataLanguage(MetadataParentItemConstructor):
         else:
             if n in self.child_elements.keys():
                 if isinstance(v, (str, unicode)):
-                    self.__dict__["_{}".format(n)].element.text = v
+                    self.__dict__["_{0}".format(n)].element.text = v
                 elif v is None:
-                    self.__dict__["_{}".format(n)].element.text = ""
+                    self.__dict__["_{0}".format(n)].element.text = ""
                 else:
                     raise RuntimeWarning("Input value must be of type String or None")
             else:
@@ -84,7 +84,7 @@ class MetadataLanguage(MetadataParentItemConstructor):
     def __getattr__(self, name):
 
         if name != "child_elements" and name in self.child_elements.keys():
-                return self.__dict__["_{}".format(name)].element.text
+                return self.__dict__["_{0}".format(name)].element.text
         #elif name == "value":
         #    return self.element
         elif name == "attr_lang":
