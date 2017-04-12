@@ -481,7 +481,7 @@ class MetadataEditor(object):
         :return:
         """
         try:
-            log.debug("cleaning up from metadata operation")
+            self.logger.debug("cleaning up from metadata operation")
             if self._workspace_type != 'FileSystem':
                 if os.path.exists(self.metadata_file):
                     os.remove(self.metadata_file)
@@ -491,7 +491,7 @@ class MetadataEditor(object):
                     os.remove(xsl_extras)
 
         except:
-            log.warning("Unable to remove temporary metadata files")
+            self.logger.warn("Unable to remove temporary metadata files")
 
     def finish(self, Enable_automatic_updates=False):
         """
