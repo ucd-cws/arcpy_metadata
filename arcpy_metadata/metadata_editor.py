@@ -491,7 +491,7 @@ class MetadataEditor(object):
                     os.remove(xsl_extras)
 
         except:
-            log.warning("Unable to remove temporary metadata files")
+            self.logger.warn("Unable to remove temporary metadata files")
 
     def finish(self, Enable_automatic_updates=False):
         """
