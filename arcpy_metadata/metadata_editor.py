@@ -6,6 +6,8 @@ import warnings
 import traceback
 import logging
 from datetime import datetime
+from datetime import date
+from datetime import time
 
 from arcpy_metadata.metadata_constructors import MetadataItem
 from arcpy_metadata.metadata_constructors import MetadataValueList
@@ -156,7 +158,7 @@ class MetadataEditor(object):
 
             setattr(self, "_{0!s}".format(name), None)
 
-            if elements[name]['type'] in ["string", "date", "integer", "float"]:
+            if elements[name]['type'] in ["string", "datetime", "date", "time", "integer", "float"]:
                 setattr(self, "_{0}".format(name), MetadataItem(elements[name]['path'], name, self, sync))
                 if self.__dict__["_{0}".format(name)].value is not None:
                     setattr(self, name, self.__dict__["_{0}".format(name)].value.strip())
@@ -232,15 +234,25 @@ class MetadataEditor(object):
                 else:
                     raise RuntimeWarning("Input value must be of type String")
 
-            elif elements[n]['type'] == "date":
+            elif elements[n]['type'] == "datetime":
+
                 if isinstance(v, datetime):
                     self.__dict__["_{0}".format(n)].value = datetime.strftime(v, "%Y-%m-%dT%H:%M:%S")
                 elif isinstance(v, (str, six.text_type)):
+
+                    # remove all whitespaces for easier handling
+                    v = "".join(v.split())
+
                     try:
                         if len(v) == 8:
                             # try first to convert to datetime to check if format is correct
                             # then write string to file
                             new_value = datetime.strptime(v, "%Y%m%d")
+                            self.__dict__["_{0}".format(n)].value = new_value.isoformat()
+                        elif len(v) == 10:
+                            # try first to convert to datetime to check if format is correct
+                            # then write string to file
+                            new_value = datetime.strptime(v, "%Y-%m-%d")
                             self.__dict__["_{0}".format(n)].value = new_value.isoformat()
 
                         else:
@@ -250,11 +262,76 @@ class MetadataEditor(object):
                             self.__dict__["_{0}".format(n)].value = new_value.isoformat()
 
                     except ValueError:
-                        RuntimeWarning("Input value must be of type a Datetime or a String ('%Y%m%d' or '%Y-%m-%dT%H:%M:%S')")
+                        RuntimeWarning(
+                            "Input value must be of type a Datetime or a String ('%Y%m%d', '%Y-%m-%d' or '%Y-%m-%dT%H:%M:%S')")
                 elif v is None:
                     self.__dict__["_{0}".format(n)].value = ""
                 else:
                     raise RuntimeWarning("Input value must be of type a Date or a String ('yyyymmdd')")
+
+            elif elements[n]['type'] == "date":
+                if isinstance(v, date):
+                    self.__dict__["_{0}".format(n)].value = datetime.strftime(v, "%Y-%m-%d")
+                elif isinstance(v, (str, six.text_type)):
+
+                    # remove all whitespaces for easier handling
+                    v = "".join(v.split())
+
+                    try:
+                        if len(v) == 8:
+                            # try first to convert to datetime to check if format is correct
+                            # then write string to file
+                            new_value = datetime.strptime(v, "%Y%m%d")
+                            self.__dict__["_{0}".format(n)].value = new_value.date().isoformat()
+                        elif len(v) == 10:
+                            # try first to convert to datetime to check if format is correct
+                            # then write string to file
+                            new_value = datetime.strptime(v, "%Y-%m-%d")
+                            self.__dict__["_{0}".format(n)].value = new_value.date().isoformat()
+
+                        else:
+                            # try first to convert to datetime to check if format is correct
+                            # then write string to fil
+                            new_value = datetime.date().strptime(v, "%Y-%m-%d")
+                            self.__dict__["_{0}".format(n)].value = new_value.date().isoformat()
+
+                    except ValueError:
+                        RuntimeWarning("Input value must be of type a Datetime.date or a String ('%Y%m%d' or '%Y-%m-%d'")
+                elif v is None:
+                    self.__dict__["_{0}".format(n)].value = ""
+                else:
+                    raise RuntimeWarning("Input value must be of type a Date or a String ('yyyymmdd')")
+
+            elif elements[n]['type'] == "time":
+                if isinstance(v, time):
+                    self.__dict__["_{0}".format(n)].value = datetime.strftime(v, "%H:%M:%S")
+                elif isinstance(v, (str, six.text_type)):
+
+                    # remove all whitespaces for easier handling
+                    v = "".join(v.split())
+
+                    try:
+                        if len(v) == 8 and v.find(":") == -1:
+                            new_value = datetime.strptime(v, "%H%M%S%f")
+                            self.__dict__["_{0}".format(n)].value = new_value.time().isoformat()
+                        elif len(v) <= 8:
+                            # try first to convert to datetime to check if format is correct
+                            # then write string to file
+                            new_value = datetime.strptime(v, "%H:%M:%S")
+                            self.__dict__["_{0}".format(n)].value = new_value.time().isoformat()
+                        else:
+                            # try first to convert to datetime to check if format is correct
+                            # then write string to file
+                            new_value = datetime.strptime(v, "%I:%M:%S%p")
+                            self.__dict__["_{0}".format(n)].value = new_value.time().isoformat()
+
+                    except ValueError:
+                        RuntimeWarning(
+                            "Input value must be of type a Datetime.time or a String ('%H:%M:%S' or '%I:%M:%S%p')")
+                elif v is None:
+                    self.__dict__["_{0}".format(n)].value = ""
+                else:
+                    raise RuntimeWarning("Input value must be of type a tatetime.time or a String ('HH:MM:SS')")
 
             elif elements[n]['type'] == "integer":
                 if isinstance(v, int):
@@ -348,17 +425,33 @@ class MetadataEditor(object):
             if "deprecated" in elements[n].keys():
                 warnings.warn("Call to deprecated property {0}. {1}".format(n, elements[n]["deprecated"]), category=DeprecationWarning)
 
-            if self.__dict__["_{0}".format(n)].value == "" and elements[n]['type'] in ["integer", "float", "date"]:
+            if self.__dict__["_{0}".format(n)].value == "" and elements[n]['type'] in ["integer", "float", "datetime", "date", "time"]:
                 return None
             elif elements[n]['type'] == "integer":
                 return int(self.__dict__["_{0}".format(n)].value)
             elif elements[n]['type'] == "float":
                 return float(self.__dict__["_{0}".format(n)].value)
-            elif elements[n]['type'] == "date":
+
+            elif elements[n]['type'] == "datetime":
                 if len(self.__dict__["_{0}".format(n)].value) == 8:
                     return datetime.strptime(self.__dict__["_{0}".format(n)].value, "%Y%m%d")
+                elif len(self.__dict__["_{0}".format(n)].value) == 10:
+                    return datetime.strptime(self.__dict__["_{0}".format(n)].value, "%Y-%m-%d")
                 else:
                     return datetime.strptime(self.__dict__["_{0}".format(n)].value, "%Y-%m-%dT%H:%M:%S")
+            elif elements[n]['type'] == "date":
+                if len(self.__dict__["_{0}".format(n)].value) == 8:
+                    return datetime.strptime(self.__dict__["_{0}".format(n)].value, "%Y%m%d").date()
+                else:
+                    return datetime.strptime(self.__dict__["_{0}".format(n)].value, "%Y-%m-%d").date()
+            elif elements[n]['type'] == "time":
+                if len(self.__dict__["_{0}".format(n)].value) == 8 and self.__dict__["_{0}".format(n)].value.find(":") == -1:
+                    return datetime.strptime(self.__dict__["_{0}".format(n)].value, "%H%M%S%f").time()
+                elif len(self.__dict__["_{0}".format(n)].value) <= 8:
+                    return datetime.strptime(self.__dict__["_{0}".format(n)].value, "%H:%M:%S").time()
+                else:
+                    return datetime.strptime(self.__dict__["_{0}".format(n)].value, "%I:%M:%S%p")
+
             elif elements[n]['type'] == "parent_item":
                 return self.__dict__["_{0}".format(n)]
             elif elements[n]['type'] == "language":
@@ -456,6 +549,18 @@ class MetadataEditor(object):
         :return:
         """
         self.logger.info("Saving metadata")
+
+        # Write meta-metadata
+        self.meta_style = "ISO 19139 Metadata Implementation Specification"
+        if not self.meta_create_date:
+            self.meta_create_date = datetime.now().date().isoformat()
+        if not self.meta_create_time:
+            self.meta_create_time = datetime.now().time().isoformat()
+        self.meta_modification_date = datetime.now().date().isoformat()
+        self.meta_modification_time = datetime.now().time().isoformat()
+        self.meta_format = "1.0"
+        self.meta_profile = "ISO19139"
+        self.meta_publish_status = "editor:arcpy_metadata"
 
         for item in self.items:  # TODO: What's going on here?
             try:
