@@ -227,7 +227,7 @@ elements = {
 
     "last_update": {
         "path": "dataIdInfo/idCitation/date/reviseDate",
-        "type": "date"},
+        "type": "datetime"},
 
     "license": {
         "path": "dataIdInfo/resConst/LegConsts/useLimit",
@@ -258,6 +258,38 @@ elements = {
                    ("spanish", "spa"),
                    ("french", "fre")]
     },
+
+    "meta_style": {
+        "path": "Esri/ArcGISstyle",
+        "type": "string"},
+
+    "meta_create_date": {
+        "path": "Esri/CreaDate",
+        "type": "date"},
+
+    "meta_create_time": {
+        "path": "Esri/CreaTime",
+        "type": "time"},
+
+    "meta_modification_date": {
+        "path": "Esri/ModDate",
+        "type": "date"},
+
+    "meta_modification_time": {
+        "path": "Esri/ModTime",
+        "type": "time"},
+
+    "meta_format": {
+        "path": "Esri/ArcGISFormat",
+        "type": "string"},
+
+    "meta_profile": {
+        "path": "Esri/ArcGISProfile",
+        "type": "string"},
+
+    "meta_publish_status": {
+        "path": "Esri/PublishStatus",
+        "type": "string"},
 
     "min_scale": {
         "path": "Esri/scaleRange/minScale",
@@ -316,15 +348,15 @@ elements = {
 
     "temporal_extent_end": {
         "path": "dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Period/tmEnd",
-        "type": "date"},
+        "type": "datetime"},
 
     "temporal_extent_instance": {
         "path": "dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Instant/tmPosition",
-        "type": "date"},
+        "type": "datetime"},
 
     "temporal_extent_start": {
         "path": "dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Period/tmBegin",
-        "type": "date"},
+        "type": "datetime"},
 
     "update_frequency": {
         "path": "dataIdInfo/resMaint/maintFreq/MaintFreqCd",
@@ -341,6 +373,3 @@ elements = {
         "type": "string"}
 
 }
-
-
-
