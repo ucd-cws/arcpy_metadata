@@ -226,6 +226,8 @@ Online Resource Items
 |Description|description|String|./orDesc|
 |Function|function|String|./orFunct/OnFunctCd|
 
+Don't see the item you need? Read more about how to extend arcpy_metadata to work with other metadata elements it doesn't yet handle in [CONTRIBUTING.md](CONTRIBUTING.md).
+
 Python and ArcGIS Support
 -------------------------
 arcpy_metadata runs on Python 2 and 3, which means it can, at a basic level, be used both with ArcMap and ArcGIS Pro. ArcGIS Pro doesn't yet have some of the metadata export functions that arcpy_metadata relies on though, so, as of version 0.5, you *must* specify a path to a metadata XML file, or use a dataset that already has its metadata in an accessible XML format (e.g. Shapefile), in order to use arcpy_metadata in ArcGIS Pro. All features work in ArcMap/Python 2.
