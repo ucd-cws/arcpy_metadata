@@ -33,6 +33,14 @@ class MetadataValueListHelper(object):
         """
         self.list_items.append(value)
 
+    def insert(self, index, value):
+        """
+        Insert given item to list at specified index location
+        :param value:
+        :return:
+        """
+        self.list_items.insert(index,value)
+
     def remove(self, value):
         """
         Remove given item from list
@@ -276,6 +284,19 @@ class MetadataValueListConstructor(MetadataItemConstructor):
         element = ET.Element(self.tag_name)
         element.text = item
         self.current_items.append(element)
+        self.element._children = self.current_items
+
+    def insert(self, index, item):
+        """
+            Inserts an individual item to the section at specified index location
+            :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag
+                configured on parent object
+            :return:
+        """
+
+        element = ET.Element(self.tag_name)
+        element.text = item
+        self.current_items.insert(index,element)
         self.element._children = self.current_items
 
     def pop(self):
