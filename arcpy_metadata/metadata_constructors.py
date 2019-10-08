@@ -35,11 +35,12 @@ class MetadataValueListHelper(object):
 
     def insert(self, index, value):
         """
-        Insert given item to list at specified index location
-        :param value:
+        Insert given item to list at specified index location. Functions similar to Python list inserts
+        :param index: location in list to insert
+        :param value: the value to insert into the list
         :return:
         """
-        self.list_items.insert(index,value)
+        self.list_items.insert(index, value)
 
     def remove(self, value):
         """
@@ -289,6 +290,7 @@ class MetadataValueListConstructor(MetadataItemConstructor):
     def insert(self, index, item):
         """
             Inserts an individual item to the section at specified index location
+            :param index: location in list to insert
             :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag
                 configured on parent object
             :return:
@@ -296,7 +298,7 @@ class MetadataValueListConstructor(MetadataItemConstructor):
 
         element = ET.Element(self.tag_name)
         element.text = item
-        self.current_items.insert(index,element)
+        self.current_items.insert(index, element)
         self.element._children = self.current_items
 
     def pop(self):
