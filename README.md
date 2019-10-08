@@ -63,6 +63,7 @@ Change list items
 metadata.tags = ["tag1", "tag2"]
 metadata.tags[1] = "another tag"
 metadata.tags.append("new tag")
+metadata.tags.insert(0, "first tag")
 metadata.tags.remove("tag1")
 metadata.tags.pop()
 ```
