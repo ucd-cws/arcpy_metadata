@@ -159,8 +159,9 @@ elements = {
         "type": "string"},
 
     "citation_contact": {
-        "path": "dataIdInfo/idCitation/citRespParty",
-        "type": "parent_item",
+        "path": "dataIdInfo/idCitation",
+        "tagname": "citRespParty",
+        "type": "object_list",
         "elements": contact_elements},
 
     "credits": {
@@ -310,6 +311,10 @@ elements = {
         "path": "dataIdInfo/idPoC",
         "type": "parent_item",
         "elements": contact_elements},
+
+    "pub_date": {
+        "path": "dataIdInfo/idCitation/date/pubDate",
+        "type": "datetime"},
 
     "purpose": {
         "path": "dataIdInfo/idPurp",
