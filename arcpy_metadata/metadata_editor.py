@@ -1,5 +1,4 @@
 import os
-import arcpy
 import xml
 import six
 import warnings
@@ -8,6 +7,8 @@ import logging
 from datetime import datetime
 from datetime import date
 from datetime import time
+
+import arcpy
 
 from arcpy_metadata.metadata_constructors import MetadataItem
 from arcpy_metadata.metadata_constructors import MetadataValueList
@@ -29,10 +30,6 @@ def warning_on_one_line(message, category, filename, lineno, file=None, line=Non
     return '{0}: {1}\n'.format(category.__name__, message)
 warnings.formatwarning = warning_on_one_line
 
-
-
-install_dir = arcpy.GetInstallInfo("desktop")["InstallDir"]
-xslt = os.path.join(install_dir, r"Metadata\Stylesheets\gpTools\exact copy of.xslt")
 metadata_temp_folder = arcpy.env.scratchFolder  # a default temp folder to use - settable by other applications so they can set it once
 
 
@@ -43,7 +40,9 @@ class MetadataEditor(object):
     """
 
     def __init__(self, dataset=None, metadata_file=None, items=None,
-                 temp_folder=metadata_temp_folder, loglevel='INFO'):
+                 temp_folder=metadata_temp_folder, loglevel='INFO',
+                 metadata_export_option="EXACT_COPY",
+                 metadata_import_option="ARCGIS_METADATA"):
 
         screen_handler = None
         self.logger = logging.getLogger("__name__")
@@ -88,6 +87,9 @@ class MetadataEditor(object):
         self.elements = xml.etree.ElementTree.ElementTree()
         self.temp_folder = temp_folder
         self.dataset = dataset
+        
+        self.metadata_export_option = metadata_export_option
+        self.metadata_import_option = metadata_import_option
 
         self._gdb_datasets = ["FeatureClass", "Table", "RasterDataset", "RasterCatalog", "MosaicDataset"]
         self._simple_datasets = ["ShapeFile", "RasterDataset", "Layer"]
@@ -128,7 +130,8 @@ class MetadataEditor(object):
                     if os.path.exists(self.metadata_file):
                         os.remove(self.metadata_file)
                     self.logger.debug("Exporting metadata to temporary file {0!s}".format(self.metadata_file))
-                    arcpy.XSLTransform_conversion(self.dataset, xslt, self.metadata_file)
+                    metadata = arcpy.metadata.Metadata(self.dataset)
+                    metadata.saveAsXML(self.metadata_file, self.metadata_export_option)  # export option configures if it's an exact copy or strips anything out. Defaults to EXACT_COPY
                 else:
                     raise TypeError("Cannot read {0}. Data type is not supported".format(self.dataset))
 
@@ -577,8 +580,9 @@ class MetadataEditor(object):
             else:
                 updates = 'DISABLED'
 
-            arcpy.ImportMetadata_conversion(self.metadata_file, "FROM_ARCGIS", self.dataset,
-                                            Enable_automatic_updates=updates)
+            metadata = arcpy.metadata.Metadata(self.dataset)
+            metadata.importMetadata(self.metadata_file, self.metadata_import_option)
+            metadata.save()
 
     def cleanup(self):
         """
@@ -590,10 +594,6 @@ class MetadataEditor(object):
             if self._workspace_type != 'FileSystem':
                 if os.path.exists(self.metadata_file):
                     os.remove(self.metadata_file)
-
-                xsl_extras = self.metadata_file + "_xslttransfor.log"
-                if os.path.exists(xsl_extras):
-                    os.remove(xsl_extras)
 
         except:
             self.logger.warn("Unable to remove temporary metadata files")
