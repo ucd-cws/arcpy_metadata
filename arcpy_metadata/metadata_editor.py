@@ -203,8 +203,8 @@ class MetadataEditor(object):
                 setattr(self, "_{0}".format(name), MetadataObjectList(elements[name]["tagname"], elements[name]['path'], self, elements[name]['elements'], sync))
                 #setattr(self, name, self.__dict__["_{}".format(name)])
 
-            if elements[name] in self.__dict__.keys():
-                self.items.append(getattr(self, "_{0}".format(elements[name])))
+            if hasattr(self, name):
+                self.items.append(getattr(self, "_{0}".format(name)))
 
         if items:
             self.initialize_items()
@@ -476,7 +476,6 @@ class MetadataEditor(object):
             else:
                 return self.__dict__["_{0}".format(n)].value
         else:
-            # return self.__dict__["_{}".format(n)]
             return self.__dict__[n]
 
     def get_datatype(self):
