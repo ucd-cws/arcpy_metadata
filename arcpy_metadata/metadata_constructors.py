@@ -179,17 +179,22 @@ class MetadataItemConstructor(object):
         e_tree = self.path.split('/')
         root = self.parent.elements.getroot()
 
-        elements = root.findall(self.path)
+        try:
+            elements = root.findall(self.path)
+        except KeyError:
+            elements = self._build_tree(e_tree, root)
+        except SyntaxError:
+            elements = self._build_tree(e_tree, root)
 
         # if there is already exactly one element, take this one
         if len(elements) == 1:
             self.element = elements[0]
             return
 
-        # if there is more than one, take the first one with a value, attribut or children.
+        # if there is more than one, take the first one with a value, attribute or children.
         # if all are empty, just take the last one
         elif len(elements) > 1:
-            for element in elements:
+            for element in elements.values():
                 if element.text.strip() != '' or element.attrib is not None or len(element.getchildren()) > 0:
                     break
             self.element = element
@@ -197,37 +202,51 @@ class MetadataItemConstructor(object):
 
         # otherwise build the tree
         else:
+            self._build_tree(e_tree, root)
 
-            done = False
-            while not done:
-                d = {}
-                i = 0
-                d[i] = root
+    def _build_tree(self, e_tree, root):
+        done = False
+        while not done:
+            d = {}
+            i = 0
+            d[i] = root
 
-                for e in e_tree:
-                    # remove index for multi items, looks goofy. Is there a better way?
-                    if "[" in e:
-                        p = e.index('[')
-                        e_name = e[:p]
-                        e_attrib = e[p:][1:-1].split('][')
-                    else:
-                        e_name = e
-                        e_attrib = []
-                    i += 1
-                    d[i] = d[i-1].find(e)
-                    if d[i] is None:
-                        child = ET.Element(e_name)
-                        for attrib in e_attrib:
-                            if attrib[0] == "@":
-                                kv = attrib.split('=')
-                                key = kv[0][1:]
-                                value = kv[1][1:-1]
-                                child.set(key, value)
-                        d[i-1].append(child)
-                        break
-                    elif i == len(e_tree):
-                        self.element = d[i]
-                        done = True
+            for e in e_tree:
+                # remove index for multi items, looks goofy. Is there a better way?
+                if "[" in e:
+                    p = e.index('[')
+                    e_name = e[:p]
+                    e_attrib = e[p:][1:-1].split('][')
+                else:
+                    e_name = e
+                    e_attrib = []
+
+                i += 1
+
+                try:
+                    d[i] = d[i-1].find(e_name)
+                except:
+                    d = self._insert_subtree(d, i, e_name, e_attrib)
+                    break
+                
+                if d[i] is None:
+                    d = self._insert_subtree(d, i, e_name, e_attrib)
+                    break
+                elif i == len(e_tree):
+                    self.element = d[i]
+                    done = True
+        return d
+
+    def _insert_subtree(self, d, i, e_name, e_attrib):
+        child = ET.Element(e_name)
+        for attrib in e_attrib:
+            if attrib[0] == "@":
+                kv = attrib.split('=')
+                key = kv[0][1:]
+                value = kv[1][1:-1]
+                child.set(key, value)
+        d[i-1].append(child)
+        return d
 
 
 class MetadataValueListConstructor(MetadataItemConstructor):

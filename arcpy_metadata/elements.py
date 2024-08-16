@@ -80,7 +80,7 @@ contact_elements = {
         "path": "rpCntInfo/cntInstr",
         "type": "string"},
 
-    # TODO: Make Online Resources a sub elemennt list
+    # TODO: Make Online Resources a sub element list
     "link": {
         "path": "rpCntInfo/cntOnlineRes/linkage",
         "type": "string"},
