@@ -229,6 +229,9 @@ class MetadataEditor(object):
             if "deprecated" in elements[n].keys() and traceback.extract_stack()[-2][2] != "__init__":
                 warnings.warn("Call to deprecated property {0}. {1}".format(n, elements[n]["deprecated"]), category=DeprecationWarning)
 
+            if "unsupported" in elements[n].keys() and self.data_type in elements[n]["unsupported"]:
+                raise RuntimeWarning(f"Can't set key {n} - key is unsupported for data type {self.data_type}")
+
             if elements[n]['type'] == "string":
                 if isinstance(v, (str, six.text_type)):
                     self.__dict__["_{0}".format(n)].value = v
@@ -428,12 +431,20 @@ class MetadataEditor(object):
             if "deprecated" in elements[n].keys():
                 warnings.warn("Call to deprecated property {0}. {1}".format(n, elements[n]["deprecated"]), category=DeprecationWarning)
 
-            if self.__dict__["_{0}".format(n)].value == "" and elements[n]['type'] in ["integer", "float", "datetime", "date", "time"]:
+            key = f"_{n}"
+
+            if "unsupported" in elements[n].keys() and self.data_type in elements[n]["unsupported"]:
+                raise AttributeError(f"Key {n} unsupported for data type {self.data_type}")
+
+            if key not in self.__dict__: # return a blanket None if we don't have the key, regardless
+                raise AttributeError(f"Key {key} not available in metadata or in this interface")
+            
+            if self.__dict__[key].value == "" and elements[n]['type'] in ["integer", "float", "datetime", "date", "time"]:
                 return None
             elif elements[n]['type'] == "integer":
-                return int(self.__dict__["_{0}".format(n)].value)
+                return int(self.__dict__[key].value)
             elif elements[n]['type'] == "float":
-                return float(self.__dict__["_{0}".format(n)].value)
+                return float(self.__dict__[key].value)
 
             elif elements[n]['type'] == "datetime":
                 if len(self.__dict__["_{0}".format(n)].value) == 8:

@@ -201,7 +201,7 @@ class MetadataItemConstructor(object):
         # if all are empty, just take the last one
         elif len(elements) > 1:
             for element in elements.values():
-                if element.text.strip() != '' or element.attrib is not None or len(element.getchildren()) > 0:
+                if (element.text and element.text.strip() != '') or element.attrib is not None or len(element) > 0:
                     break
             self.element = element
             return
@@ -310,7 +310,10 @@ class MetadataValueListConstructor(MetadataItemConstructor):
         element = ET.Element(self.tag_name)
         element.text = item
         self.current_items.append(element)
-        self.element._children = self.current_items
+        #self._removeall()
+        #for element in self.current_items:
+        #    self.element.append(element)
+        self.element.append(element)  # This should really be a replacement of all of the children to perform the update, I think. We're losing subitems for some reason in our update
 
     def insert(self, index, item):
         """
@@ -324,7 +327,7 @@ class MetadataValueListConstructor(MetadataItemConstructor):
         element = ET.Element(self.tag_name)
         element.text = item
         self.current_items.insert(index, element)
-        self.element._children = self.current_items
+        self.element.insert(index, element)  # THIS MAY NEED TO BE index + 1 or a replacement of all child
 
     def pop(self):
         """
@@ -408,8 +411,8 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
                 new_path = "{0}/{1}".format(self.path, tagname)
                 
                 # XPath is 1-indexed, so we don't want to pass forward a 0 index on 0 length
-                index = len(self.current_items)
-                index = index if index > 0 else 1
+                index = len(self.current_items) + 1
+                # index = index if index > 0 else 1
 
                 child = MetadataParentItem(path=new_path,
                                             parent=self.parent,
