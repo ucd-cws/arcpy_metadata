@@ -128,11 +128,16 @@ class MetadataItemConstructor(object):
         self._require_tree_elements()
 
         # set current metadata value and attributes
-        if self.parent.elements.find(self.path).text is not None:
+        element = self.parent.elements.find(self.path)
+        if element is not None and element.text is not None:
             self.value = self.parent.elements.find(self.path).text.strip()
         else:
-            self.value = self.parent.elements.find(self.path).text
-        self.attributes = self.parent.elements.find(self.path).attrib
+            self.value = None
+        
+        if element is not None:
+            self.attributes = element.attrib
+        else:
+            self.attributes = {}
 
         if self.sync is not None:
             if self.sync:
@@ -180,7 +185,8 @@ class MetadataItemConstructor(object):
         root = self.parent.elements.getroot()
 
         try:
-            elements = root.findall(self.path)
+            if root.findall(self.path) is not None:
+                elements = root.findall(self.path)
         except KeyError:
             elements = self._build_tree(e_tree, root)
         except SyntaxError:
@@ -400,7 +406,15 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
         for item in self.parent.elements.find(self.path):
             if item.tag == self.tag_name:
                 new_path = "{0}/{1}".format(self.path, tagname)
-                child = MetadataParentItem(new_path, self.parent, child_elements, len(self.current_items))
+                
+                # XPath is 1-indexed, so we don't want to pass forward a 0 index on 0 length
+                index = len(self.current_items)
+                index = index if index > 0 else 1
+
+                child = MetadataParentItem(path=new_path,
+                                            parent=self.parent,
+                                            elements=child_elements,
+                                            index=index)
                 self.current_items.append(child)
 
     def new(self):
@@ -503,7 +517,7 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
                         if not found:
                             raise TypeError("Value must be in {0}".format(allowed_values))
 
-                elif isinstance(v, (str, unicode)):
+                elif isinstance(v, (str, bytes)):
                     self.__dict__["_{0}".format(n)].element.text = v
                 elif v is None:
                     self.__dict__["_{0}".format(n)].element.text = ""
@@ -602,7 +616,7 @@ class MetadataSubItemConstructor(object):
 
     @value.setter
     def value(self, v):
-        if isinstance(v, (str, unicode)):
+        if isinstance(v, (str, bytes)):
             self.element.text = v
         elif v is None:
             self.element.text = ""
@@ -658,6 +672,6 @@ class MetadataParentItem(MetadataParentItemConstructor):
         Just a shortcut MetadataContacts that predefines the paths and position
     """
     # TODO: Define Role, Country and Online Resource list
-    def __init__(self, path, parent, elements, index=0):
+    def __init__(self, path, parent, elements, index=1):
         self.path = "{0!s}[{1:d}]".format(path, index)
         super(MetadataParentItem, self).__init__(parent, elements)

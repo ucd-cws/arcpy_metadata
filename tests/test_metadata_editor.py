@@ -18,7 +18,7 @@ sys.path.insert(0, parent_dir)
 import arcpy_metadata as md
 
 # import test element dictionary
-from test_elements import test_elements
+from .test_elements import test_elements
 
 
 class TestMetadataWriteRead(unittest.TestCase):
