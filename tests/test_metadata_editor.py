@@ -156,7 +156,7 @@ class TestMetadataWriteRead(unittest.TestCase):
                     if isinstance(test_elements[key][0], dict):
 
                         # make sure both lists are sorted in the same way
-                        keys = test_elements[key][0].keys()
+                        keys = list(test_elements[key][0].keys())
                         sorted_items = sorted(item, key=lambda x: (getattr(x, keys[0]), getattr(x, keys[1])))
                         sorted_elements = sorted(test_elements[key], key=lambda x: (x[keys[0]], x[keys[1]]))
 

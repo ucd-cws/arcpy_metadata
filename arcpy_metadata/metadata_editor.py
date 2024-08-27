@@ -34,10 +34,9 @@ metadata_temp_folder = arcpy.env.scratchFolder  # a default temp folder to use -
 
 
 class MetadataEditor(object):
-    """
-    The metadata editor
-    Create an instance of this object for each metadata file you want to edit
-    """
+    
+    _arcgis_metadata = None
+
 
     def __init__(self, dataset=None, metadata_file=None, items=None,
                  temp_folder=metadata_temp_folder, loglevel='INFO',
@@ -92,6 +91,7 @@ class MetadataEditor(object):
         self.metadata_import_option = metadata_import_option
 
         self._gdb_datasets = ["FeatureClass", "Table", "RasterDataset", "RasterCatalog", "MosaicDataset"]
+        self._network_datasets = ["MapServer", "FeatureServer"]
         self._simple_datasets = ["ShapeFile", "RasterDataset", "Layer"]
         self._layers = ["FeatureLayer"]
 
@@ -124,14 +124,19 @@ class MetadataEditor(object):
             # Metadata for GDB datasets are stored inside the GDB itself.
             # We need to first export them to a temporary file, modify them and then import them back
             else:
-                if self.data_type in self._gdb_datasets:
+                if self.data_type in self._gdb_datasets + self._network_datasets:
                     metadata_filename = os.path.basename(self.dataset) + ".xml"
                     self.metadata_file = os.path.join(self.temp_folder, metadata_filename)
                     if os.path.exists(self.metadata_file):
                         os.remove(self.metadata_file)
                     self.logger.debug("Exporting metadata to temporary file {0!s}".format(self.metadata_file))
-                    metadata = arcpy.metadata.Metadata(self.dataset)
-                    metadata.saveAsXML(self.metadata_file, self.metadata_export_option)  # export option configures if it's an exact copy or strips anything out. Defaults to EXACT_COPY
+                    self._arcgis_metadata = arcpy.metadata.Metadata(self.dataset)  # we might be able to speed this up by storing it, but that may leave a lock?
+                    self._arcgis_metadata.saveAsXML(self.metadata_file, self.metadata_export_option)  # export option configures if it's an exact copy or strips anything out. Defaults to EXACT_COPY
+
+                    if self._arcgis_metadata.isReadOnly:
+                        # it would be good to make setattr calls check this
+                        self.logger.info(f"Metadata for {self.dataset} is read only. You can access the metadata and save it back to another dataset, but will not be able to save changes back to the original source.")
+
                 else:
                     raise TypeError("Cannot read {0}. Data type is not supported".format(self.dataset))
 
@@ -494,6 +499,12 @@ class MetadataEditor(object):
         Get ArcGIS datatype datatype of current dataset
         :return:
         """
+        
+        if self.dataset.startswith("http://") or self.dataset.startswith("https://"):
+            for server_type in self._network_datasets:
+                if server_type in self.dataset:
+                    return server_type
+
         # get datatype
         desc = arcpy.Describe(self.dataset)
         return desc.dataType
@@ -505,10 +516,14 @@ class MetadataEditor(object):
         check next lower base directory of current base directory until criteria matches
         :return:
         """
+
+        if self.dataset.startswith("http://") or self.dataset.startswith("https://"):
+            return "Server"
+
         workspace = self.dataset
         desc = arcpy.Describe(workspace)
 
-        while 1 == 1:
+        while True:
 
             if desc.dataType == "Workspace" or desc.dataType == "Folder":
                 return workspace
@@ -525,6 +540,11 @@ class MetadataEditor(object):
         Get ArcGIS Workspace type for current dataset
         :return:
         """
+
+        # for datasets on a server, determine if it's a MapServer, FeatureServer, etc. May not matter, but also, it might
+        if self._workspace == "Server":
+            return "Server"
+
         desc = arcpy.Describe(self._workspace)
         return desc.workspaceType
 
@@ -583,16 +603,20 @@ class MetadataEditor(object):
 
         self.elements.write(self.metadata_file)  # overwrites itself
 
-        if self._workspace_type != 'FileSystem':
+        if self._workspace_type != 'FileSystem':  # this is a different check than we use to trigger an export...Should this be updated to be the same as what triggers the export?
 
             if Enable_automatic_updates:
                 updates = 'ENABLED'
             else:
                 updates = 'DISABLED'
 
-            metadata = arcpy.metadata.Metadata(self.dataset)
-            metadata.importMetadata(self.metadata_file, self.metadata_import_option)
-            metadata.save()
+            if not self._arcgis_metadata:
+                self._arcgis_metadata = arcpy.metadata.Metadata(self.dataset)
+
+            if self._arcgis_metadata.isReadOnly:
+                raise PermissionError("The metadata is read only - this likely means you are accessing a source that we are *unable* to write to, even if you have permissions in another context.")
+            self._arcgis_metadata.importMetadata(self.metadata_file, self.metadata_import_option)
+            self._arcgis_metadata.save()
 
     def cleanup(self):
         """
