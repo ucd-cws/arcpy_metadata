@@ -115,7 +115,6 @@ class MetadataItemConstructor(object):
     '''
 
     path = None
-    value = ""
     sync = None
 
     def __init__(self, parent=None):
@@ -164,7 +163,8 @@ class MetadataItemConstructor(object):
 
     @property
     def value(self):
-        return self.parent.elements.find(self.path).text
+        node = self.parent.elements.find(self.path)
+        return node.text
 
     @value.setter
     def value(self, v):
@@ -262,7 +262,6 @@ class MetadataValueListConstructor(MetadataItemConstructor):
     """
 
     tag_name = None
-    current_items = []
     path = None
 
     def __init__(self, parent=None, tagname=None, path=None):
@@ -273,9 +272,10 @@ class MetadataValueListConstructor(MetadataItemConstructor):
         if path:
             self.path = path
 
-        super(MetadataValueListConstructor, self).__init__(parent)
-
         self.current_items = []
+
+        super().__init__(parent)
+
         values = []
         for item in self.parent.elements.find(self.path):
             values.append(item.text)
@@ -390,7 +390,6 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
     """
 
     tag_name = None
-    current_items = []
     path = None
 
     def __init__(self, parent=None, tagname=None, path=None, child_elements=None):
@@ -422,7 +421,11 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
 
     def new(self):
         new_path = "{0}/{1}".format(self.path, self.tag_name)
-        child = MetadataParentItem(new_path, self.parent, self.child_elements, len(self.current_items)+1)
+        child = MetadataParentItem(path=new_path,
+                                    parent=self.parent,
+                                    elements=self.child_elements,
+                                    index=len(self.current_items)+1
+                                )
         self.current_items.append(child)
 
     def pop(self):
@@ -648,7 +651,7 @@ class MetadataItem(MetadataItemConstructor):
         self.path = path
         self.name = name
         self.sync = sync
-        super(MetadataItem, self).__init__(parent)
+        super().__init__(parent)
 
 
 class MetadataValueList(MetadataValueListConstructor):
@@ -660,7 +663,7 @@ class MetadataValueList(MetadataValueListConstructor):
     def __init__(self, tagname, path, name, parent=None, sync=True):
         self.name = name
         self.sync = sync
-        super(MetadataValueList, self).__init__(parent, tagname=tagname, path=path)
+        super().__init__(parent, tagname=tagname, path=path)
 
 
 class MetadataObjectList(MetadataObjectListConstructor):
@@ -669,11 +672,10 @@ class MetadataObjectList(MetadataObjectListConstructor):
     Define path, parent item position and item tag name
     """
 
-    child_elements = {}
-
     def __init__(self, tagname, path, parent, elements, sync=True):
+        self.child_elements = {}
         self.sync = sync
-        super(MetadataObjectList, self).__init__(parent, tagname=tagname, path=path, child_elements=elements)
+        super().__init__(parent, tagname=tagname, path=path, child_elements=elements)
 
 
 class MetadataParentItem(MetadataParentItemConstructor):
