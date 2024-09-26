@@ -95,6 +95,21 @@ metadata.last_update = today
 metadata.last_update = "20160221"
 ```
 
+Add and edit field definitions
+```python
+metadata.fields.new()  # add the new field
+metadata.fields[-1].name = "MyFieldName" # the item at index -1 will be the new one
+metadata.fields[-1].definition = "Here I am describing how the field was created and how to use and interpret its values for a reader"
+
+# or find an existing field and update its definition
+search_for_field = "OBJECTID"
+for field in metadata.fields:
+    if field.name == search_for_field:
+        field.definition = "Some updated information about the field defintiion"
+        break  # not necessary, but faster as it stops searching once you've found the field
+
+```
+
 Get contact items (returns contact object)
 
 ```python
