@@ -142,6 +142,17 @@ online_resource_elements = {
     },
 }
 
+field_elements = {
+    "name": {
+        "path": "attrlabl",
+        "type": "string",
+    },
+    "definition": {
+        "path": "attrdef",
+        "type": "string"
+    }
+}
+
 elements = {
     "abstract": {
         "path": "dataIdInfo/idAbs",
@@ -318,6 +329,12 @@ elements = {
     "resource_label": {
         "path": "eainfo/detailed/enttyp/enttypl",
         "type": "string"},
+
+    "fields": {
+        "path": "eainfo/detailed",
+        "tagname": "attr",
+        "type": "object_list",
+        "elements": field_elements},
 
     "scale_resolution": {
         "path": "dataIdInfo/dataScale/equScale/rfDenom",

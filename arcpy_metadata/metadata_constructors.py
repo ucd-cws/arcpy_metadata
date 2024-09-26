@@ -317,7 +317,7 @@ class MetadataValueListConstructor(MetadataItemConstructor):
 
     def insert(self, index, item):
         """
-            Inserts an individual item to the section at specified index location
+            Inserts an individual item to the section at specified index locatio
             :param index: location in list to insert
             :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag
                 configured on parent object
@@ -403,7 +403,7 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
         if path:
             self.path = path
 
-        super(MetadataObjectListConstructor, self).__init__(parent)
+        super().__init__(parent)
 
         self.current_items = []
         for item in self.parent.elements.find(self.path):
@@ -484,7 +484,7 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
     def __init__(self, parent, child_elements):
         self.parent = parent
         self.child_elements = child_elements
-        super(MetadataParentItemConstructor, self).__init__(self.parent)
+        super().__init__(self.parent)
 
         i = 0
         while i < len(self.child_elements):
@@ -492,11 +492,12 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
 
                 path = self.child_elements[element]["path"]
 
-                if "_{0}".format(element) not in self.__dict__.keys():
-                    setattr(self, "_{0}".format(element), self._create_item(path))
+                if f"_{element}" not in self.__dict__.keys():
+                    setattr(self, f"_{element}", self._create_item(path))
                     i = 0
                 else:
                     i += 1
+        pass
 
     def __setattr__(self, n, v):
         if n in ["path", "parent", "child_elements", "value", "attr_lang", "attr_country"]:
@@ -521,9 +522,9 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
                             raise TypeError("Value must be in {0}".format(allowed_values))
 
                 elif isinstance(v, (str, bytes)):
-                    self.__dict__["_{0}".format(n)].element.text = v
+                    self.__dict__[f"_{n}"].element.text = v
                 elif v is None:
-                    self.__dict__["_{0}".format(n)].element.text = ""
+                    self.__dict__[f"_{n}"].element.text = ""
                 else:
                     raise RuntimeWarning("Input value must be of type String or None")
             else:
@@ -572,7 +573,12 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
                     break
                 # item exists already and is final one
                 elif item.tag == tag and i == len(tags)-1:
-                    return MetadataSubItemConstructor(item)
+                    #create_element = ET.Element(tag)
+                    #create_element.attrib = copy.deepcopy(item.attrib)
+                    #create_element.text = copy.copy(item.text)
+                    #parent.append(create_element)
+                    return MetadataSubItemConstructor(element=item)
+                
             # item does not yet exist
             if p is None:
                 p = ET.Element(tag)
@@ -677,4 +683,7 @@ class MetadataParentItem(MetadataParentItemConstructor):
     # TODO: Define Role, Country and Online Resource list
     def __init__(self, path, parent, elements, index=1):
         self.path = "{0!s}[{1:d}]".format(path, index)
-        super(MetadataParentItem, self).__init__(parent, elements)
+        super().__init__(parent, elements)
+
+    def __repr__(self):
+        return f"<MetadataParentItem at Path {self.path}>"

@@ -7,8 +7,10 @@ import logging
 from datetime import datetime
 from datetime import date
 from datetime import time
+import urllib
 
 import arcpy
+import arcgis
 
 from arcpy_metadata.metadata_constructors import MetadataItem
 from arcpy_metadata.metadata_constructors import MetadataValueList
@@ -124,18 +126,20 @@ class MetadataEditor(object):
             # Metadata for GDB datasets are stored inside the GDB itself.
             # We need to first export them to a temporary file, modify them and then import them back
             else:
-                if self.data_type in self._gdb_datasets + self._network_datasets:
+                if self.data_type in self._gdb_datasets:
                     metadata_filename = os.path.basename(self.dataset) + ".xml"
                     self.metadata_file = os.path.join(self.temp_folder, metadata_filename)
                     if os.path.exists(self.metadata_file):
                         os.remove(self.metadata_file)
                     self.logger.debug("Exporting metadata to temporary file {0!s}".format(self.metadata_file))
+
+                    # we're going to change how we do this for server-based datasets soon, but just making a checkpoint
                     self._arcgis_metadata = arcpy.metadata.Metadata(self.dataset)  # we might be able to speed this up by storing it, but that may leave a lock?
                     self._arcgis_metadata.saveAsXML(self.metadata_file, self.metadata_export_option)  # export option configures if it's an exact copy or strips anything out. Defaults to EXACT_COPY
-
                     if self._arcgis_metadata.isReadOnly:
-                        # it would be good to make setattr calls check this
+                        # it would be good to make setattr calls check this? But they may want to edit the XML and import elsewhere
                         self.logger.info(f"Metadata for {self.dataset} is read only. You can access the metadata and save it back to another dataset, but will not be able to save changes back to the original source.")
+
 
                 else:
                     raise TypeError("Cannot read {0}. Data type is not supported".format(self.dataset))
