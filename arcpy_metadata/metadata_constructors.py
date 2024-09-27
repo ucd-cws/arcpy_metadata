@@ -1,4 +1,3 @@
-import os
 import copy
 import xml.etree.ElementTree as ET
 

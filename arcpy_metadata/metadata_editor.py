@@ -1,12 +1,10 @@
 import os
 import xml
-import six
 import warnings
 import traceback
 import logging
-from datetime import datetime
-from datetime import date
-from datetime import time
+from datetime import datetime, date, time
+
 import urllib
 
 import arcpy
@@ -242,7 +240,7 @@ class MetadataEditor(object):
                 raise RuntimeWarning(f"Can't set key {n} - key is unsupported for data type {self.data_type}")
 
             if elements[n]['type'] == "string":
-                if isinstance(v, (str, six.text_type)):
+                if isinstance(v, (str, bytes)):
                     self.__dict__["_{0}".format(n)].value = v
                 elif v is None:
                     self.__dict__["_{0}".format(n)].value = ""
@@ -253,7 +251,7 @@ class MetadataEditor(object):
 
                 if isinstance(v, datetime):
                     self.__dict__["_{0}".format(n)].value = datetime.strftime(v, "%Y-%m-%dT%H:%M:%S")
-                elif isinstance(v, (str, six.text_type)):
+                elif isinstance(v, (str, bytes)):
 
                     # remove all whitespaces for easier handling
                     v = "".join(v.split())
@@ -287,7 +285,7 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "date":
                 if isinstance(v, date):
                     self.__dict__["_{0}".format(n)].value = datetime.strftime(v, "%Y-%m-%d")
-                elif isinstance(v, (str, six.text_type)):
+                elif isinstance(v, (str, bytes)):
 
                     # remove all whitespaces for easier handling
                     v = "".join(v.split())
@@ -320,7 +318,7 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "time":
                 if isinstance(v, time):
                     self.__dict__["_{0}".format(n)].value = datetime.strftime(v, "%H:%M:%S")
-                elif isinstance(v, (str, six.text_type)):
+                elif isinstance(v, (str, bytes)):
 
                     # remove all whitespaces for easier handling
                     v = "".join(v.split())
@@ -365,7 +363,7 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "float":
                 if isinstance(v, float):
                     self.__dict__["_{0}".format(n)].value = str(v)
-                elif isinstance(v, (str, six.text_type)):
+                elif isinstance(v, (str, bytes)):
                     try:
                         new_value = float(v)
                         self.__dict__["_{0}".format(n)].value = str(new_value)
@@ -379,7 +377,7 @@ class MetadataEditor(object):
             elif elements[n]['type'] == 'attribute':
                 key = elements[n]['key']
                 values = elements[n]['values']
-                if isinstance(v,(str, six.text_type)):
+                if isinstance(v,(str, bytes)):
                     done = False
                     for value in values:
                         if v in value:

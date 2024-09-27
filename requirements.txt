@@ -1,3 +1,2 @@
-six
 lxml >= 2.0
 arcpy >= 2.6

@@ -12,7 +12,6 @@ setup(name="arcpy_metadata",
 	packages=['arcpy_metadata',],
 	install_requires=[
         'python>=3.6'
-		'six',
         'arcpy>=2.6',  # when the metadata export tools were introduced in Pro
         'lxml>=2.0' # they changed how the tree behaves here - this was updated to use the new behavior
 	],
