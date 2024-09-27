@@ -163,10 +163,9 @@ class TestMetadataWriteRead(unittest.TestCase):
                         i = 0
                         for sub_element in sorted_elements:
                             for k in sub_element:
-                                expected = sub_element[k]
-                                actual = getattr(sorted_items[i], k)
-                                print("{0}[{1}].{2}: before = {3}; after = {4}".format(key, i+1, k, expected, actual))
-                                self.assertEqual(actual, child,
+                                child = sub_element[k]
+                                print("{0}[{1}].{2}: before = {3}; after = {4}".format(key, i, k, child, getattr(sorted_items[i], k)))
+                                self.assertEqual(getattr(sorted_items[i], k), child,
                                                  'Value for element {0}[{1}].{2} was not correctly saved'.format(key, i, k))
                             i += 1
                     # simple lists

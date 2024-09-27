@@ -62,6 +62,7 @@ class MetadataValueListHelper(object):
         Sort list items
         :return: list
         """
+
         return self.list_items.sort()
 
 class MetadataObjectListHelper(object):
@@ -184,13 +185,13 @@ class MetadataItemConstructor(object):
         e_tree = self.path.split('/')
         root = self.parent.elements.getroot()
 
-        try:
-            if root.findall(self.path) is not None:
-                elements = root.findall(self.path)
-        except KeyError:
-            elements = self._build_tree(e_tree, root)
-        except SyntaxError:
-            elements = self._build_tree(e_tree, root)
+        #try:
+        if root.findall(self.path) is not None:
+            elements = root.findall(self.path)
+        #except KeyError:
+        #    elements = self._build_tree(e_tree, root)
+        #except SyntaxError:
+        #    elements = self._build_tree(e_tree, root)
 
         # if there is already exactly one element, take this one
         if len(elements) == 1:
@@ -200,7 +201,7 @@ class MetadataItemConstructor(object):
         # if there is more than one, take the first one with a value, attribute or children.
         # if all are empty, just take the last one
         elif len(elements) > 1:
-            for element in elements.values():
+            for element in elements:
                 if (element.text and element.text.strip() != '') or element.attrib is not None or len(element) > 0:
                     break
             self.element = element
@@ -230,7 +231,7 @@ class MetadataItemConstructor(object):
                 i += 1
 
                 try:
-                    d[i] = d[i-1].find(e_name)
+                    d[i] = d[i-1].find(e)
                 except:
                     d = self._insert_subtree(d, i, e_name, e_attrib)
                     break
@@ -380,7 +381,8 @@ class MetadataValueListConstructor(MetadataItemConstructor):
         sort items
         :return:
         """
-        return self.current_items.sort()
+
+        return self.current_items.sort(key=lambda elm: elm.tag)  # sort by tag name
 
 
 class MetadataObjectListConstructor(MetadataItemConstructor):
@@ -404,10 +406,13 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
 
         super().__init__(parent)
 
+        self.reset()
+
+    def reset(self):
         self.current_items = []
         for item in self.parent.elements.find(self.path):
             if item.tag == self.tag_name:
-                new_path = "{0}/{1}".format(self.path, tagname)
+                new_path = "{0}/{1}".format(self.path, self.tag_name)
                 
                 # XPath is 1-indexed, so we don't want to pass forward a 0 index on 0 length
                 index = len(self.current_items) + 1
@@ -415,12 +420,15 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
 
                 child = MetadataParentItem(path=new_path,
                                             parent=self.parent,
-                                            elements=child_elements,
+                                            elements=self.child_elements,
                                             index=index)
                 self.current_items.append(child)
 
     def new(self):
         new_path = "{0}/{1}".format(self.path, self.tag_name)
+        #element = ET.Element(f"{new_path}[{len(self.current_items)+1}]")
+        #self.parent.append(element)
+
         child = MetadataParentItem(path=new_path,
                                     parent=self.parent,
                                     elements=self.child_elements,
