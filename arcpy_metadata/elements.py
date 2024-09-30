@@ -80,7 +80,7 @@ contact_elements = {
         "path": "rpCntInfo/cntInstr",
         "type": "string"},
 
-    # TODO: Make Online Resources a sub elemennt list
+    # TODO: Make Online Resources a sub element list
     "link": {
         "path": "rpCntInfo/cntOnlineRes/linkage",
         "type": "string"},
@@ -140,6 +140,17 @@ online_resource_elements = {
                    ("order", "004"),
                    ("search", "005")]
     },
+}
+
+field_elements = {
+    "name": {
+        "path": "attrlabl",
+        "type": "string",
+    },
+    "definition": {
+        "path": "attrdef",
+        "type": "string"
+    }
 }
 
 elements = {
@@ -318,6 +329,12 @@ elements = {
     "resource_label": {
         "path": "eainfo/detailed/enttyp/enttypl",
         "type": "string"},
+
+    "fields": {
+        "path": "eainfo/detailed",
+        "tagname": "attr",
+        "type": "object_list",
+        "elements": field_elements},
 
     "scale_resolution": {
         "path": "dataIdInfo/dataScale/equScale/rfDenom",

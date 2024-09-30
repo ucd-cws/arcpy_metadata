@@ -1,4 +1,3 @@
-import os
 import copy
 import xml.etree.ElementTree as ET
 
@@ -62,6 +61,7 @@ class MetadataValueListHelper(object):
         Sort list items
         :return: list
         """
+
         return self.list_items.sort()
 
 class MetadataObjectListHelper(object):
@@ -115,7 +115,6 @@ class MetadataItemConstructor(object):
     '''
 
     path = None
-    value = ""
     sync = None
 
     def __init__(self, parent=None):
@@ -128,11 +127,16 @@ class MetadataItemConstructor(object):
         self._require_tree_elements()
 
         # set current metadata value and attributes
-        if self.parent.elements.find(self.path).text is not None:
+        element = self.parent.elements.find(self.path)
+        if element is not None and element.text is not None:
             self.value = self.parent.elements.find(self.path).text.strip()
         else:
-            self.value = self.parent.elements.find(self.path).text
-        self.attributes = self.parent.elements.find(self.path).attrib
+            self.value = None
+        
+        if element is not None:
+            self.attributes = element.attrib
+        else:
+            self.attributes = {}
 
         if self.sync is not None:
             if self.sync:
@@ -159,7 +163,8 @@ class MetadataItemConstructor(object):
 
     @property
     def value(self):
-        return self.parent.elements.find(self.path).text
+        node = self.parent.elements.find(self.path)
+        return node.text
 
     @value.setter
     def value(self, v):
@@ -179,55 +184,75 @@ class MetadataItemConstructor(object):
         e_tree = self.path.split('/')
         root = self.parent.elements.getroot()
 
-        elements = root.findall(self.path)
+        #try:
+        if root.findall(self.path) is not None:
+            elements = root.findall(self.path)
+        #except KeyError:
+        #    elements = self._build_tree(e_tree, root)
+        #except SyntaxError:
+        #    elements = self._build_tree(e_tree, root)
 
         # if there is already exactly one element, take this one
         if len(elements) == 1:
             self.element = elements[0]
             return
 
-        # if there is more than one, take the first one with a value, attribut or children.
+        # if there is more than one, take the first one with a value, attribute or children.
         # if all are empty, just take the last one
         elif len(elements) > 1:
             for element in elements:
-                if element.text.strip() != '' or element.attrib is not None or len(element.getchildren()) > 0:
+                if (element.text and element.text.strip() != '') or element.attrib is not None or len(element) > 0:
                     break
             self.element = element
             return
 
         # otherwise build the tree
         else:
+            self._build_tree(e_tree, root)
 
-            done = False
-            while not done:
-                d = {}
-                i = 0
-                d[i] = root
+    def _build_tree(self, e_tree, root):
+        done = False
+        while not done:
+            d = {}
+            i = 0
+            d[i] = root
 
-                for e in e_tree:
-                    # remove index for multi items, looks goofy. Is there a better way?
-                    if "[" in e:
-                        p = e.index('[')
-                        e_name = e[:p]
-                        e_attrib = e[p:][1:-1].split('][')
-                    else:
-                        e_name = e
-                        e_attrib = []
-                    i += 1
+            for e in e_tree:
+                # remove index for multi items, looks goofy. Is there a better way?
+                if "[" in e:
+                    p = e.index('[')
+                    e_name = e[:p]
+                    e_attrib = e[p:][1:-1].split('][')
+                else:
+                    e_name = e
+                    e_attrib = []
+
+                i += 1
+
+                try:
                     d[i] = d[i-1].find(e)
-                    if d[i] is None:
-                        child = ET.Element(e_name)
-                        for attrib in e_attrib:
-                            if attrib[0] == "@":
-                                kv = attrib.split('=')
-                                key = kv[0][1:]
-                                value = kv[1][1:-1]
-                                child.set(key, value)
-                        d[i-1].append(child)
-                        break
-                    elif i == len(e_tree):
-                        self.element = d[i]
-                        done = True
+                except:
+                    d = self._insert_subtree(d, i, e_name, e_attrib)
+                    break
+                
+                if d[i] is None:
+                    d = self._insert_subtree(d, i, e_name, e_attrib)
+                    break
+                elif i == len(e_tree):
+                    self.element = d[i]
+                    done = True
+        return d
+
+    def _insert_subtree(self, d, i, e_name, e_attrib):
+        child = ET.Element(e_name)
+        for attrib in e_attrib:
+            if attrib[0] == "@":
+                kv = attrib.split('=')
+                key = kv[0][1:]
+                value = kv[1][1:-1]
+                child.set(key, value)
+        d[i-1].append(child)
+        return d
 
 
 class MetadataValueListConstructor(MetadataItemConstructor):
@@ -237,7 +262,6 @@ class MetadataValueListConstructor(MetadataItemConstructor):
     """
 
     tag_name = None
-    current_items = []
     path = None
 
     def __init__(self, parent=None, tagname=None, path=None):
@@ -248,9 +272,10 @@ class MetadataValueListConstructor(MetadataItemConstructor):
         if path:
             self.path = path
 
-        super(MetadataValueListConstructor, self).__init__(parent)
-
         self.current_items = []
+
+        super().__init__(parent)
+
         values = []
         for item in self.parent.elements.find(self.path):
             values.append(item.text)
@@ -285,11 +310,14 @@ class MetadataValueListConstructor(MetadataItemConstructor):
         element = ET.Element(self.tag_name)
         element.text = item
         self.current_items.append(element)
-        self.element._children = self.current_items
+        #self._removeall()
+        #for element in self.current_items:
+        #    self.element.append(element)
+        self.element.append(element)  # This should really be a replacement of all of the children to perform the update, I think. We're losing subitems for some reason in our update
 
     def insert(self, index, item):
         """
-            Inserts an individual item to the section at specified index location
+            Inserts an individual item to the section at specified index locatio
             :param index: location in list to insert
             :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag
                 configured on parent object
@@ -299,7 +327,7 @@ class MetadataValueListConstructor(MetadataItemConstructor):
         element = ET.Element(self.tag_name)
         element.text = item
         self.current_items.insert(index, element)
-        self.element._children = self.current_items
+        self.element.insert(index, element)  # THIS MAY NEED TO BE index + 1 or a replacement of all child
 
     def pop(self):
         """
@@ -352,7 +380,8 @@ class MetadataValueListConstructor(MetadataItemConstructor):
         sort items
         :return:
         """
-        return self.current_items.sort()
+
+        return self.current_items.sort(key=lambda elm: elm.tag)  # sort by tag name
 
 
 class MetadataObjectListConstructor(MetadataItemConstructor):
@@ -362,7 +391,6 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
     """
 
     tag_name = None
-    current_items = []
     path = None
 
     def __init__(self, parent=None, tagname=None, path=None, child_elements=None):
@@ -375,18 +403,36 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
         if path:
             self.path = path
 
-        super(MetadataObjectListConstructor, self).__init__(parent)
+        super().__init__(parent)
 
+        self.reset()
+
+    def reset(self):
         self.current_items = []
         for item in self.parent.elements.find(self.path):
             if item.tag == self.tag_name:
-                new_path = "{0}/{1}".format(self.path, tagname)
-                child = MetadataParentItem(new_path, self.parent, child_elements, len(self.current_items))
+                new_path = "{0}/{1}".format(self.path, self.tag_name)
+                
+                # XPath is 1-indexed, so we don't want to pass forward a 0 index on 0 length
+                index = len(self.current_items) + 1
+                # index = index if index > 0 else 1
+
+                child = MetadataParentItem(path=new_path,
+                                            parent=self.parent,
+                                            elements=self.child_elements,
+                                            index=index)
                 self.current_items.append(child)
 
     def new(self):
         new_path = "{0}/{1}".format(self.path, self.tag_name)
-        child = MetadataParentItem(new_path, self.parent, self.child_elements, len(self.current_items)+1)
+        #element = ET.Element(f"{new_path}[{len(self.current_items)+1}]")
+        #self.parent.append(element)
+
+        child = MetadataParentItem(path=new_path,
+                                    parent=self.parent,
+                                    elements=self.child_elements,
+                                    index=len(self.current_items)+1
+                                )
         self.current_items.append(child)
 
     def pop(self):
@@ -448,7 +494,7 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
     def __init__(self, parent, child_elements):
         self.parent = parent
         self.child_elements = child_elements
-        super(MetadataParentItemConstructor, self).__init__(self.parent)
+        super().__init__(self.parent)
 
         i = 0
         while i < len(self.child_elements):
@@ -456,11 +502,12 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
 
                 path = self.child_elements[element]["path"]
 
-                if "_{0}".format(element) not in self.__dict__.keys():
-                    setattr(self, "_{0}".format(element), self._create_item(path))
+                if f"_{element}" not in self.__dict__.keys():
+                    setattr(self, f"_{element}", self._create_item(path))
                     i = 0
                 else:
                     i += 1
+        pass
 
     def __setattr__(self, n, v):
         if n in ["path", "parent", "child_elements", "value", "attr_lang", "attr_country"]:
@@ -484,10 +531,10 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
                         if not found:
                             raise TypeError("Value must be in {0}".format(allowed_values))
 
-                elif isinstance(v, (str, unicode)):
-                    self.__dict__["_{0}".format(n)].element.text = v
+                elif isinstance(v, (str, bytes)):
+                    self.__dict__[f"_{n}"].element.text = v
                 elif v is None:
-                    self.__dict__["_{0}".format(n)].element.text = ""
+                    self.__dict__[f"_{n}"].element.text = ""
                 else:
                     raise RuntimeWarning("Input value must be of type String or None")
             else:
@@ -536,7 +583,12 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
                     break
                 # item exists already and is final one
                 elif item.tag == tag and i == len(tags)-1:
-                    return MetadataSubItemConstructor(item)
+                    #create_element = ET.Element(tag)
+                    #create_element.attrib = copy.deepcopy(item.attrib)
+                    #create_element.text = copy.copy(item.text)
+                    #parent.append(create_element)
+                    return MetadataSubItemConstructor(element=item)
+                
             # item does not yet exist
             if p is None:
                 p = ET.Element(tag)
@@ -583,7 +635,7 @@ class MetadataSubItemConstructor(object):
 
     @value.setter
     def value(self, v):
-        if isinstance(v, (str, unicode)):
+        if isinstance(v, (str, bytes)):
             self.element.text = v
         elif v is None:
             self.element.text = ""
@@ -606,7 +658,7 @@ class MetadataItem(MetadataItemConstructor):
         self.path = path
         self.name = name
         self.sync = sync
-        super(MetadataItem, self).__init__(parent)
+        super().__init__(parent)
 
 
 class MetadataValueList(MetadataValueListConstructor):
@@ -618,7 +670,7 @@ class MetadataValueList(MetadataValueListConstructor):
     def __init__(self, tagname, path, name, parent=None, sync=True):
         self.name = name
         self.sync = sync
-        super(MetadataValueList, self).__init__(parent, tagname=tagname, path=path)
+        super().__init__(parent, tagname=tagname, path=path)
 
 
 class MetadataObjectList(MetadataObjectListConstructor):
@@ -627,11 +679,10 @@ class MetadataObjectList(MetadataObjectListConstructor):
     Define path, parent item position and item tag name
     """
 
-    child_elements = {}
-
     def __init__(self, tagname, path, parent, elements, sync=True):
+        self.child_elements = {}
         self.sync = sync
-        super(MetadataObjectList, self).__init__(parent, tagname=tagname, path=path, child_elements=elements)
+        super().__init__(parent, tagname=tagname, path=path, child_elements=elements)
 
 
 class MetadataParentItem(MetadataParentItemConstructor):
@@ -639,6 +690,9 @@ class MetadataParentItem(MetadataParentItemConstructor):
         Just a shortcut MetadataContacts that predefines the paths and position
     """
     # TODO: Define Role, Country and Online Resource list
-    def __init__(self, path, parent, elements, index=0):
+    def __init__(self, path, parent, elements, index=1):
         self.path = "{0!s}[{1:d}]".format(path, index)
-        super(MetadataParentItem, self).__init__(parent, elements)
+        super().__init__(parent, elements)
+
+    def __repr__(self):
+        return f"<MetadataParentItem at Path {self.path}>"

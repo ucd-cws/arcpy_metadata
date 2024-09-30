@@ -101,7 +101,20 @@ test_elements = {
         "name": "Name 2",
         "description": "Description 2",
         "function": "offline access"}],
-
+    "fields": [
+        {
+            "name": "OBJECTID",
+            "definition": "Sequential internal numbering"
+        },
+        {
+            "name": "MyTestField",
+            "definition": "A field I'm adding in the metadata"
+        },
+        {
+            "name": "AnotherTestField",
+            "definition": "A second field"
+        }
+    ],
     "place_keywords": ["Place 1", "Place 2", "Place 3"],
 
     "point_of_contact": {

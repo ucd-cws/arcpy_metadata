@@ -1,13 +1,14 @@
 import os
-import arcpy
 import xml
-import six
 import warnings
 import traceback
 import logging
-from datetime import datetime
-from datetime import date
-from datetime import time
+from datetime import datetime, date, time
+
+import urllib
+
+import arcpy
+import arcgis
 
 from arcpy_metadata.metadata_constructors import MetadataItem
 from arcpy_metadata.metadata_constructors import MetadataValueList
@@ -29,21 +30,18 @@ def warning_on_one_line(message, category, filename, lineno, file=None, line=Non
     return '{0}: {1}\n'.format(category.__name__, message)
 warnings.formatwarning = warning_on_one_line
 
-
-
-install_dir = arcpy.GetInstallInfo("desktop")["InstallDir"]
-xslt = os.path.join(install_dir, r"Metadata\Stylesheets\gpTools\exact copy of.xslt")
 metadata_temp_folder = arcpy.env.scratchFolder  # a default temp folder to use - settable by other applications so they can set it once
 
 
 class MetadataEditor(object):
-    """
-    The metadata editor
-    Create an instance of this object for each metadata file you want to edit
-    """
+    
+    _arcgis_metadata = None
+
 
     def __init__(self, dataset=None, metadata_file=None, items=None,
-                 temp_folder=metadata_temp_folder, loglevel='INFO'):
+                 temp_folder=metadata_temp_folder, loglevel='INFO',
+                 metadata_export_option="EXACT_COPY",
+                 metadata_import_option="ARCGIS_METADATA"):
 
         screen_handler = None
         self.logger = logging.getLogger("__name__")
@@ -88,8 +86,12 @@ class MetadataEditor(object):
         self.elements = xml.etree.ElementTree.ElementTree()
         self.temp_folder = temp_folder
         self.dataset = dataset
+        
+        self.metadata_export_option = metadata_export_option
+        self.metadata_import_option = metadata_import_option
 
         self._gdb_datasets = ["FeatureClass", "Table", "RasterDataset", "RasterCatalog", "MosaicDataset"]
+        self._network_datasets = ["MapServer", "FeatureServer"]
         self._simple_datasets = ["ShapeFile", "RasterDataset", "Layer"]
         self._layers = ["FeatureLayer"]
 
@@ -128,7 +130,15 @@ class MetadataEditor(object):
                     if os.path.exists(self.metadata_file):
                         os.remove(self.metadata_file)
                     self.logger.debug("Exporting metadata to temporary file {0!s}".format(self.metadata_file))
-                    arcpy.XSLTransform_conversion(self.dataset, xslt, self.metadata_file)
+
+                    # we're going to change how we do this for server-based datasets soon, but just making a checkpoint
+                    self._arcgis_metadata = arcpy.metadata.Metadata(self.dataset)  # we might be able to speed this up by storing it, but that may leave a lock?
+                    self._arcgis_metadata.saveAsXML(self.metadata_file, self.metadata_export_option)  # export option configures if it's an exact copy or strips anything out. Defaults to EXACT_COPY
+                    if self._arcgis_metadata.isReadOnly:
+                        # it would be good to make setattr calls check this? But they may want to edit the XML and import elsewhere
+                        self.logger.info(f"Metadata for {self.dataset} is read only. You can access the metadata and save it back to another dataset, but will not be able to save changes back to the original source.")
+
+
                 else:
                     raise TypeError("Cannot read {0}. Data type is not supported".format(self.dataset))
 
@@ -200,8 +210,8 @@ class MetadataEditor(object):
                 setattr(self, "_{0}".format(name), MetadataObjectList(elements[name]["tagname"], elements[name]['path'], self, elements[name]['elements'], sync))
                 #setattr(self, name, self.__dict__["_{}".format(name)])
 
-            if elements[name] in self.__dict__.keys():
-                self.items.append(getattr(self, "_{0}".format(elements[name])))
+            if hasattr(self, name):
+                self.items.append(getattr(self, "_{0}".format(name)))
 
         if items:
             self.initialize_items()
@@ -226,8 +236,11 @@ class MetadataEditor(object):
             if "deprecated" in elements[n].keys() and traceback.extract_stack()[-2][2] != "__init__":
                 warnings.warn("Call to deprecated property {0}. {1}".format(n, elements[n]["deprecated"]), category=DeprecationWarning)
 
+            if "unsupported" in elements[n].keys() and self.data_type in elements[n]["unsupported"]:
+                raise RuntimeWarning(f"Can't set key {n} - key is unsupported for data type {self.data_type}")
+
             if elements[n]['type'] == "string":
-                if isinstance(v, (str, six.text_type)):
+                if isinstance(v, (str, bytes)):
                     self.__dict__["_{0}".format(n)].value = v
                 elif v is None:
                     self.__dict__["_{0}".format(n)].value = ""
@@ -238,7 +251,7 @@ class MetadataEditor(object):
 
                 if isinstance(v, datetime):
                     self.__dict__["_{0}".format(n)].value = datetime.strftime(v, "%Y-%m-%dT%H:%M:%S")
-                elif isinstance(v, (str, six.text_type)):
+                elif isinstance(v, (str, bytes)):
 
                     # remove all whitespaces for easier handling
                     v = "".join(v.split())
@@ -272,7 +285,7 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "date":
                 if isinstance(v, date):
                     self.__dict__["_{0}".format(n)].value = datetime.strftime(v, "%Y-%m-%d")
-                elif isinstance(v, (str, six.text_type)):
+                elif isinstance(v, (str, bytes)):
 
                     # remove all whitespaces for easier handling
                     v = "".join(v.split())
@@ -305,7 +318,7 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "time":
                 if isinstance(v, time):
                     self.__dict__["_{0}".format(n)].value = datetime.strftime(v, "%H:%M:%S")
-                elif isinstance(v, (str, six.text_type)):
+                elif isinstance(v, (str, bytes)):
 
                     # remove all whitespaces for easier handling
                     v = "".join(v.split())
@@ -350,7 +363,7 @@ class MetadataEditor(object):
             elif elements[n]['type'] == "float":
                 if isinstance(v, float):
                     self.__dict__["_{0}".format(n)].value = str(v)
-                elif isinstance(v, (str, six.text_type)):
+                elif isinstance(v, (str, bytes)):
                     try:
                         new_value = float(v)
                         self.__dict__["_{0}".format(n)].value = str(new_value)
@@ -364,7 +377,7 @@ class MetadataEditor(object):
             elif elements[n]['type'] == 'attribute':
                 key = elements[n]['key']
                 values = elements[n]['values']
-                if isinstance(v,(str, six.text_type)):
+                if isinstance(v,(str, bytes)):
                     done = False
                     for value in values:
                         if v in value:
@@ -425,12 +438,20 @@ class MetadataEditor(object):
             if "deprecated" in elements[n].keys():
                 warnings.warn("Call to deprecated property {0}. {1}".format(n, elements[n]["deprecated"]), category=DeprecationWarning)
 
-            if self.__dict__["_{0}".format(n)].value == "" and elements[n]['type'] in ["integer", "float", "datetime", "date", "time"]:
+            key = f"_{n}"
+
+            if "unsupported" in elements[n].keys() and self.data_type in elements[n]["unsupported"]:
+                raise AttributeError(f"Key {n} unsupported for data type {self.data_type}")
+
+            if key not in self.__dict__: # return a blanket None if we don't have the key, regardless
+                raise AttributeError(f"Key {key} not available in metadata or in this interface")
+            
+            if self.__dict__[key].value == "" and elements[n]['type'] in ["integer", "float", "datetime", "date", "time"]:
                 return None
             elif elements[n]['type'] == "integer":
-                return int(self.__dict__["_{0}".format(n)].value)
+                return int(self.__dict__[key].value)
             elif elements[n]['type'] == "float":
-                return float(self.__dict__["_{0}".format(n)].value)
+                return float(self.__dict__[key].value)
 
             elif elements[n]['type'] == "datetime":
                 if len(self.__dict__["_{0}".format(n)].value) == 8:
@@ -473,7 +494,6 @@ class MetadataEditor(object):
             else:
                 return self.__dict__["_{0}".format(n)].value
         else:
-            # return self.__dict__["_{}".format(n)]
             return self.__dict__[n]
 
     def get_datatype(self):
@@ -481,6 +501,12 @@ class MetadataEditor(object):
         Get ArcGIS datatype datatype of current dataset
         :return:
         """
+        
+        if self.dataset.startswith("http://") or self.dataset.startswith("https://"):
+            for server_type in self._network_datasets:
+                if server_type in self.dataset:
+                    return server_type
+
         # get datatype
         desc = arcpy.Describe(self.dataset)
         return desc.dataType
@@ -492,10 +518,14 @@ class MetadataEditor(object):
         check next lower base directory of current base directory until criteria matches
         :return:
         """
+
+        if self.dataset.startswith("http://") or self.dataset.startswith("https://"):
+            return "Server"
+
         workspace = self.dataset
         desc = arcpy.Describe(workspace)
 
-        while 1 == 1:
+        while True:
 
             if desc.dataType == "Workspace" or desc.dataType == "Folder":
                 return workspace
@@ -512,6 +542,11 @@ class MetadataEditor(object):
         Get ArcGIS Workspace type for current dataset
         :return:
         """
+
+        # for datasets on a server, determine if it's a MapServer, FeatureServer, etc. May not matter, but also, it might
+        if self._workspace == "Server":
+            return "Server"
+
         desc = arcpy.Describe(self._workspace)
         return desc.workspaceType
 
@@ -570,15 +605,20 @@ class MetadataEditor(object):
 
         self.elements.write(self.metadata_file)  # overwrites itself
 
-        if self._workspace_type != 'FileSystem':
+        if self._workspace_type != 'FileSystem':  # this is a different check than we use to trigger an export...Should this be updated to be the same as what triggers the export?
 
             if Enable_automatic_updates:
                 updates = 'ENABLED'
             else:
                 updates = 'DISABLED'
 
-            arcpy.ImportMetadata_conversion(self.metadata_file, "FROM_ARCGIS", self.dataset,
-                                            Enable_automatic_updates=updates)
+            if not self._arcgis_metadata:
+                self._arcgis_metadata = arcpy.metadata.Metadata(self.dataset)
+
+            if self._arcgis_metadata.isReadOnly:
+                raise PermissionError("The metadata is read only - this likely means you are accessing a source that we are *unable* to write to, even if you have permissions in another context.")
+            self._arcgis_metadata.importMetadata(self.metadata_file, self.metadata_import_option)
+            self._arcgis_metadata.save()
 
     def cleanup(self):
         """
@@ -590,10 +630,6 @@ class MetadataEditor(object):
             if self._workspace_type != 'FileSystem':
                 if os.path.exists(self.metadata_file):
                     os.remove(self.metadata_file)
-
-                xsl_extras = self.metadata_file + "_xslttransfor.log"
-                if os.path.exists(xsl_extras):
-                    os.remove(xsl_extras)
 
         except:
             self.logger.warn("Unable to remove temporary metadata files")

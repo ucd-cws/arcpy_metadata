@@ -1,17 +1,14 @@
-Arcpy Metadata Editor (arcpy_metadata)
-==============
+# Arcpy Metadata Editor (arcpy_metadata)
 Whether you create it or not, metadata is a critical part of GIS analysis. ArcGIS includes a built-in GUI metadata editor, but has scant access to metadata properties from Python. The arcpy_metadata package provides this access, allowing large Python packages that generate their own geospatial outputs in ArcGIS to properly document the data.
 
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/410cbc590b3c463489fd3a7c786f1f04/badge.svg)](https://www.quantifiedcode.com/app/project/410cbc590b3c463489fd3a7c786f1f04)
 
-Getting arcpy_metadata
-----------------------
+## Getting arcpy_metadata
 arcpy_metadata is pure Python and its only dependency is arcpy (installed with ArcGIS). It's available on the Python Package Index so you can get arcpy_metadata via pip (pip install arcpy_metadata).
  
 If you don't have or don't know how to use pip, you can install arcpy_metadata by cloning/downloading this repository and running setup.py install in the root folder
 
-Using arcpy_metadata
---------------------
+## Using arcpy_metadata
 
 Creating the Metadata Editor
 
@@ -98,6 +95,21 @@ metadata.last_update = today
 metadata.last_update = "20160221"
 ```
 
+Add and edit field definitions
+```python
+metadata.fields.new()  # add the new field
+metadata.fields[-1].name = "MyFieldName" # the item at index -1 will be the new one
+metadata.fields[-1].definition = "Here I am describing how the field was created and how to use and interpret its values for a reader"
+
+# or find an existing field and update its definition
+search_for_field = "OBJECTID"
+for field in metadata.fields:
+    if field.name == search_for_field:
+        field.definition = "Some updated information about the field defintiion"
+        break  # not necessary, but faster as it stops searching once you've found the field
+
+```
+
 Get contact items (returns contact object)
 
 ```python
@@ -153,10 +165,9 @@ If you want to enable automatic updates of your metadata (feature classes only) 
 metadata.finish(True) 
 ```
 
-Supported items
----------------
+## Supported items
 
-|Item description|Internal name|Type|Location in ArcCatalog|Path in ArcGIS XML file|
+|Item description|Internal name|Type|Catalog Edit View|Path in ArcGIS XML file|
 |---|---|---|---|---|
 |Title|title|String|Overview/ Item Description/ Title|dataIdInfo/idCitation/resTitle|
 |Abstract|abstract|String|Overview/ Item Description/ Description|dataIdInfo/idAbs|
@@ -192,9 +203,16 @@ Supported items
 |Dataset URI|dataset_uri|String|Metadata/Details/Dataset URI|dataSetURI|
 |Resource Label|resource_label|String|Resource/Fields/Details/Label|eainfo/detailed/enttyp/enttypl|
 |Format|format|String|Resource/Distribution/Distribution Format/Format Name|distInfo/distFormat/formatName|
+|Field|attr|FieldObj|Resource/Fields/Entity and Attribute Information/Details|eainfo/detailed/attr|
 
-Contact items
----------------
+### Field items
+|Item description|Internal name|Type|Relative path in ArcGIS XML file|
+|---|---|---|---|
+|Field Name|name|String|./attrlabl|
+|Field Definition|definition|String|./attrdef|
+
+
+### Contact items
 |Item description|Internal name|Type|Relative path in ArcGIS XML file|
 |---|---|---|---|
 |Contact Name|contact_name|String|./rpIndName|
@@ -216,8 +234,7 @@ Contact items
 |Website Name|or_name|String|./rpCntInfo/cntOnlineRes/orName|
 |Website Description|or_desc|String|./rpCntInfo/cntOnlineRes/orDesc|
 
-Online Resource Items
---------------
+### Online Resource Items
 |Item description|Internal name|Type|Relative path in ArcGIS XML file|
 |---|---|---|---|
 |Link|link|String|./linkage|
@@ -229,29 +246,30 @@ Online Resource Items
 
 Don't see the item you need? Read more about how to extend arcpy_metadata to work with other metadata elements it doesn't yet handle in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Python and ArcGIS Support
--------------------------
-arcpy_metadata runs on Python 2 and 3, which means it can, at a basic level, be used both with ArcMap and ArcGIS Pro. ArcGIS Pro doesn't yet have some of the metadata export functions that arcpy_metadata relies on though, so, as of version 0.5, you *must* specify a path to a metadata XML file, or use a dataset that already has its metadata in an accessible XML format (e.g. Shapefile), in order to use arcpy_metadata in ArcGIS Pro. All features work in ArcMap/Python 2.
+## Python and ArcGIS Support
+arcpy_metadata version 1.x supports Python 3 and ArcGIS Pro only
 
-Under the hood
----------------
+arcpy_metadata version 0.x runs on Python 2 and 3, which means it can, at a basic level, be used both with ArcMap and ArcGIS Pro. When 0.x was developed, ArcGIS Pro didn't yet have some of the metadata export functions that arcpy_metadata relies on though, so, as of version 0.5, you *must* specify a path to a metadata XML file, or use a dataset that already has its metadata in an accessible XML format (e.g. Shapefile), if you want to use that branch in ArcGIS Pro. Otherwise, for ArcGIS Pro, upgrade to version 1.x.
+
+## Under the hood
 arcpy_metadata uses the strategy of exporting the metadata from the layer, then edits the xml export based on your method calls. When you're done, use finish() to save your data back to the source.
 
 
-Known limitations
----------------
+## Known limitations
 Does not yet support all metadata items.
 
-arcpy_metadata only works with 32-bit Python. We use arcpy.XSLTransform_conversion() to extract metadata from geodatabases. 64bit arcpy python bindings for background processing [do not support](http://desktop.arcgis.com/en/arcmap/latest/analyze/executing-tools/64bit-background.htm) tools inside the metadata conversion toolset.
+### Legacy ArcMap Versions
+arcpy_metadata version 0.x only works with 32-bit Python. We use arcpy.XSLTransform_conversion() to extract metadata from geodatabases. 64bit arcpy python bindings for background processing [do not support](http://desktop.arcgis.com/en/arcmap/latest/analyze/executing-tools/64bit-background.htm) tools inside the metadata conversion toolset. arcpy_metadata version 1.x for ArcGIS Pro does
+not have these limitations.
 
 
-How to contribute
--------------
+## How to contribute
 Contributions are well come! Please fork and submit pull requests.
 If you are missing a particular metadata attribute, you can easiy add them [here](https://github.com/ucd-cws/arcpy_metadata/blob/master/arcpy_metadata/elements.py). Don't forget to also add them to the [test cases](https://github.com/ucd-cws/arcpy_metadata/blob/master/tests/test_elements.py) to make sure everything works as expected
 
 
-Acknowledgements
-----------------
-arcpy_metadata was initially a project of the [UC Davis Center for Watershed Sciences](https://watershed.ucdavis.edu) and has received significant contributions from the [World Resources Institute](https://www.wri.org). It was created as part of a larger project funded by the California Department of Fish and Wildlife [Biogeographic Data Branch](http://www.dfg.ca.gov/biogeodata/) and further developed for [Global Forest Watch](https://www.globalforestwatch.org). We thank our funders for their support and their commitment to high quality geospatial data.
+## Acknowledgements
+arcpy_metadata is maintained by Nick Santos at the California Department of Technology.
+
+arcpy_metadata was initially a project of the [UC Davis Center for Watershed Sciences](https://watershed.ucdavis.edu) and received significant contributions from the [World Resources Institute](https://www.wri.org). It was created as part of a larger project funded by the California Department of Fish and Wildlife [Biogeographic Data Branch](http://www.dfg.ca.gov/biogeodata/) and further developed for [Global Forest Watch](https://www.globalforestwatch.org). We thank our funders for their support and their commitment to high quality geospatial data.
 
