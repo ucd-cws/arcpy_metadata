@@ -560,7 +560,7 @@ class MetadataEditor(object):
 
     def rm_gp_history(self):
         """
-        Remove all items form the geoprocessing history
+        Remove all items from the geoprocessing history
         :return:
         """
         element = self.elements.find("Esri/DataProperties/lineage")
