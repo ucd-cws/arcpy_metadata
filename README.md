@@ -239,7 +239,7 @@ metadata.finish(True)
 |---|---|---|---|
 |Link|link|String|./linkage|
 |Protocol|protocol|String|./protocol|
-|Profil|profile|String|./appProfile|
+|Profile|profile|String|./appProfile|
 |Name|name|String|./orName|
 |Description|description|String|./orDesc|
 |Function|function|String|./orFunct/OnFunctCd|

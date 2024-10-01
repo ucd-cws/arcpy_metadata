@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 
 class MetadataValueListHelper(object):
     """
-    A helper class to have value list items behave like a python lists
+    A helper class to have value list items behave like a python list
     """
     def __init__(self, list_items):
         if isinstance(list_items, MetadataValueListConstructor):
@@ -66,7 +66,7 @@ class MetadataValueListHelper(object):
 
 class MetadataObjectListHelper(object):
     """
-    A helper class to have value list items behave like a python lists
+    A helper class to have value list items behave like a python list
     """
     def __init__(self, list_objects):
         if isinstance(list_objects, MetadataObjectListConstructor):
@@ -317,7 +317,7 @@ class MetadataValueListConstructor(MetadataItemConstructor):
 
     def insert(self, index, item):
         """
-            Inserts an individual item to the section at specified index locatio
+            Inserts an individual item to the section at specified index location
             :param index: location in list to insert
             :param item: the text that will be added to the multi-item section, wrapped in the appropriate tag
                 configured on parent object
@@ -364,7 +364,7 @@ class MetadataValueListConstructor(MetadataItemConstructor):
 
     def _removeall(self):
         """
-        removes all items from element tree
+        Removes all items from element tree
         :return:
         """
         items_to_remove = []
@@ -377,7 +377,7 @@ class MetadataValueListConstructor(MetadataItemConstructor):
 
     def sort(self):
         """
-        sort items
+        Sort items
         :return:
         """
 
@@ -487,7 +487,7 @@ class MetadataObjectListConstructor(MetadataItemConstructor):
 
 class MetadataParentItemConstructor(MetadataItemConstructor):
     """
-    A helper object for more complex items like Contact, Online Resources and Locals
+    A helper object for more complex items like Contact, Online Resources, and Locales
     This object will allow to add child elements to an item based on supplied element list
     """
 
@@ -603,7 +603,7 @@ class MetadataParentItemConstructor(MetadataItemConstructor):
 
 class MetadataSubItemConstructor(object):
     """
-    A helper object for more complex items like Contact and Locals
+    A helper object for more complex items like Contact and Locales
     This object can be placed as single item inside a parent items
     """
 
