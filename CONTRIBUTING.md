@@ -1,4 +1,4 @@
-# Contributing
+# Contributing and Extending arcpy_metadata
 
 ## Extending the library to new metadata properties
 Extending arcpy metadata to support additional metadata properties can vary in complexity, but is often an

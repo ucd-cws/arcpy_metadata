@@ -247,7 +247,7 @@ metadata.finish(True)
 Don't see the item you need? Read more about how to extend arcpy_metadata to work with other metadata elements it doesn't yet handle in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Python and ArcGIS Support
-arcpy_metadata version 1.x supports Python 3 and ArcGIS Pro only
+arcpy_metadata version 1.x supports Python 3 and ArcGIS Pro only.
 
 arcpy_metadata version 0.x runs on Python 2 and 3, which means it can, at a basic level, be used both with ArcMap and ArcGIS Pro. When 0.x was developed, ArcGIS Pro didn't yet have some of the metadata export functions that arcpy_metadata relies on though, so, as of version 0.5, you *must* specify a path to a metadata XML file, or use a dataset that already has its metadata in an accessible XML format (e.g. Shapefile), if you want to use that branch in ArcGIS Pro. Otherwise, for ArcGIS Pro, upgrade to version 1.x.
 
@@ -256,16 +256,17 @@ arcpy_metadata uses the strategy of exporting the metadata from the layer, then 
 
 
 ## Known limitations
-Does not yet support all metadata items.
+Does not yet support all metadata items. Work is in progress to support server-based dataset editing.
 
 ### Legacy ArcMap Versions
 arcpy_metadata version 0.x only works with 32-bit Python. We use arcpy.XSLTransform_conversion() to extract metadata from geodatabases. 64bit arcpy python bindings for background processing [do not support](http://desktop.arcgis.com/en/arcmap/latest/analyze/executing-tools/64bit-background.htm) tools inside the metadata conversion toolset. arcpy_metadata version 1.x for ArcGIS Pro does
 not have these limitations.
 
 
-## How to contribute
+## How to contribute or extend arcpy_metadata
 Contributions are well come! Please fork and submit pull requests.
-If you are missing a particular metadata attribute, you can easiy add them [here](https://github.com/ucd-cws/arcpy_metadata/blob/master/arcpy_metadata/elements.py). Don't forget to also add them to the [test cases](https://github.com/ucd-cws/arcpy_metadata/blob/master/tests/test_elements.py) to make sure everything works as expected
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more information on how to extend arcpy_metadata to new attributes
 
 
 ## Acknowledgements
