@@ -1,3 +1,13 @@
+## DEVELOPMENT HAS MOVED
+Future development of this library will now be at [https://github.com/Office-of-Digital-Services/arcpy_metadata](https://github.com/Office-of-Digital-Services/arcpy_metadata), where the library is being maintained.
+
+This repository will be wound down in the future.
+
+
+
+
+
+
 # Arcpy Metadata Editor (arcpy_metadata)
 Whether you create it or not, metadata is a critical part of GIS analysis. ArcGIS includes a built-in GUI metadata editor, but has scant access to metadata properties from Python. The arcpy_metadata package provides this access, allowing large Python packages that generate their own geospatial outputs in ArcGIS to properly document the data.
 
